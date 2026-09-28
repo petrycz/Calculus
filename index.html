@@ -54,6 +54,10 @@
   .entry input:focus{border-color:var(--accent);}
   .miniout{margin-top:9px;font-size:13.5px;line-height:1.5;} .miniout.ok{color:var(--good);} .miniout.no{color:var(--bad);}
   .choices{display:grid;grid-template-columns:1fr;gap:9px;margin-top:13px;}
+  .seg{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 2px;}
+  .segb{font-family:var(--mono);font-size:13px;font-weight:600;padding:9px 12px;border-radius:9px;background:var(--panel2);border:1.5px solid var(--line);color:var(--muted);cursor:pointer;}
+  .segb.on{border-color:var(--accent);color:var(--accent);background:#0e2530;}
+  .ucircle{position:relative;}
   .choice{background:var(--panel2);border:1.5px solid var(--line);border-radius:11px;padding:13px;cursor:pointer;font-size:14px;line-height:1.4;transition:.12s;}
   .choice .cm{font-family:var(--mono);}
   .choice.correct{border-color:var(--good);background:var(--good2);color:#c7f4e3;} .choice.wrong{border-color:var(--bad);background:var(--bad2);color:#f6cdc4;} .choice.dim{opacity:.45;} .choice.locked{cursor:default;}
@@ -109,9 +113,12 @@ const stage=document.getElementById('stage'),hintBtn=document.getElementById('hi
 let view='menu',curM=0,beat=0,unlocked=false,hints=[],hintIdx=0,recallReturn=null;
 const completed={};
 const MODULES=[
+ {id:'c0',title:'Functions & the Building Blocks',sub:'From algebra: what a function is, the building-block library, composition, exponentials/logs, and trig on the unit circle.',ready:true,
+  outro:`Every function calculus touches is here — polynomials, powers, rationals, roots, exponentials, logs, and trig defined on the unit circle — plus composition, the seed of the chain rule. Nothing beyond algebra was assumed.`,
+  beats:[c0_intro,c0_library,c0_compose,c0_explog,c0_trig,c0_problems,c0_recap]},
  {id:'c1',title:'Limits & Continuity',sub:'The ε-δ foundation: what it means to approach a value, and when a function has no breaks.',ready:true,
   outro:`A limit is the value a function approaches — made rigorous by the ε-δ challenge. Continuity is "the limit equals the value," and it powers the Intermediate Value Theorem. Everything in calculus is built on this.`,
-  beats:[c1_intro,c1_intuitive,c1_epsdelta,c1_laws,c1_indet,c1_continuity,c1_infinity,c1_problems,c1_recap]},
+  beats:[c1_recall,c1_intro,c1_intuitive,c1_epsdelta,c1_laws,c1_indet,c1_continuity,c1_infinity,c1_problems,c1_recap]},
  {id:'c2',title:'The Derivative',sub:'Instantaneous rate of change as a limit; the rules and the chain rule.',ready:true,
   outro:`A derivative is one specific limit — the secant slope as the gap closes. Every rule (power via binomial, product/quotient via add-and-subtract, chain, sin/cos via the squeeze limit) is derived from that one definition. eˣ and ln wait for the integral in Module 6.`,
   beats:[c2_recall,c2_intro,c2_notation,c2_powerrule,c2_prodquot,c2_chain,c2_trig,c2_diffcont,c2_problems,c2_recap]},
@@ -121,6 +128,7 @@ const MODULES=[
  {id:'c6',title:'Sequences & Series',sub:'Convergence tests, power series, and Taylor/Maclaurin expansions.',ready:false},
  {id:'c7',title:'Multivariable Calculus',sub:'Partial derivatives, the gradient, directional derivatives, and multiple integrals.',ready:false},
  {id:'c8',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:false},
+ {id:'c9',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:false},
 ];
 function setHints(a){hints=a||[];hintIdx=0;hintBtn.style.display=hints.length?'block':'none';}
 function unlock(){if(unlocked)return;unlocked=true;contBtn.disabled=false;}
@@ -206,6 +214,18 @@ function mcChoices(host,opts,onDone){shuffle(opts);let done=false;host.innerHTML
 
 /* ================= RECALL SYSTEM ================= */
 const RECALL={
+ c0:{title:'Module 1 — Functions & the Building Blocks', cues:[
+   {q:'What is a function (domain, range), and what does the vertical line test check?',
+    a:'A rule assigning exactly one output to each input; domain = allowed inputs, range = outputs produced. The vertical line test: a graph is a function iff no vertical line meets it twice (one output per input).', b:0},
+   {q:'Name the building-block functions, and why √x and 1/x are secretly power functions.',
+    a:'Polynomials, power functions xⁿ, rationals (ratios of polynomials), roots. <span class="mono">√x = x^(1/2)</span> and <span class="mono">1/x = x⁻¹</span> — fractional/negative exponents — so the power rule covers them all.', b:1},
+   {q:'What is composition f(g(x)), and why does order matter?',
+    a:'Feeding g\'s output into f: inner g wrapped by outer f. <span class="mono">f(g(x)) ≠ g(f(x))</span> in general — the nesting the chain rule must track.', b:2},
+   {q:'How are logs related to exponentials, and what are the log laws?',
+    a:'<span class="mono">log_a</span> is the inverse of <span class="mono">aˣ</span> (graphs mirror across y=x). Laws: <span class="mono">log(xy)=log x+log y</span>, <span class="mono">log(xᵖ)=p log x</span>. e is the base where growth rate equals height (deferred to Module 6).', b:3},
+   {q:'How are sin θ and cos θ defined on the unit circle, and what two identities matter?',
+    a:'The point at angle θ (in radians = arc length) is <span class="mono">(cos θ, sin θ)</span>. Identities: <span class="mono">sin²θ+cos²θ=1</span> and angle addition <span class="mono">sin(A+B)=sin A cos B+cos A sin B</span>.', b:4}
+ ]},
  c1:{title:'Module 1 — Limits & Continuity', cues:[
    {q:'What does <span class="mono">lim<sub>x→a</sub> f(x) = L</span> mean, intuitively and via the ε-δ definition?',
     a:'f(x) approaches L as x nears a (ignoring x=a itself). Rigorously: for every ε&gt;0 there is a δ&gt;0 with <span class="mono">0&lt;|x−a|&lt;δ ⟹ |f(x)−L|&lt;ε</span> — you can force the output within any tolerance by keeping the input close enough.', b:2},
@@ -239,7 +259,161 @@ function recallFrom(introText, moduleKeys, hintHTML){
     recallReturn={mod:curM,beat:beat};curM=mi;beat=parseInt(el.dataset.beat);renderBeat();});
   setHints(hintHTML?[hintHTML]:[]);unlock();
 }
-function c2_recall(){recallFrom(`Before the derivative, rebuild the limit foundation it's built on — a derivative is nothing but one particular limit.`,['c1'],RECALL_HINT);}
+function c1_recall(){recallFrom(`Before limits, rebuild the cast of functions from Module 1 — limits act on exactly these.`,['c0'],RECALL_HINT);}
+function c2_recall(){recallFrom(`Before the derivative, rebuild the functions and the limit foundation it's built on — a derivative is nothing but one particular limit.`,['c0','c1'],RECALL_HINT);}
+
+/* ================= MODULE 1 — FUNCTIONS & THE BUILDING BLOCKS ================= */
+function c0_intro(){
+  stage.innerHTML=`<div class="card"><h2>A function is a machine: one input, one output</h2>
+    <p>Calculus studies how quantities change, and the objects that change are <b>functions</b>. Start from the definition, assuming only algebra. A <b>function</b> <span class="mono">f</span> is a rule that assigns to each input <em>exactly one</em> output, written <span class="mono">f(x)</span>. The set of allowed inputs is the <b>domain</b>; the set of outputs it can produce is the <b>range</b>.</p>
+    <p>"Exactly one output" is the whole content — it's what the <b>vertical line test</b> checks: a graph is a function precisely when no vertical line crosses it twice. And the domain is a real constraint: <span class="mono">1/(x−2)</span> can't take <span class="mono">x = 2</span>, and <span class="mono">√(x−1)</span> needs <span class="mono">x ≥ 1</span> to stay real.</p>
+    <p>Below is <span class="mono">f(x) = √(x − 1)</span>. Drag <span class="cy">x</span> — notice the curve simply <em>doesn't exist</em> left of 1, because those inputs aren't in the domain.</p>
+    <canvas id="cv" width="640" height="330"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">f(x) = √(x−1)</div><div class="v" id="fv">—</div></div></div>
+    <div class="task"><b>Find the domain's edge</b>What is the smallest input <span class="mono">x</span> for which <span class="mono">f(x) = √(x − 1)</span> is defined?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-2,xmax:6,ymin:-1,ymax:3});
+  const f=x=>x>=1?Math.sqrt(x-1):NaN;let xc=3;
+  function draw(){pl.grid();pl.curve(f,'#7ab8ff');pl.vline(xc,'#3a4c66',true);
+    const y=f(xc);if(isFinite(y))pl.point(xc,y,'#e8b84b',5);
+    document.getElementById('xv').textContent=xc.toFixed(2);
+    document.getElementById('fv').textContent=isFinite(y)?y.toFixed(3):'undefined';}
+  xdrag(cv,pl,x=>{xc=x;draw();});draw();
+  numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ x = 1</div><p><span class="mono">√(x−1)</span> is real only when the inside is <span class="mono">≥ 0</span>, i.e. <span class="mono">x − 1 ≥ 0</span>, so <span class="mono">x ≥ 1</span>. The domain is <span class="mono">[1, ∞)</span>, and the graph starts exactly at x = 1 — the leftmost point where a valid output exists. Domain is not a technicality; it's where the function lives.</p>`);});
+  setHints([`√ of a negative number isn't real. Set the inside x − 1 ≥ 0 and solve.`,`x − 1 ≥ 0 ⟹ x ≥ 1.`]);
+}
+function c0_library(){
+  stage.innerHTML=`<div class="card"><h2>The building-block functions</h2>
+    <p>Nearly everything we differentiate is assembled from a small library. Meet them by shape — tap to switch:</p>
+    <div class="seg" id="seg"></div>
+    <canvas id="cv" width="640" height="330"></canvas>
+    <p class="small" id="obs" style="margin-top:8px"></p>
+    <div class="task"><b>Unify the notation</b>The square root <span class="mono">√x</span> is the same as <span class="mono">x</span> raised to what power? (Enter as a decimal.)</div>
+    <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-3.5,xmax:3.5,ymin:-3,ymax:5});
+  const lib={
+    'line':{f:x=>0.8*x+0.5,note:'Linear <span class="mono">mx + b</span>: constant slope m, y-intercept b. A degree-1 polynomial — the simplest changing function.'},
+    'parabola':{f:x=>x*x-1,note:'Quadratic <span class="mono">x² − 1</span>: a degree-2 polynomial. Polynomials are sums of power terms; degree n means at most n crossings of the x-axis.'},
+    'cubic':{f:x=>0.4*x*x*x,note:'Cubic <span class="mono">0.4x³</span>: a power function xⁿ. Odd powers flip sign across 0; even powers stay positive.'},
+    '1/x':{f:x=>Math.abs(x)<0.08?NaN:1/x,note:'Rational <span class="mono">1/x</span>: a ratio of polynomials. It blows up where the denominator hits 0 (here x = 0) — a vertical asymptote.'},
+    'sqrt':{f:x=>x>=0?Math.sqrt(x):NaN,note:'Root <span class="mono">√x = x^(1/2)</span>: a power function with a fractional exponent, defined only for x ≥ 0.'}
+  };
+  let sel='parabola';
+  function draw(){pl.grid();pl.curve(lib[sel].f,'#7ab8ff');document.getElementById('obs').innerHTML=lib[sel].note;}
+  function build(){document.getElementById('seg').innerHTML=Object.keys(lib).map(k=>`<span class="segb ${k===sel?'on':''}" data-k="${k}">${k}</span>`).join('');
+    document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{sel=b.dataset.k;build();draw();});}
+  build();draw();
+  numChk(stage.querySelector('.card'),0.5,()=>{addReveal(`<div class="rh">✓ ½ = 0.5</div><p><span class="mono">√x = x^(1/2)</span>. Writing roots as fractional powers is the trick that lets one rule — the power rule <span class="mono">(xⁿ)′ = nxⁿ⁻¹</span> — handle roots, reciprocals (<span class="mono">1/x = x⁻¹</span>), and polynomials all at once. The whole library collapses into "power functions and their combinations."</p>`);},s=>parseFloat(s));
+  setHints([`√x means "the number whose square is x." As a power, squaring is exponent 2, so square-rooting is exponent...`,`√x = x^(1/2) = x^0.5.`]);
+}
+function c0_compose(){
+  stage.innerHTML=`<div class="card"><h2>Combining and composing functions</h2>
+    <p>From the building blocks we assemble everything by four combinations — <span class="mono">f+g</span>, <span class="mono">f−g</span>, <span class="mono">f·g</span>, <span class="mono">f/g</span> (computed input by input) — and one more that matters most for calculus: <b>composition</b>.</p>
+    <p><b>Composition</b> <span class="mono">f(g(x))</span> feeds the output of one function into another — an inner function <span class="mono">g</span> wrapped by an outer function <span class="mono">f</span>. It's written <span class="mono">(f∘g)(x)</span>. This nesting is exactly what the <em>chain rule</em> will differentiate, so it's worth seeing clearly now.</p>
+    <div class="eqbox">g(x) = x + 3&nbsp;&nbsp;(inner)&nbsp;&nbsp;·&nbsp;&nbsp;f(u) = u²&nbsp;&nbsp;(outer)&nbsp;&nbsp;⟹&nbsp;&nbsp;f(g(x)) = (x + 3)²</div>
+    <p>Order matters: <span class="mono">f(g(x))</span> and <span class="mono">g(f(x))</span> are usually different functions. Also worth knowing — the standard <b>transformations</b>: <span class="mono">f(x)+c</span> shifts up, <span class="mono">f(x+c)</span> shifts left, <span class="mono">c·f(x)</span> stretches vertically, <span class="mono">f(−x)</span> reflects across the y-axis.</p>
+    <div class="task"><b>Compose, and mind the order</b>With <span class="mono">g(x) = x + 3</span> and <span class="mono">f(u) = u²</span>, compute <span class="mono">f(g(1))</span>.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  numChk(stage.querySelector('.card'),16,()=>{addReveal(`<div class="rh">✓ 16</div><p>Inner first: <span class="mono">g(1) = 1 + 3 = 4</span>. Then outer: <span class="mono">f(4) = 4² = 16</span>. Compare the reverse: <span class="mono">g(f(1)) = g(1) = 1 + 3 = 4</span> — completely different. Composition is not commutative, which is exactly why the chain rule has to track <em>which</em> function is inside. This nested structure is the single most important thing to carry into the derivative.</p>`);});
+  setHints([`Work inside-out: compute g(1) first, then apply f to that result.`,`g(1)=4, then f(4)=4²=16.`]);
+}
+function c0_explog(){
+  stage.innerHTML=`<div class="card"><h2>Exponentials, logarithms, and inverses</h2>
+    <p><b>Exponential functions</b> <span class="mono">aˣ</span> extend repeated multiplication to all real inputs. For <span class="mono">a &gt; 1</span> they grow explosively (populations, interest, anything whose rate is proportional to its size); for <span class="mono">0 &lt; a &lt; 1</span> they decay. Their defining algebra:</p>
+    <div class="eqbox">aˣ · aʸ = aˣ⁺ʸ&nbsp;&nbsp;·&nbsp;&nbsp;(aˣ)ʸ = aˣʸ&nbsp;&nbsp;·&nbsp;&nbsp;a⁰ = 1</div>
+    <p>One base is special. There's a value <span class="mono">a ≈ 2.718</span>, called <span class="mono">e</span>, for which the function grows at a rate exactly equal to its own height (<span class="mono">dy/dx = y</span>). That self-reproducing property makes <span class="mono">eˣ</span> the natural language of growth — we'll pin <span class="mono">e</span> down rigorously in Module 6, once we have the integral.</p>
+    <p><b>Inverse functions</b> undo each other: if <span class="mono">f</span> is one-to-one, its inverse <span class="mono">f⁻¹</span> reverses it, and their graphs are mirror images across the line <span class="mono">y = x</span>. The <b>logarithm</b> <span class="mono">log_a</span> is the inverse of <span class="mono">aˣ</span>: it answers "a to what power gives this?" The exponential laws become the <b>log laws</b>:</p>
+    <div class="eqbox">log(xy) = log x + log y&nbsp;&nbsp;·&nbsp;&nbsp;log(xᵖ) = p·log x&nbsp;&nbsp;·&nbsp;&nbsp;log(1) = 0</div>
+    <p>The natural log <span class="mono">ln = log_e</span> is the inverse of <span class="mono">eˣ</span>. (It's the transcendental whose rigorous definition we defer.)</p>
+    <div class="task"><b>Use a log law</b>Given <span class="mono">log 2 = 0.30</span> and <span class="mono">log 3 = 0.48</span>, find <span class="mono">log 6</span>.</div>
+    <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  numChk(stage.querySelector('.card'),0.78,()=>{addReveal(`<div class="rh">✓ 0.78</div><p>Since <span class="mono">6 = 2·3</span>, the product law gives <span class="mono">log 6 = log 2 + log 3 = 0.30 + 0.48 = 0.78</span>. Logs turn multiplication into addition — that's their whole reason for existing, and it's why <span class="mono">ln</span> will show up whenever a product needs to be broken apart under differentiation.</p>`);},s=>parseFloat(s));
+  setHints([`6 factors as 2 × 3. Which log law turns a product into a sum?`,`log 6 = log(2·3) = log 2 + log 3 = 0.30 + 0.48.`]);
+}
+function c0_trig(){
+  stage.innerHTML=`<div class="card"><h2>Trigonometry, from the unit circle</h2>
+    <p>The trig functions are the last building block, and we define them the way calculus needs — <b>geometrically, on the unit circle</b> (the circle of radius 1 centered at the origin). For an angle <span class="mono">θ</span> measured counter-clockwise from the positive x-axis, the point where it meets the circle has coordinates</p>
+    <div class="eqbox">(cos θ, sin θ)&nbsp;&nbsp;<span style="color:#5d7186">cos θ = the x-coordinate, sin θ = the y-coordinate</span></div>
+    <p>Drag the point around the circle and watch its coordinates <em>be</em> cosine and sine.</p>
+    <canvas id="cv" width="640" height="360"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">θ (radians)</div><div class="v" id="tv">—</div></div><div class="rdc"><div class="k">cos θ</div><div class="v" id="cv2">—</div></div><div class="rdc"><div class="k">sin θ</div><div class="v" id="sv">—</div></div></div>
+    <p class="small" style="margin-top:10px"><b>Radians</b> are the key choice: an angle in radians <em>is</em> the arc length it sweeps on the unit circle (a full turn = <span class="mono">2π</span>). That identification is exactly what will make <span class="mono">(sin θ)/θ → 1</span> for small θ — the limit behind the sine derivative. Two facts we'll lean on: the Pythagorean identity <span class="mono">sin²θ + cos²θ = 1</span> (the point is on the unit circle), and the <b>angle-addition formula</b> <span class="mono">sin(A+B) = sin A cos B + cos A sin B</span>.</p>
+    <div class="task"><b>Read the circle</b>At a quarter turn, <span class="mono">θ = π/2</span> (about 1.571), what is <span class="mono">sin θ</span>?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,cx=W/2,cy=H/2,R=130;
+  let th=0.9;
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let gx=cx%40;gx<W;gx+=40){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke();}for(let gy=cy%40;gy<H;gy+=40){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();}
+    ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(W,cy);ctx.moveTo(cx,0);ctx.lineTo(cx,H);ctx.stroke();
+    ctx.strokeStyle='#3a4c66';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.stroke();
+    const px=cx+R*Math.cos(th),py=cy-R*Math.sin(th);
+    ctx.strokeStyle='#e2664f';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px,cy);ctx.stroke();
+    ctx.strokeStyle='#3fb98f';ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(cx,py);ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle='#7ab8ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(px,py);ctx.stroke();
+    ctx.fillStyle='#e8b84b';ctx.beginPath();ctx.arc(px,py,6,0,7);ctx.fill();
+    ctx.fillStyle='#e2664f';ctx.font='600 13px '+getComputedStyle(document.body).fontFamily;ctx.fillText('cos θ',(px+cx)/2-16,cy+16);
+    ctx.fillStyle='#3fb98f';ctx.fillText('sin θ',px+ (Math.cos(th)>=0?8:-40),(py+cy)/2);
+    let t=((th%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+    document.getElementById('tv').textContent=t.toFixed(3);
+    document.getElementById('cv2').textContent=Math.cos(th).toFixed(3);
+    document.getElementById('sv').textContent=Math.sin(th).toFixed(3);}
+  let dragging=false;cv.style.touchAction='none';
+  function setA(e){const r=cv.getBoundingClientRect();const mx=(e.clientX-r.left)*(W/Math.max(1,r.width))-cx;const my=cy-(e.clientY-r.top)*(H/Math.max(1,r.height));th=Math.atan2(my,mx);draw();}
+  cv.addEventListener('pointerdown',e=>{dragging=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setA(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(dragging){e.preventDefault();setA(e);}});
+  const end=()=>dragging=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ sin(π/2) = 1</div><p>A quarter turn lands the point at the top of the circle, <span class="mono">(0, 1)</span> — so <span class="mono">cos(π/2) = 0</span> and <span class="mono">sin(π/2) = 1</span>. Reading sine and cosine straight off the coordinates is the whole definition. This geometric picture is what makes the derivative of sine provable in Module 3 — no circular reasoning, just the unit circle, radians, and the angle-addition formula stated above.</p>`);});
+  setHints([`A quarter turn puts the point at the very top of the unit circle. What's the y-coordinate there?`,`The top point is (0, 1), so sin = 1.`]);
+}
+function c0_problems(){
+  stage.innerHTML=`<div class="card"><h2>Problem set</h2>
+    <p>Algebra/precalculus level — the foundation everything rests on. Paper first; solutions fold open.</p>
+
+    <div class="prob"><span class="lvl">domain</span><div class="ph">Problem 1</div>
+    <p>Find the domain of <span class="mono">f(x) = √(x − 2) / (x − 5)</span>.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Two constraints. The root needs <span class="mono">x − 2 ≥ 0</span>, i.e. <span class="mono">x ≥ 2</span>. The denominator can't be zero, so <span class="mono">x ≠ 5</span>. Combined domain: <span class="mono">[2, 5) ∪ (5, ∞)</span> — everything from 2 up, with a hole punched at 5.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">composition</span><div class="ph">Problem 2</div>
+    <p>With <span class="mono">f(x) = x²</span> and <span class="mono">g(x) = 2x + 1</span>, find both <span class="mono">f(g(x))</span> and <span class="mono">g(f(x))</span>, and confirm they differ.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p><span class="mono">f(g(x)) = (2x+1)² = 4x² + 4x + 1</span>. <span class="mono">g(f(x)) = 2(x²) + 1 = 2x² + 1</span>. Different functions — e.g. at x=1, the first is 9, the second is 3. Composition order matters, which the chain rule must respect.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">inverse</span><div class="ph">Problem 3</div>
+    <p>Find the inverse of <span class="mono">f(x) = 3x − 1</span>, and verify <span class="mono">f(f⁻¹(x)) = x</span>.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Set <span class="mono">y = 3x − 1</span> and solve for x: <span class="mono">x = (y+1)/3</span>. So <span class="mono">f⁻¹(x) = (x+1)/3</span>. Check: <span class="mono">f(f⁻¹(x)) = 3·(x+1)/3 − 1 = (x+1) − 1 = x</span> ✓. (Graphically, f⁻¹ is f reflected across y = x.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">log laws</span><div class="ph">Problem 4</div>
+    <p>Solve <span class="mono">2ˣ = 32</span> for x, then simplify <span class="mono">log(x³) − log(x)</span> to a single term.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p><span class="mono">32 = 2⁵</span>, so <span class="mono">2ˣ = 2⁵ ⟹ x = 5</span> (take log base 2, or recognize the power). For the second: <span class="mono">log(x³) − log(x) = 3log x − log x = 2log x</span> (power law, then subtract). Equivalently <span class="mono">log(x³/x) = log(x²) = 2log x</span>.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">unit circle</span><div class="ph">Problem 5</div>
+    <p>Give the exact values of <span class="mono">cos θ</span> and <span class="mono">sin θ</span> at <span class="mono">θ = π/3</span> (60°), and verify the Pythagorean identity.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>At <span class="mono">π/3</span>: <span class="mono">cos(π/3) = 1/2</span>, <span class="mono">sin(π/3) = √3/2</span>. Check: <span class="mono">(1/2)² + (√3/2)² = 1/4 + 3/4 = 1</span> ✓ — the point lies on the unit circle, as it must.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">angle addition</span><div class="ph">Problem 6</div>
+    <p>Use the angle-addition formula to simplify <span class="mono">sin(θ + π/2)</span>.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p><span class="mono">sin(θ + π/2) = sin θ cos(π/2) + cos θ sin(π/2) = sin θ·0 + cos θ·1 = cos θ</span>. So shifting sine left by a quarter turn gives cosine — the two are the same wave, offset by π/2. (This is why "sine and cosine" are really one function seen from two starting points.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">challenge</span><div class="ph">Problem 7</div>
+    <p>Explain why <span class="mono">(cos t, sin t)</span>, as <span class="mono">t</span> runs from 0 to 2π, traces the entire unit circle exactly once, and why its speed around the circle is constant.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>By definition <span class="mono">(cos t, sin t)</span> is the point at angle t on the unit circle, so as t increases from 0 to 2π the angle sweeps one full turn — covering every point once and returning to the start. Distance <span class="mono">√(cos²t + sin²t) = 1</span> confirms it stays on the circle. Because t is measured in <em>radians</em> (arc length), equal increments of t sweep equal arc lengths, so the point moves at constant speed — the arc covered from 0 to t is exactly t. This constant-speed, radian parametrization is precisely what makes the calculus of sine and cosine clean.</p></div></details></div>
+  </div>`;
+  setHints([]);unlock();
+}
+function c0_recap(){
+  stage.innerHTML=`<div class="card"><h2>What you built</h2>
+    <div class="eqbox" style="line-height:1.95">function = one output per input (domain, range, vertical line test)<br>library: polynomials · power xⁿ · rational · roots (all powers)<br>composition f(g(x)) — the seed of the chain rule<br>exponentials aˣ &amp; logs (inverses); e teased, deferred to Module 6<br>trig via the unit circle: (cos θ, sin θ), radians, sin²+cos²=1, angle addition</div>
+    <p>This is the whole cast of characters. Every function calculus touches is one of these or a combination of them, and the two facts flagged as "load-bearing" — composition and the unit-circle definition of sine — are exactly what the chain rule and the sine derivative will need.</p>
+    <p><b>Next — Module 2:</b> the <b>limit</b>. Every function here is a static rule; the limit is the tool that lets us ask how a function <em>behaves as its input approaches</em> a value — the single idea that turns algebra into calculus.</p></div>`;
+  setHints([]);unlock();
+}
 
 /* ================= MODULE 1 — LIMITS & CONTINUITY ================= */
 function c1_intro(){
