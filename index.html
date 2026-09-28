@@ -128,7 +128,9 @@ const MODULES=[
  {id:'c2',title:'The Derivative',sub:'Instantaneous rate of change as a limit; the rules and the chain rule.',ready:true,
   outro:`A derivative is one specific limit — the secant slope as the gap closes. Every rule (power via binomial, product/quotient via add-and-subtract, chain, sin/cos via the squeeze limit) is derived from that one definition. eˣ and ln wait for the integral in Module 6.`,
   beats:[c2_recall,c2_intro,c2_slopefn,c2_notation,c2_powerrule,c2_prodquot,c2_chain,c2_trig,c2_diffcont,c2_problems,c2_recap]},
- {id:'c3',title:'Applications of the Derivative',sub:'Extrema, the Mean Value Theorem, optimization, related rates, L\u2019H\u00f4pital.',ready:false},
+ {id:'c3',title:'Applications of the Derivative',sub:'Extrema, the Mean Value Theorem, optimization, related rates, L\u2019H\u00f4pital.',ready:true,
+  outro:`The derivative's sign maps where a function rises and falls; its zeros locate the peaks and valleys; the second derivative reads concavity. The Mean Value Theorem ties average rate to instantaneous, and optimization, related rates, and L\u2019H\u00f4pital's rule are the payoff. Every result rode on the one limit from Module 3.`,
+  beats:[c3_recall,c3_intro,c3_critical,c3_firsttest,c3_concavity,c3_mvt,c3_optimization,c3_relatedrates,c3_lhopital,c3_problems,c3_recap]},
  {id:'c4',title:'Integration & the FTC',sub:'Riemann sums, the definite integral, and the Fundamental Theorem of Calculus.',ready:false},
  {id:'c5',title:'Techniques & Applications of Integration',sub:'Substitution, parts, partial fractions, improper integrals; area, volume, arc length.',ready:false},
  {id:'c6',title:'Sequences & Series',sub:'Convergence tests, power series, and Taylor/Maclaurin expansions.',ready:false},
@@ -244,6 +246,18 @@ const RECALL={
     a:'Continuous at a ⟺ <span class="mono">lim<sub>x→a</sub> f = f(a)</span> (value exists, limit exists, they agree). IVT: a function continuous on [a,b] takes every value between f(a) and f(b) — so a sign change guarantees a root.', b:6},
    {q:'For a ratio of polynomials, how do you find the limit as x→∞?',
     a:'Compare leading terms (divide by the highest power of x): equal degrees → ratio of leading coefficients (a horizontal asymptote); smaller top degree → 0; larger top degree → diverges.', b:7}
+ ]},
+ c2:{title:'Module 3 — The Derivative', cues:[
+   {q:"What is $f'(a)$ as a limit, and what does it measure geometrically?",
+    a:"$f'(a)=\\lim_{h\\to 0}\\frac{f(a+h)-f(a)}{h}$ — the limit of the secant slope as the gap closes, i.e. the slope of the tangent (the instantaneous rate of change).", b:1},
+   {q:"How does the power rule follow from the definition, and what is $(x^n)'$?",
+    a:"Expand $(x+h)^n$ with the binomial theorem; every term past the first carries a factor of $h$, so the difference quotient $\\to n x^{n-1}$. Hence $(x^n)'=n x^{n-1}$, and polynomials differentiate term by term.", b:4},
+   {q:"State the product and quotient rules, and the trick that proves them.",
+    a:"$(fg)'=f'g+fg'$ and $\\left(\\frac{f}{g}\\right)'=\\frac{f'g-fg'}{g^2}$. Both come from adding and subtracting a middle term in the difference quotient, splitting it into two familiar quotients.", b:5},
+   {q:"State the chain rule for a composition $f(g(x))$.",
+    a:"$(f\\circ g)'(x)=f'(g(x))\\,g'(x)$ — rate of the whole = rate of the outer (at the inner) times rate of the inner. In Leibniz form $\\frac{dy}{dx}=\\frac{dy}{du}\\frac{du}{dx}$.", b:6},
+   {q:"What are $(\\sin x)'$ and $(\\cos x)'$, the limit behind them, and how do differentiable and continuous relate?",
+    a:"$(\\sin x)'=\\cos x$ and $(\\cos x)'=-\\sin x$, both resting on $\\lim_{h\\to 0}\\frac{\\sin h}{h}=1$ (squeeze theorem) plus angle addition. And: differentiable $\\Rightarrow$ continuous, but not the reverse — corners like $|x|$ are continuous yet not differentiable.", b:7}
  ]}
 };
 const RECALL_HINT=`Run it as one unbroken chain — each cue answers the previous one's "so what?". If a link takes you away to review, one tap on Back returns you to this list.`;
@@ -792,6 +806,255 @@ function c2_recap(){
     <div style="text-align:center;line-height:1.9;color:#dbe6f4;margin-top:6px">notations: $f'(x) = \\frac{dy}{dx}$ &nbsp;(Lagrange = Leibniz)<br>power (binomial) · product &amp; quotient (add-subtract) · chain<br>$\\sin/\\cos$ (squeeze + angle addition)<br>differentiable ⟹ continuous &nbsp;·&nbsp; continuous ⇏ differentiable</div></div>
     <p>Every rule here was <em>derived</em> from the one limit — nothing taken on faith. The transcendentals $e^x$ and $\\ln x$ are the deliberate exception: defining them rigorously needs the integral, so they wait for Module 6, where $\\ln x := \\int_1^x \\frac{dt}{t}$ defines the logarithm and $e^x$ is its inverse — both differentiated cleanly there.</p>
     <p><b>Next — Module 3:</b> what the derivative is <em>for</em>. A zero derivative marks flat spots (maxima, minima); its sign tells you where a function rises or falls; the Mean Value Theorem connects average and instantaneous rates; and setting up <b>optimization</b> problems is the payoff.</p></div>`;
+  setHints([]);unlock();
+}
+
+/* ================= MODULE 3 — APPLICATIONS OF THE DERIVATIVE ================= */
+function c3_recall(){recallFrom(`Module 4 puts the derivative to work — so first rebuild what it <em>is</em>, and the limit-and-function machinery beneath it. Every application below is just this toolkit, aimed at a question.`,['c0','c1','c2'],RECALL_HINT);}
+
+function c3_intro(){
+  stage.innerHTML=`<div class="card"><h2>The sign of f′ is the direction of travel</h2>
+    <p>You <em>built</em> the derivative in Module 3; now you'll <em>use</em> it. The whole module rests on one reading of $f'$: it is a signed rate, so its <b>sign</b> says which way the curve is heading.</p>
+    <div class="eqbox">$$f'(x) > 0 \\;\\Rightarrow\\; f \\text{ rising} \\qquad f'(x) < 0 \\;\\Rightarrow\\; f \\text{ falling} \\qquad f'(x)=0 \\;\\Rightarrow\\; f \\text{ momentarily flat}$$</div>
+    <p>Below is $f(x)=\\tfrac{x^3}{3}-x$. The background is tinted <span class="grn">green where $f'>0$</span> and <span class="rd">red where $f'<0$</span>. Drag the point across and watch the tangent tilt up in green zones, down in red — then find the red zone yourself.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">f′(x)</div><div class="v" id="sv">—</div></div><div class="rdc"><div class="k">motion</div><div class="v" id="dv">—</div></div></div>
+    <div class="task"><b>Explore</b>Drag into the red band (between the peak and the valley) and see the tangent point downhill.</div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-2.6,xmax:2.6,ymin:-2.2,ymax:2.2});
+  const f=x=>x*x*x/3-x, fp=x=>x*x-1;let a=1.75,seen=false;
+  function draw(){pl.grid();
+    pl.bandX(pl.xmin,-1,'rgba(63,185,143,0.10)');pl.bandX(-1,1,'rgba(226,102,79,0.11)');pl.bandX(1,pl.xmax,'rgba(63,185,143,0.10)');
+    pl.vline(-1,'#2b3a4f',true);pl.vline(1,'#2b3a4f',true);
+    pl.curve(f,'#7ab8ff');
+    const m=fp(a),{ctx}=pl;ctx.strokeStyle='#e8b84b';ctx.lineWidth=2;ctx.beginPath();
+    const y0=f(a)+m*(pl.xmin-a),y1=f(a)+m*(pl.xmax-a);ctx.moveTo(pl.px(pl.xmin),pl.py(y0));ctx.lineTo(pl.px(pl.xmax),pl.py(y1));ctx.stroke();
+    pl.point(a,f(a),'#e8b84b',5);
+    document.getElementById('xv').textContent=a.toFixed(2);
+    document.getElementById('sv').textContent=m.toFixed(2);
+    document.getElementById('dv').textContent=m>0.03?'rising ↗':(m<-0.03?'falling ↘':'flat →');
+    if(!seen&&a>-1&&a<1){seen=true;flash('✓ Falling');
+      addReveal(`<div class="rh">✓ In the red band, $f' < 0$ and the curve descends</div><p>Between $x=-1$ and $x=+1$ the derivative is negative, and the curve runs downhill — every tangent there tilts down. Cross either dashed line and $f'$ flips sign; the curve turns around. That single fact drives the whole module: the <b>zeros of $f'$</b> (where green meets red) locate the peaks and valleys, its <b>sign</b> maps out rising vs. falling, and — with the second derivative — the bending. Three questions, one function.</p>`);}}
+  xdrag(cv,pl,x=>{a=x;draw();});draw();
+  setHints([`Drag the gold point to somewhere between x = −1 and x = +1 — the shaded red middle. Watch the tangent point downhill and f′ read negative.`]);
+}
+
+function c3_critical(){
+  stage.innerHTML=`<div class="card"><h2>Extrema hide at critical points (Fermat's idea)</h2>
+    <p>If the peaks and valleys are where the curve stops rising and starts falling, then <em>at</em> such an interior point the tangent must be level — otherwise you could still climb. That is <b>Fermat's theorem</b>:</p>
+    <div class="eqbox">$$\\text{if } f \\text{ has a local max or min at an interior } c, \\text{ then } f'(c)=0 \\;\\text{ (or } f'(c) \\text{ doesn't exist).}$$</div>
+    <p>Points where $f'(c)=0$ or $f'$ is undefined are the <b>critical points</b> — the only <em>candidates</em> for extrema. Here $f(x)=\\tfrac{x^3}{3}-x$ has $f'(x)=x^2-1=0$ at the two hollow marks. Drag to one and level the tangent.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">f′(x)</div><div class="v" id="sv">—</div></div></div>
+    <div class="task"><b>Find the peak</b>One critical point is a local <em>maximum</em> (the curve's crest). Enter its $x$-value.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-2.6,xmax:2.6,ymin:-2.2,ymax:2.2});
+  const f=x=>x*x*x/3-x, fp=x=>x*x-1;let a=-2;
+  function draw(){pl.grid();pl.curve(f,'#7ab8ff');
+    const m=fp(a),{ctx}=pl;ctx.strokeStyle=Math.abs(m)<0.05?'#3fb98f':'#e8b84b';ctx.lineWidth=2;ctx.beginPath();
+    const y0=f(a)+m*(pl.xmin-a),y1=f(a)+m*(pl.xmax-a);ctx.moveTo(pl.px(pl.xmin),pl.py(y0));ctx.lineTo(pl.px(pl.xmax),pl.py(y1));ctx.stroke();
+    pl.point(-1,f(-1),'#e8b84b',6,true);pl.point(1,f(1),'#e8b84b',6,true);
+    pl.point(a,f(a),'#e8b84b',5);
+    document.getElementById('xv').textContent=a.toFixed(2);
+    document.getElementById('sv').textContent=m.toFixed(2);}
+  xdrag(cv,pl,x=>{a=x;draw();});draw();
+  numChk(stage.querySelector('.card'),-1,()=>{addReveal(`<div class="rh">✓ Local max at x = −1</div><p>At $x=-1$, $f'=0$ and the curve crests (the left hollow mark); at $x=+1$ it bottoms out. Fermat guarantees extrema <em>can only</em> sit at critical points — but the converse fails: $x=0$ for $f(x)=x^3$ has $f'(0)=0$ yet is no extremum, just a flat spot the curve slides straight through. So critical points are <b>suspects, not convictions</b> — the next beat gives the test that decides.</p>`);});
+  setHints([`Both critical points solve x²−1=0, i.e. x=±1. The crest (local max) is on the left.`,`x = −1.`]);
+}
+
+function c3_firsttest(){
+  stage.innerHTML=`<div class="card"><h2>The first-derivative test: read the sign change</h2>
+    <p>A critical point is a max, a min, or neither — and $f'$ itself tells you which. Walk across the critical point and watch how $f'$ changes sign:</p>
+    <div class="eqbox">$$+ \\to -\\;:\\ \\text{local max} \\qquad - \\to +\\;:\\ \\text{local min} \\qquad \\text{no change}\\;:\\ \\text{neither}$$</div>
+    <p>Below is the <em>derivative</em> $f'(x)=x^2-1$ (green), not $f$. It is a parabola with roots at $\\pm 1$. Drag along it and read the sign; notice how it plunges through zero at $-1$ and climbs through zero at $+1$.</p>
+    <canvas id="cv" width="640" height="360"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">f′(x)</div><div class="v" id="sv">—</div></div><div class="rdc"><div class="k">sign</div><div class="v" id="gv">—</div></div></div>
+    <div class="task"><b>Classify it</b>At $x=+1$, $f'$ changes from negative to positive. So $f$ has a local ___ there.</div>
+    <div class="choices" id="ch"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-2.6,xmax:2.6,ymin:-1.6,ymax:3.2});
+  const fp=x=>x*x-1;let a=-2;
+  function draw(){pl.grid();
+    pl.bandX(pl.xmin,-1,'rgba(63,185,143,0.10)');pl.bandX(-1,1,'rgba(226,102,79,0.11)');pl.bandX(1,pl.xmax,'rgba(63,185,143,0.10)');
+    pl.curve(fp,'#3fb98f');pl.point(-1,0,'#e8b84b',6,true);pl.point(1,0,'#e8b84b',6,true);
+    pl.point(a,fp(a),'#3fb98f',5);
+    document.getElementById('xv').textContent=a.toFixed(2);
+    const v=fp(a);document.getElementById('sv').textContent=v.toFixed(2);
+    document.getElementById('gv').textContent=v>0.02?'positive (f ↗)':(v<-0.02?'negative (f ↘)':'zero');}
+  xdrag(cv,pl,x=>{a=x;draw();});draw();
+  const opts=[['<b>minimum</b> — f was falling, then rising, so this is a valley','y'],['<b>maximum</b> — this is a crest','n'],['neither — f just flattens and continues','n'],['can\'t tell from the sign change alone','n']];
+  mcChoices(document.getElementById('ch'),opts,()=>{addReveal(`<div class="rh">✓ Local minimum at x = +1</div><p>$f'$ going $-\\to+$ means $f$ was falling and then rises — a valley. At $x=-1$ the opposite ($+\\to-$) marks the crest. This <b>sign chart</b> is the first-derivative test: split the line at the critical points, check $f'$'s sign in each interval, and read off the shape. No second derivative required — it even handles critical points where $f''$ is awkward or zero.</p>`);});
+  setHints([`Falling then rising traces a valley shape ∪ — that's a minimum.`]);
+}
+
+function c3_concavity(){
+  stage.innerHTML=`<div class="card"><h2>The second derivative reads the bending</h2>
+    <p>Take the derivative <em>of the derivative</em>. $f''=(f')'$ measures how the <em>slope</em> is changing — the <b>concavity</b>, or which way the curve bows:</p>
+    <div class="eqbox">$$f''>0 \\;\\Rightarrow\\; \\text{concave up } (\\smile) \\qquad f''<0 \\;\\Rightarrow\\; \\text{concave down } (\\frown) \\qquad f''=0 \\text{ and flips} \\;\\Rightarrow\\; \\text{inflection}$$</div>
+    <p>For $f(x)=\\tfrac{x^3}{3}-x$: $f'=x^2-1$, so $f''=2x$. Drag the point — the tangent is drawn, and the curve lies <em>above</em> it where concave up, <em>below</em> where concave down. Watch the bowing flip as you cross the center.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">f″(x) = 2x</div><div class="v" id="sv">—</div></div><div class="rdc"><div class="k">concavity</div><div class="v" id="cvc">—</div></div></div>
+    <div class="task"><b>Find the inflection point</b>Where does concavity switch (so $f''=0$)? Enter that $x$.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-2.6,xmax:2.6,ymin:-2.2,ymax:2.2});
+  const f=x=>x*x*x/3-x, fp=x=>x*x-1, fpp=x=>2*x;let a=-1.4;
+  function draw(){pl.grid();
+    pl.bandX(pl.xmin,0,'rgba(226,102,79,0.09)');pl.bandX(0,pl.xmax,'rgba(63,185,143,0.09)');
+    pl.vline(0,'#2b3a4f',true);pl.curve(f,'#7ab8ff');
+    const m=fp(a),{ctx}=pl;ctx.strokeStyle='#e8b84b';ctx.lineWidth=1.8;ctx.setLineDash([5,4]);ctx.beginPath();
+    const y0=f(a)+m*(pl.xmin-a),y1=f(a)+m*(pl.xmax-a);ctx.moveTo(pl.px(pl.xmin),pl.py(y0));ctx.lineTo(pl.px(pl.xmax),pl.py(y1));ctx.stroke();ctx.setLineDash([]);
+    pl.point(0,f(0),'#8095ab',5,true);pl.point(a,f(a),'#e8b84b',5);
+    document.getElementById('xv').textContent=a.toFixed(2);
+    const v=fpp(a);document.getElementById('sv').textContent=v.toFixed(2);
+    document.getElementById('cvc').textContent=v>0.03?'up ⌣':(v<-0.03?'down ⌢':'inflection');}
+  xdrag(cv,pl,x=>{a=x;draw();});draw();
+  numChk(stage.querySelector('.card'),0,()=>{addReveal(`<div class="rh">✓ Inflection at x = 0</div><p>$f''=2x$ is negative left of 0 (concave down, curve below its tangents) and positive to the right (concave up), switching sign at the grey mark — an <b>inflection point</b>. This also hands you the <b>second-derivative test</b>: at a critical point, $f''>0$ means a valley, $f''<0$ a crest. Check it — critical $x=+1$ gives $f''=2>0$ (min ✓); $x=-1$ gives $f''=-2<0$ (max ✓). One evaluation classifies, no sign chart needed.</p>`);});
+  setHints([`f″ = 2x. Set it to zero: 2x = 0.`,`x = 0.`]);
+}
+
+function c3_mvt(){
+  stage.innerHTML=`<div class="card"><h2>The Mean Value Theorem: some tangent matches the average</h2>
+    <p>Over $[a,b]$, the <b>average</b> rate of change is the secant slope $\\frac{f(b)-f(a)}{b-a}$. The Mean Value Theorem says the <em>instantaneous</em> rate hits that average somewhere inside:</p>
+    <div class="eqbox">$$\\text{if } f \\text{ is continuous on } [a,b] \\text{ and differentiable on } (a,b),\\; \\exists\\, c\\in(a,b):\\ f'(c)=\\frac{f(b)-f(a)}{b-a}$$</div>
+    <p>Geometrically: some tangent runs <b>parallel to the secant</b>. Here $f(x)=x^2$ on $[0,2]$; the gold dashed secant has slope $2$. Drag $c$ until the green tangent is parallel — matching slope $2$.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">c</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">tangent f′(c)</div><div class="v" id="sv">—</div></div><div class="rdc"><div class="k">secant slope</div><div class="v">2.00</div></div></div>
+    <div class="task"><b>Match the average</b>Find the $c$ in $(0,2)$ where $f'(c)=2$. Enter it.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.4,xmax:2.5,ymin:-0.6,ymax:5});
+  const f=x=>x*x, fp=x=>2*x, A=0,B=2;let c=0.35;
+  function draw(){pl.grid();pl.curve(f,'#7ab8ff');
+    const{ctx}=pl;const sm=(f(B)-f(A))/(B-A);
+    ctx.strokeStyle='#e8b84b';ctx.lineWidth=1.8;ctx.setLineDash([5,4]);ctx.beginPath();
+    const s0=f(A)+sm*(pl.xmin-A),s1=f(A)+sm*(pl.xmax-A);ctx.moveTo(pl.px(pl.xmin),pl.py(s0));ctx.lineTo(pl.px(pl.xmax),pl.py(s1));ctx.stroke();ctx.setLineDash([]);
+    pl.point(A,f(A),'#e8b84b',4);pl.point(B,f(B),'#e8b84b',4);
+    const m=fp(c),par=Math.abs(m-sm)<0.05;ctx.strokeStyle=par?'#3fb98f':'#7ab8ff';ctx.lineWidth=2;ctx.beginPath();
+    const t0=f(c)+m*(pl.xmin-c),t1=f(c)+m*(pl.xmax-c);ctx.moveTo(pl.px(pl.xmin),pl.py(t0));ctx.lineTo(pl.px(pl.xmax),pl.py(t1));ctx.stroke();
+    pl.point(c,f(c),par?'#3fb98f':'#7ab8ff',5);
+    document.getElementById('xv').textContent=c.toFixed(2);
+    document.getElementById('sv').textContent=m.toFixed(2);
+    if(par&&!draw.f){draw.f=true;flash('✓ Parallel');}}
+  xdrag(cv,pl,x=>{c=Math.max(0.05,Math.min(1.95,x));draw();});draw();
+  numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ c = 1</div><p>$f'(c)=2c=2$ gives $c=1$ — the tangent there is exactly parallel to the secant. <b>Rolle's theorem</b> is the special case $f(a)=f(b)$: a horizontal secant forces a horizontal tangent (a flat spot) between them. Don't over-read the parabola's tidy midpoint: for $f(x)=x^3$ on $[0,3]$ the secant slope is $9$, so $3c^2=9$ gives $c=\\sqrt{3}\\approx 1.73$ — pulled toward the steeper end, not the middle. The MVT is the workhorse behind "$f'=0$ everywhere $\\Rightarrow f$ constant" and L'Hôpital's rule ahead.</p>`);});
+  setHints([`f′(x)=2x, and you need f′(c)=2. Solve 2c=2.`,`c = 1.`]);
+}
+
+function c3_optimization(){
+  stage.innerHTML=`<div class="card"><h2>Optimization: turn a problem into a critical point</h2>
+    <p>This is the payoff. A rancher has <b>8 m of fencing</b> for a rectangular pen against a straight river — no fence needed on the river side. If the two sides jutting out have length $x$, the side parallel to the river is $8-2x$, so the enclosed <b>area</b> is:</p>
+    <div class="eqbox">$$A(x) = x\\,(8 - 2x) = 8x - 2x^2, \\qquad 0 \\le x \\le 4$$</div>
+    <p>Maximizing area is now just "find the critical point of $A$." Drag $x$ and ride the area curve to its crest.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">x (side)</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">length 8−2x</div><div class="v" id="lv">—</div></div><div class="rdc"><div class="k">area A</div><div class="v" id="av">—</div></div></div>
+    <div class="task"><b>Maximize</b>Which side length $x$ gives the largest area? Enter it.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.4,xmax:4.3,ymin:-1,ymax:9});
+  const A=x=>8*x-2*x*x;let a=0.5;
+  function draw(){pl.grid();pl.curve(A,'#7ab8ff');pl.point(2,A(2),'#e8b84b',6,true);
+    pl.point(a,A(a),'#e8b84b',5);pl.vline(a,'#3a4c66',true);
+    document.getElementById('xv').textContent=a.toFixed(2);
+    document.getElementById('lv').textContent=(8-2*a).toFixed(2);
+    document.getElementById('av').textContent=A(a).toFixed(2);}
+  xdrag(cv,pl,x=>{a=Math.max(0,Math.min(4,x));draw();});draw();
+  numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ x = 2, giving area 8</div><p>$A'(x)=8-4x=0 \\Rightarrow x=2$, and $A''=-4<0$ confirms a maximum. The pen is $2\\times 4$ (area $8\\,\\text{m}^2$) — the classic result that the river-side rectangle is <b>half a square</b>: depth is half the width. Every optimization is this recipe — write the quantity as a function of one variable, note the domain, and hunt its critical points (checking endpoints too). The modeling is the hard part; the calculus is one derivative.</p>`);});
+  setHints([`Set A′(x)=8−4x equal to 0 and solve.`,`8 − 4x = 0 → x = 2.`]);
+}
+
+function c3_relatedrates(){
+  stage.innerHTML=`<div class="card"><h2>Related rates: the chain rule in time</h2>
+    <p>When two quantities are linked by an equation and both change over time, the chain rule links their <em>rates</em>. Drop a stone in a pond: the ripple's radius grows at a steady $\\frac{dr}{dt}=2$ m/s. Its area is $A=\\pi r^2$, so differentiating both sides <b>with respect to $t$</b>:</p>
+    <div class="eqbox">$$\\frac{dA}{dt} = \\frac{d}{dt}\\big(\\pi r^2\\big) = 2\\pi r\\,\\frac{dr}{dt} = 2\\pi r \\cdot 2 = 4\\pi r$$</div>
+    <p>The radius climbs at a constant rate, yet the area's rate $4\\pi r$ <em>grows with $r$</em> — a bigger ripple gains area faster. Drag to inflate it and watch $dA/dt$ accelerate.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">r</div><div class="v" id="rv">—</div></div><div class="rdc"><div class="k">area πr²</div><div class="v" id="av">—</div></div><div class="rdc"><div class="k">dA/dt = 4πr</div><div class="v" id="dv">—</div></div></div>
+    <div class="task"><b>Evaluate</b>At the instant $r=5$, $\\dfrac{dA}{dt}=k\\pi$. Enter $k$.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-10.1,xmax:10.1,ymin:-6,ymax:6});
+  let r=1.5;
+  function draw(){pl.grid();const{ctx}=pl;
+    ctx.beginPath();for(let i=0;i<=100;i++){const t=i/100*2*Math.PI,X=pl.px(r*Math.cos(t)),Y=pl.py(r*Math.sin(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}
+    ctx.closePath();ctx.fillStyle='rgba(122,184,255,0.14)';ctx.fill();ctx.strokeStyle='#7ab8ff';ctx.lineWidth=2.5;ctx.stroke();
+    ctx.strokeStyle='#e8b84b';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(pl.px(0),pl.py(0));ctx.lineTo(pl.px(r),pl.py(0));ctx.stroke();
+    pl.point(0,0,'#e8b84b',4);
+    document.getElementById('rv').textContent=r.toFixed(2);
+    document.getElementById('av').textContent=(Math.PI*r*r).toFixed(1);
+    document.getElementById('dv').textContent=(4*Math.PI*r).toFixed(1);}
+  xdrag(cv,pl,x=>{r=Math.max(0.5,Math.min(5,Math.abs(x)));draw();});draw();
+  numChk(stage.querySelector('.card'),20,()=>{addReveal(`<div class="rh">✓ k = 20</div><p>$\\frac{dA}{dt}=4\\pi r$, and at $r=5$ that is $20\\pi \\approx 62.8\\ \\text{m}^2/\\text{s}$. The recipe: relate the quantities ($A=\\pi r^2$), differentiate the whole equation in $t$ (the chain rule supplies the $\\frac{dr}{dt}$ factor), then substitute the instant's numbers <em>last</em>. Same machinery sizes a ladder sliding down a wall, a shadow lengthening, a tank draining — any two rates chained by one relation.</p>`);});
+  setHints([`dA/dt = 4πr. Put r = 5.`,`4π·5 = 20π, so k = 20.`]);
+}
+
+function c3_lhopital(){
+  stage.innerHTML=`<div class="card"><h2>L'Hôpital's rule: a 0/0 limit is a ratio of slopes</h2>
+    <p>Module 2 met limits like $\\frac{0}{0}$ that substitution can't touch. Here is a derivative-powered shortcut. If $f(a)=g(a)=0$, then near $a$ the quotient is secretly a ratio of difference quotients:</p>
+    <div class="eqbox">$$\\frac{f(x)}{g(x)} = \\frac{\\,\\dfrac{f(x)-f(a)}{x-a}\\,}{\\,\\dfrac{g(x)-g(a)}{x-a}\\,} \\;\\xrightarrow{\\,x\\to a\\,}\\; \\frac{f'(a)}{g'(a)}$$</div>
+    <p>That's <b>L'Hôpital's rule</b>: for a $\\frac{0}{0}$ form, differentiate top and bottom <em>separately</em> and re-evaluate. Below, $f(x)=x^2-9$ and $g(x)=x^2-x-6$ both hit $0$ at $x=3$. Drag $x$ toward $3$ and watch the ratio settle.</p>
+    <canvas id="cv" width="640" height="360"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">f/g</div><div class="v" id="qv">—</div></div></div>
+    <div class="task"><b>Apply the rule</b>Evaluate $\\displaystyle\\lim_{x\\to 3}\\frac{x^2-9}{x^2-x-6}$ (enter a decimal).</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:2,xmax:4,ymin:-6,ymax:8});
+  const f=x=>x*x-9, g=x=>x*x-x-6;let a=2.1;
+  function draw(){pl.grid();pl.vline(3,'#2b3a4f',true);pl.curve(f,'#7ab8ff');pl.curve(g,'#3fb98f');
+    pl.point(3,0,'#8095ab',5,true);pl.point(a,f(a),'#7ab8ff',4);pl.point(a,g(a),'#3fb98f',4);
+    document.getElementById('xv').textContent=a.toFixed(3);
+    const q=g(a)===0?NaN:f(a)/g(a);document.getElementById('qv').textContent=isFinite(q)?q.toFixed(3):'—';}
+  xdrag(cv,pl,x=>{a=Math.max(2,Math.min(3.98,Math.abs(x-3)<0.02?(x<3?2.98:3.02):x));draw();});draw();
+  numChk(stage.querySelector('.card'),1.2,()=>{addReveal(`<div class="rh">✓ 1.2</div><p>Both are $0$ at $3$, so differentiate each: $f'=2x$, $g'=2x-1$, giving $\\frac{f'(3)}{g'(3)}=\\frac{6}{5}=1.2$. Factoring agrees — $\\frac{(x-3)(x+3)}{(x-3)(x+2)}=\\frac{x+3}{x+2}\\to\\frac{6}{5}$ — which is exactly why the rule works: the shared $(x-3)$ that made it $\\frac{0}{0}$ is the linear piece the derivatives capture. The clean $\\frac{0}{0}$ case is just the derivative definition (as above); the full rule — covering $\\frac{\\infty}{\\infty}$ and repeated use — leans on a stronger Mean Value Theorem, but the idea is this one.</p>`);});
+  setHints([`Both top and bottom are 0 at x=3, so it's 0/0. Differentiate each: (2x)/(2x−1), then plug in x=3.`,`6/5 = 1.2.`]);
+}
+
+function c3_problems(){
+  stage.innerHTML=`<div class="card"><h2>Problem set</h2>
+    <p>Everything here uses only Modules 1–4 (no $e^x$ or $\\ln$ yet). Work it on paper; solutions fold open.</p>
+
+    <div class="prob"><span class="lvl">critical points</span><div class="ph">Problem 1</div>
+    <p>Find and classify all critical points of $f(x) = x^3 - 3x^2$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$f'(x) = 3x^2 - 6x = 3x(x-2)$, zero at $x=0$ and $x=2$. Second-derivative test with $f''(x)=6x-6$: $f''(0)=-6<0$ so $x=0$ is a local <b>max</b> ($f(0)=0$); $f''(2)=6>0$ so $x=2$ is a local <b>min</b> ($f(2)=-4$).</p></div></details></div>
+
+    <div class="prob"><span class="lvl">monotonic intervals</span><div class="ph">Problem 2</div>
+    <p>On which intervals is $f(x) = x^3 - 3x$ increasing? Decreasing?</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$f'(x) = 3x^2 - 3 = 3(x-1)(x+1)$. Sign chart: $f'>0$ on $(-\\infty,-1)$ and $(1,\\infty)$ — <b>increasing</b>; $f'<0$ on $(-1,1)$ — <b>decreasing</b>. So $x=-1$ is a local max, $x=+1$ a local min.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">concavity</span><div class="ph">Problem 3</div>
+    <p>Find the inflection point and concavity of $f(x) = x^3 - 3x^2$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$f''(x) = 6x - 6 = 6(x-1)$, zero at $x=1$ (and it changes sign there). Concave <b>down</b> on $(-\\infty,1)$, concave <b>up</b> on $(1,\\infty)$; the inflection point is $(1, -2)$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">Mean Value Theorem</span><div class="ph">Problem 4</div>
+    <p>Verify the MVT for $f(x) = x^2$ on $[1,3]$ and find the guaranteed $c$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$f$ is a polynomial, so continuous and differentiable everywhere. Secant slope $= \\frac{f(3)-f(1)}{3-1} = \\frac{9-1}{2} = 4$. Set $f'(c) = 2c = 4 \\Rightarrow c = 2$, which lies in $(1,3)$. ✓</p></div></details></div>
+
+    <div class="prob"><span class="lvl">optimization</span><div class="ph">Problem 5</div>
+    <p>Of all rectangles with perimeter $20$, which has the largest area?</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Sides $x$ and $10-x$ (since $2x+2(10-x)=20$). Area $A(x)=x(10-x)=10x-x^2$; $A'(x)=10-2x=0 \\Rightarrow x=5$. The rectangle is $5\\times 5$ — a <b>square</b>, area $25$. ($A''=-2<0$ confirms the max.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">optimization — box</span><div class="ph">Problem 6</div>
+    <p>An open box is made from a $12\\times 12$ sheet by cutting squares of side $x$ from each corner and folding up. What $x$ maximizes volume?</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$V(x) = x(12-2x)^2$ for $0<x<6$. $V'(x) = (12-2x)^2 + x\\cdot 2(12-2x)(-2) = (12-2x)(12-6x)$. Zeros at $x=6$ (degenerate) and $x=2$. So $x=2$, giving $V = 2\\cdot 8^2 = 128$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">related rates</span><div class="ph">Problem 7</div>
+    <p>A $13$ ft ladder rests against a wall; its base slides out at $5$ ft/s. How fast is the top sliding down when the base is $5$ ft from the wall?</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$x^2 + y^2 = 169$. Differentiate in $t$: $2x\\frac{dx}{dt} + 2y\\frac{dy}{dt} = 0$. At $x=5$, $y=\\sqrt{169-25}=12$. So $\\frac{dy}{dt} = -\\frac{x}{y}\\frac{dx}{dt} = -\\frac{5}{12}(5) = -\\frac{25}{12} \\approx -2.08$ ft/s (negative = descending).</p></div></details></div>
+
+    <div class="prob"><span class="lvl">L'Hôpital</span><div class="ph">Problem 8</div>
+    <p>Evaluate $\\displaystyle\\lim_{x\\to 0}\\frac{\\sin 3x}{\\sin 5x}$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Both $\\to 0$, so it's $\\frac{0}{0}$. Differentiate top and bottom: $\\frac{3\\cos 3x}{5\\cos 5x}$. At $x=0$: $\\frac{3\\cdot 1}{5\\cdot 1} = \\frac{3}{5}$.</p></div></details></div>
+  </div>`;
+  setHints([]);unlock();
+}
+
+function c3_recap(){
+  stage.innerHTML=`<div class="card"><h2>What you built</h2>
+    <div class="eqbox" style="line-height:2.3">$$f'>0,\\,f'<0 \\;\\Rightarrow\\; \\text{rising, falling} \\qquad f'(c)=0 \\;\\Rightarrow\\; \\text{critical point}$$
+    <div style="text-align:center;line-height:2;color:#dbe6f4;margin-top:6px">1st-deriv test (sign change) &amp; 2nd-deriv test ($f''$) classify extrema<br>$f''$ sign = concavity · flip = inflection<br>MVT: $f'(c)=\\frac{f(b)-f(a)}{b-a}$ (Rolle = flat case)<br>optimization = critical point of the objective · related rates = chain rule in $t$<br>L'Hôpital: $\\frac{0}{0}\\to\\frac{f'}{g'}$</div></div>
+    <p>Every tool here is the one derivative from Module 3, aimed at a question — direction, shape, the best value, coupled rates, stubborn limits. Nothing new was assumed.</p>
+    <p><b>Next — Module 5:</b> the derivative's mirror image. Integration reverses differentiation and measures accumulated area; the <b>Fundamental Theorem of Calculus</b> is the bridge that makes the two operations inverses — and it's where $\\ln x := \\int_1^x \\tfrac{dt}{t}$ and $e^x$ finally arrive, rigorously.</p></div>`;
   setHints([]);unlock();
 }
 
