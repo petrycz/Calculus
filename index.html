@@ -678,37 +678,18 @@ function c2_powerrule(){
 }
 function c2_prodquot(){
   stage.innerHTML=`<div class="card"><h2>Product & quotient rules — the add-and-subtract trick</h2>
-    <p>A tempting guess is <span class="mono">(fg)′ = f′g′</span>. It's <em>wrong</em> (check <span class="mono">f=g=x</span>: <span class="mono">(x²)′ = 2x</span>, not <span class="mono">1·1</span>). There's a clean geometric reason, and it hands us the real rule. Think of <span class="mono">f·g</span> as the <b>area of a rectangle</b> with width <span class="mono">f</span> and height <span class="mono">g</span>. Nudge x by a little <span class="mono">h</span>: both sides grow, and the area gains two strips plus a tiny corner.</p>
-    <canvas id="cv" width="640" height="330"></canvas>
-    <div class="ctrls"><span class="slabel" id="hl">h = 0.60</span><input type="range" id="sl" min="2" max="60" value="60"></div>
-    <p class="small" id="obs" style="margin-top:6px"></p>
-    <p>The area increment is <span class="mono">g·Δf + f·Δg + Δf·Δg</span>. Divide by h and shrink it: the corner <span class="mono">Δf·Δg</span> is second-order — it vanishes faster than the strips — leaving the two strips. Algebraically, the same fact comes from adding and subtracting a middle term in the difference quotient:</p>
-    <div class="eqbox"><sup>f(x+h)g(x+h) − f(x)g(x)</sup>⁄<sub>h</sub> = f(x+h)·<sup>Δg</sup>⁄<sub>h</sub> + g(x)·<sup>Δf</sup>⁄<sub>h</sub> → f g′ + g f′</div>
-    <div class="eqbox"><span class="hl">(fg)′ = f′g + f g′</span>&nbsp;&nbsp;·&nbsp;&nbsp;<span class="hl">(f/g)′ = <sup>f′g − f g′</sup>⁄<sub>g²</sub></span></div>
+    <p>A tempting guess is <span class="mono">(fg)′ = f′g′</span>. It's <em>wrong</em> — check <span class="mono">f = g = x</span>: <span class="mono">(x²)′ = 2x</span>, not <span class="mono">1·1 = 1</span>. So the product rule can't be that simple. The real one comes from the limit definition plus a single clever move: in the difference quotient for <span class="mono">fg</span>, <b>add and subtract</b> the same middle term <span class="mono">f(x+h)g(x)</span>.</p>
+    <div class="eqbox"><sup>f(x+h)g(x+h) − f(x)g(x)</sup>⁄<sub>h</sub></div>
+    <p>Insert <span class="mono">− f(x+h)g(x) + f(x+h)g(x)</span> in the numerator (it changes nothing) and regroup into two familiar difference quotients:</p>
+    <div class="eqbox">= f(x+h)·<sup>g(x+h) − g(x)</sup>⁄<sub>h</sub> + g(x)·<sup>f(x+h) − f(x)</sup>⁄<sub>h</sub></div>
+    <p>As <span class="mono">h → 0</span>: the two quotients become <span class="mono">g′</span> and <span class="mono">f′</span>, and <span class="mono">f(x+h) → f(x)</span> (differentiable ⟹ continuous, proven next beat). That leaves the rule:</p>
+    <div class="eqbox"><span class="hl">(fg)′ = f′g + f g′</span></div>
+    <p>The <b>quotient rule</b> comes out of the identical trick applied to <span class="mono">f/g</span> — add and subtract <span class="mono">f(x)g(x)</span> in the numerator:</p>
+    <div class="eqbox"><span class="hl">(f/g)′ = <sup>f′g − f g′</sup>⁄<sub>g²</sub></span></div>
     <div class="task"><b>Apply the product rule</b>Let <span class="mono">f(x) = (x² + 1)(x − 2)</span>. Using the product rule (don't expand first), compute <span class="mono">f′(2)</span>.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
-  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
-  const ox=90,oy=H-50,scale=52;const u=3.0,v=2.4;const sl=document.getElementById('sl');
-  function draw(){if(!ctx)return;const h=+sl.value/100;const du=h,dv=0.8*h;ctx.clearRect(0,0,W,H);
-    // base rectangle u x v
-    ctx.fillStyle='rgba(122,184,255,0.22)';ctx.fillRect(ox,oy-v*scale,u*scale,v*scale);
-    ctx.strokeStyle='#7ab8ff';ctx.lineWidth=2;ctx.strokeRect(ox,oy-v*scale,u*scale,v*scale);
-    // bottom/right strips (first-order) and corner (second-order)
-    ctx.fillStyle='rgba(63,185,143,0.35)';ctx.fillRect(ox,oy-(v+dv)*scale,u*scale,dv*scale); // top strip g·Δf? label as f·Δg
-    ctx.fillStyle='rgba(232,184,75,0.35)';ctx.fillRect(ox+u*scale,oy-v*scale,du*scale,v*scale); // right strip g·Δf
-    ctx.fillStyle='rgba(226,102,79,0.55)';ctx.fillRect(ox+u*scale,oy-(v+dv)*scale,du*scale,dv*scale); // corner Δf·Δg
-    ctx.fillStyle='#9fb0c4';ctx.font='600 13px '+getComputedStyle(document.body).fontFamily;
-    ctx.fillText('f',ox+u*scale/2-4,oy+18);ctx.fillText('g',ox-16,oy-v*scale/2);
-    ctx.fillStyle='#e8b84b';ctx.fillText('g·Δf',ox+u*scale+4,oy-v*scale/2);
-    ctx.fillStyle='#3fb98f';ctx.fillText('f·Δg',ox+u*scale/2-14,oy-(v+dv)*scale-6);
-    ctx.fillStyle='#e2664f';ctx.fillText('Δf·Δg',ox+u*scale+4,oy-(v+dv)*scale-6);
-    document.getElementById('hl').textContent='h = '+h.toFixed(2);
-    document.getElementById('obs').innerHTML= h<0.12
-      ? '✓ As h shrinks, the red corner (area ≈ h²) becomes negligible next to the two strips (area ≈ h) — only <span class="mono">f·Δg + g·Δf</span> survives.'
-      : 'The red corner is the product Δf·Δg — an h² term. Watch it shrink relative to the strips as you drag h down.';}
-  sl.addEventListener('input',draw);draw();
-  numChk(stage.querySelector('.card'),5,()=>{addReveal(`<div class="rh">✓ 5</div><p>With <span class="mono">u=x²+1</span> (<span class="mono">u′=2x</span>) and <span class="mono">v=x−2</span> (<span class="mono">v′=1</span>): <span class="mono">f′ = u′v + uv′ = 2x(x−2) + (x²+1)</span>. At x=2: <span class="mono">0 + 5 = 5</span>. The rectangle made the rule inevitable: change in area = (strip from widening) + (strip from heightening), and that's <span class="mono">g f′ + f g′</span>.</p>`);});
-  setHints([`Drag h toward 0 to see the corner vanish. For the task: f′ = (first)′·second + first·(second)′.`,`2x(x−2)+(x²+1); at x=2 the first term is 0, leaving 5.`]);
+  numChk(stage.querySelector('.card'),5,()=>{addReveal(`<div class="rh">✓ 5</div><p>With <span class="mono">u = x²+1</span> (<span class="mono">u′ = 2x</span>) and <span class="mono">v = x−2</span> (<span class="mono">v′ = 1</span>): <span class="mono">f′ = u′v + uv′ = 2x(x−2) + (x²+1)</span>. At x = 2: <span class="mono">2·2·0 + (4+1) = 0 + 5 = 5</span>. (Expanding first and using the power rule gives <span class="mono">3x²−4x+1 → 5</span> — same answer; the product rule just saves the multiplication.)</p>`);},s=>parseFloat(s));
+  setHints([`Product rule: f′ = (first)′·(second) + (first)·(second)′, with first = x²+1, second = x−2.`,`2x(x−2) + (x²+1); at x=2 the first term is 0, leaving 5.`]);
 }
 function c2_chain(){
   stage.innerHTML=`<div class="card"><h2>The chain rule: differentiating a composition</h2>
