@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-<title>Calculus, Refreshed</title>
+<title>Calculus, from First Principles</title>
 <style>
   :root{--bg:#0d1420;--grid:#172233;--panel:#131d2c;--panel2:#182437;--ink:#e9eef6;
     --muted:#8095ab;--muted2:#5d6f85;--accent:#7ab8ff;--good:#3fb98f;--good2:#1e4a3d;--bad:#e2664f;--bad2:#4a2620;
@@ -95,7 +95,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="htop"><span class="back" id="backBtn" style="display:none">‹ Menu</span><span class="kick course" id="kick">Calculus, Refreshed</span><span class="step" id="stepLbl"></span></div>
+    <div class="htop"><span class="back" id="backBtn" style="display:none">‹ Menu</span><span class="kick course" id="kick">Calculus, from First Principles</span><span class="step" id="stepLbl"></span></div>
     <div class="pbar" id="pbarWrap" style="display:none"><i id="pfill" style="width:0%"></i></div>
   </header>
   <main><div id="stage"></div><div class="hintbox" id="hintbox"></div></main>
@@ -113,8 +113,8 @@ const MODULES=[
   outro:`A limit is the value a function approaches — made rigorous by the ε-δ challenge. Continuity is "the limit equals the value," and it powers the Intermediate Value Theorem. Everything in calculus is built on this.`,
   beats:[c1_intro,c1_intuitive,c1_epsdelta,c1_laws,c1_indet,c1_continuity,c1_infinity,c1_problems,c1_recap]},
  {id:'c2',title:'The Derivative',sub:'Instantaneous rate of change as a limit; the rules and the chain rule.',ready:true,
-  outro:`A derivative is one specific limit — the secant slope as the gap closes. Written f′(x) or dy/dx, precomputed into the power/product/quotient rules and composed by the chain rule. Differentiable implies continuous, but corners and cusps show the converse fails.`,
-  beats:[c2_recall,c2_intro,c2_notation,c2_rules,c2_chain,c2_diffcont,c2_problems,c2_recap]},
+  outro:`A derivative is one specific limit — the secant slope as the gap closes. Every rule (power via binomial, product/quotient via add-and-subtract, chain, sin/cos via the squeeze limit) is derived from that one definition. eˣ and ln wait for the integral in Module 6.`,
+  beats:[c2_recall,c2_intro,c2_notation,c2_powerrule,c2_prodquot,c2_chain,c2_trig,c2_diffcont,c2_problems,c2_recap]},
  {id:'c3',title:'Applications of the Derivative',sub:'Extrema, the Mean Value Theorem, optimization, related rates, L\u2019H\u00f4pital.',ready:false},
  {id:'c4',title:'Integration & the FTC',sub:'Riemann sums, the definite integral, and the Fundamental Theorem of Calculus.',ready:false},
  {id:'c5',title:'Techniques & Applications of Integration',sub:'Substitution, parts, partial fractions, improper integrals; area, volume, arc length.',ready:false},
@@ -132,9 +132,9 @@ function scrollTop(){try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){}}
 function renderMenu(){
   view='menu';footer.style.display='none';hintbox.className='hintbox';hintbox.innerHTML='';
   document.getElementById('backBtn').style.display='none';document.getElementById('pbarWrap').style.display='none';
-  document.getElementById('kick').className='kick course';document.getElementById('kick').textContent='Calculus, Refreshed';
+  document.getElementById('kick').className='kick course';document.getElementById('kick').textContent='Calculus, from First Principles';
   document.getElementById('stepLbl').textContent='';
-  let html=`<div class="card"><h1>Calculus, Refreshed</h1><p class="lede">A rigorous reactivation of the standard college sequence — Calc 1 through multivariable and vector calculus — for anyone who once knew it and wants it sharp again. Real definitions and theorems, guided discovery, worked problems. (The matrix-calculus view of gradients lives in a separate ML course.)</p></div>`;
+  let html=`<div class="card"><h1>Calculus, from First Principles</h1><p class="lede">A self-contained calculus course, built from the ground up: every rule and theorem is derived, nothing is assumed beyond basic algebra. It runs from limits through single-variable, multivariable, and vector calculus, and on into matrix calculus — the bridge to machine learning. Guided discovery, real proofs, worked problems.</p></div>`;
   MODULES.forEach((m,i)=>{const done=completed[m.id];const st=done?['done','✓ Done']:(m.ready?['todo','Start']:['soon','Soon']);
     html+=`<div class="card mcard${m.ready?'':' lock'}" data-i="${i}"><div class="mtop"><span class="mnum">Module ${i+1}</span><span class="mstat ${st[0]}">${st[1]}</span></div>
       <div class="mtitle">${m.title}</div><div class="msub">${m.sub}</div></div>`;});
@@ -394,7 +394,7 @@ function c1_problems(){
   setHints([]);unlock();
 }
 function c1_recap(){
-  stage.innerHTML=`<div class="card"><h2>What you refreshed</h2>
+  stage.innerHTML=`<div class="card"><h2>What you built</h2>
     <div class="eqbox" style="line-height:1.95">limit = the value f approaches near a (not f(a) itself)<br>ε-δ: ∀ε&gt;0 ∃δ&gt;0, 0&lt;|x−a|&lt;δ ⟹ |f(x)−L|&lt;ε<br>limit laws ⟹ substitute when continuous<br>0/0: factor, rationalize, or squeeze<br>continuous at a ⟺ lim<sub>x→a</sub> f = f(a)&nbsp;·&nbsp;IVT guarantees roots<br>x→∞: compare leading terms → horizontal asymptote</div>
     <p>The limit is the single tool underneath all of calculus. You now have it both intuitively (approach, ignore the endpoint) and rigorously (the ε-δ guarantee), plus continuity and its payoff, the Intermediate Value Theorem.</p>
     <p><b>Next — Module 2:</b> the <b>derivative</b>. It's not a new idea — it's a specific limit, the one from the very first beat: the slope of the secant <span class="mono">(f(x)−f(a))/(x−a)</span> as <span class="mono">x → a</span>. Every differentiation rule you'll refresh is that one limit, computed once and packaged.</p></div>`;
@@ -404,27 +404,25 @@ function c1_recap(){
 /* ================= MODULE 2 — THE DERIVATIVE ================= */
 function c2_intro(){
   stage.innerHTML=`<div class="card"><h2>The derivative is one specific limit</h2>
-    <p>Module 1 ended on the secant→tangent picture. The <b>derivative</b> just names that limit. The average rate of change of <span class="mono">f</span> from <span class="mono">a</span> to a nearby point is the secant slope; letting the second point slide in gives the instantaneous rate — the tangent slope:</p>
+    <p>Module 1's very first beat previewed the secant→tangent picture. The <b>derivative</b> just names that limit. The average rate of change of <span class="mono">f</span> from <span class="mono">a</span> to a nearby point is the secant slope; letting the second point slide in gives the instantaneous rate — the tangent slope:</p>
     <div class="eqbox">f′(a) = lim<sub>h→0</sub> <sup>f(a + h) − f(a)</sup>⁄<sub>h</sub>&nbsp;&nbsp;<span style="color:#5d7186">(h = the gap x − a)</span></div>
-    <p>That's the entire definition. Everything else — the power rule, product rule, chain rule — is this one limit, computed once for a family of functions and then reused so you never touch the limit again. Watch the secant become the tangent: drag the second point toward <span class="cy">a</span> and read both slopes.</p>
+    <p>That's the entire definition. Everything else — the power, product, quotient, and chain rules — is this one limit, computed once for a family of functions and then reused so you never touch the limit again. Watch the secant become the tangent: drag the moving point toward <span class="cy">a</span> and read both slopes.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">h</div><div class="v" id="hv">—</div></div><div class="rdc"><div class="k">secant slope</div><div class="v" id="sv">—</div></div><div class="rdc"><div class="k">tangent f′(a)</div><div class="v" id="tv">2.0</div></div></div>
     <div class="task"><b>Slide it in</b>Drag the moving point toward <span class="cy">a = 1</span> and watch the secant slope approach the tangent slope, f′(1) = 2.</div></div>`;
-  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.5,xmax:3,ymin:-0.5,ymax:5});
-  const f=x=>x*x, a=1;let xh=2.6,done=false;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.5,xmax:2.7,ymin:-1,ymax:7});
+  const f=x=>x*x, a=1;let xh=2.3,done=false;
   function draw(){pl.grid();pl.curve(f,'#7ab8ff');
     const{ctx}=pl;const m=(f(xh)-f(a))/(xh-a);
-    // secant line
     ctx.strokeStyle='#e8b84b';ctx.lineWidth=2;ctx.beginPath();
     const y0=f(a)+m*(pl.xmin-a),y1=f(a)+m*(pl.xmax-a);ctx.moveTo(pl.px(pl.xmin),pl.py(y0));ctx.lineTo(pl.px(pl.xmax),pl.py(y1));ctx.stroke();
-    // tangent (slope 2 at a)
     ctx.strokeStyle='#3fb98f';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();
     const t0=f(a)+2*(pl.xmin-a),t1=f(a)+2*(pl.xmax-a);ctx.moveTo(pl.px(pl.xmin),pl.py(t0));ctx.lineTo(pl.px(pl.xmax),pl.py(t1));ctx.stroke();ctx.setLineDash([]);
     pl.point(a,f(a),'#7ab8ff',5);pl.point(xh,f(xh),'#e8b84b',5);
     document.getElementById('hv').textContent=(xh-a).toFixed(3);
     document.getElementById('sv').textContent=m.toFixed(3);
     if(!done&&Math.abs(xh-a)<0.15&&Math.abs(xh-a)>1e-6){done=true;flash('✓ Secant → tangent');
-      addReveal(`<div class="rh">✓ The secant slope → 2, the tangent slope</div><p>As <span class="mono">h → 0</span> the secant collapses onto the tangent (green). For <span class="mono">f(x)=x²</span> the limit computes cleanly: <span class="mono">(  (1+h)² − 1 )/h = (2h + h²)/h = 2 + h → 2</span>. So <span class="mono">f′(1) = 2</span>. Notice we could divide by h only because the limit ignores <span class="mono">h = 0</span> itself — the same "approach, never arrive" that made the 0/0 removable in Module 1.</p>`);}}
+      addReveal(`<div class="rh">✓ The secant slope → 2, the tangent slope</div><p>As <span class="mono">h → 0</span> the secant collapses onto the tangent (green). For <span class="mono">f(x)=x²</span> the limit computes cleanly: <span class="mono">( (1+h)² − 1 )/h = (2h + h²)/h = 2 + h → 2</span>. So <span class="mono">f′(1) = 2</span>. We could divide by h only because the limit ignores <span class="mono">h = 0</span> itself — the same "approach, never arrive" that made the 0/0 removable in Module 1.</p>`);}}
   xdrag(cv,pl,x=>{if(Math.abs(x-a)>1e-3)xh=x;draw();});draw();
   setHints([`Drag the gold point left toward a=1. The secant slope in the readout should head toward 2.`]);
 }
@@ -440,84 +438,118 @@ function c2_notation(){
   mcChoices(document.getElementById('ch'),opts,()=>{addReveal(`<div class="rh">✓ f′(x) = dy/dx</div><p>Same object, two notations. Watch the near-miss: <span class="mono">Δy/Δx</span> is the <em>average</em> rate (a secant slope, a genuine ratio); <span class="mono">dy/dx</span> is its <em>limit</em> (the instantaneous rate). Leibniz's notation deliberately echoes the ratio it came from, but the "d"s are not literally a fraction — they're a limit that, conveniently, often behaves like one.</p>`);});
   setHints([`Lagrange's prime and Leibniz's dy/dx are the same derivative. Δy/Δx (deltas) is only the average rate, before the limit.`]);
 }
-function c2_rules(){
-  stage.innerHTML=`<div class="card"><h2>The rules — the limit, precomputed</h2>
-    <p>Run the definition once on a whole family and you never run it again. The essential rules:</p>
-    <div class="eqbox" style="line-height:2.1"><b>Power:</b>&nbsp; <sup>d</sup>⁄<sub>dx</sub> xⁿ = n xⁿ⁻¹&nbsp;&nbsp;<span style="color:#5d7186">(so x³ → 3x², √x = x<sup>1/2</sup> → ½x<sup>−1/2</sup>)</span><br><b>Constant multiple / sum:</b>&nbsp; (cf)′ = c f′,&nbsp; (f+g)′ = f′ + g′<br><b>Product:</b>&nbsp; (fg)′ = f′g + fg′<br><b>Quotient:</b>&nbsp; (f/g)′ = <sup>f′g − fg′</sup>⁄<sub>g²</sub></div>
-    <p>And the standard library, each provable from the definition: <span class="mono">(eˣ)′ = eˣ</span>, <span class="mono">(ln x)′ = 1/x</span>, <span class="mono">(sin x)′ = cos x</span>, <span class="mono">(cos x)′ = −sin x</span>. The power rule alone handles every polynomial — differentiate term by term.</p>
-    <div class="task"><b>Differentiate, then evaluate</b>Let <span class="mono">f(x) = x³ − 4x + 7</span>. Compute <span class="mono">f′(2)</span>.</div>
+function c2_powerrule(){
+  stage.innerHTML=`<div class="card"><h2>Deriving the power rule</h2>
+    <p>Time to actually <em>earn</em> the rules from the definition — no more taking them on faith. Start with <span class="mono">f(x) = xⁿ</span> for a positive integer n. The engine is the <b>binomial theorem</b>, which expands <span class="mono">(x+h)ⁿ</span>:</p>
+    <div class="eqbox">(x+h)ⁿ = xⁿ + n xⁿ⁻¹ h + <sup>n(n−1)</sup>⁄<sub>2</sub> xⁿ⁻² h² + … + hⁿ</div>
+    <p>Every term past the first two carries an <span class="mono">h²</span> or higher. Drop it into the difference quotient — the <span class="mono">xⁿ</span> cancels, then divide by h:</p>
+    <div class="eqbox"><sup>(x+h)ⁿ − xⁿ</sup>⁄<sub>h</sub> = n xⁿ⁻¹ + <sup>n(n−1)</sup>⁄<sub>2</sub> xⁿ⁻² h + … + hⁿ⁻¹</div>
+    <p>Now let <span class="mono">h → 0</span>: every remaining term still has a factor of h and vanishes, leaving only the first:</p>
+    <div class="eqbox"><span class="hl">(xⁿ)′ = n xⁿ⁻¹</span></div>
+    <p>That's the power rule, derived. (It extends to negative and fractional exponents once we have the quotient and chain rules; the fully general real-exponent version waits for logarithms in Module 6.) With it, every polynomial differentiates term by term.</p>
+    <div class="task"><b>Use it</b>Let <span class="mono">f(x) = x³ − 4x + 7</span>. Compute <span class="mono">f′(2)</span>.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
-  numChk(stage.querySelector('.card'),8,()=>{addReveal(`<div class="rh">✓ 8</div><p>Term by term with the power rule: <span class="mono">f′(x) = 3x² − 4</span>. Then <span class="mono">f′(2) = 3·4 − 4 = 12 − 4 = 8</span> — the slope of the tangent to the curve at x = 2. The constant 7 differentiates to 0 (a flat shift has no slope).</p>`);});
-  setHints([`Power rule on each term: d/dx(x³)=3x², d/dx(−4x)=−4, d/dx(7)=0.`,`f′(x)=3x²−4; at x=2, 12−4=8.`]);
+  numChk(stage.querySelector('.card'),8,()=>{addReveal(`<div class="rh">✓ 8</div><p>Term by term: <span class="mono">(x³)′ = 3x²</span>, <span class="mono">(−4x)′ = −4</span>, <span class="mono">(7)′ = 0</span> (a flat constant has no slope). So <span class="mono">f′(x) = 3x² − 4</span>, and <span class="mono">f′(2) = 12 − 4 = 8</span> — the tangent's slope at x = 2.</p>`);});
+  setHints([`Power rule on each term: (x³)′=3x², (−4x)′=−4, (7)′=0.`,`f′(x)=3x²−4; at x=2, 12−4=8.`]);
+}
+function c2_prodquot(){
+  stage.innerHTML=`<div class="card"><h2>Product & quotient rules — the add-and-subtract trick</h2>
+    <p>A tempting guess is <span class="mono">(fg)′ = f′g′</span>. It's <em>wrong</em> (check <span class="mono">f=g=x</span>: <span class="mono">(x²)′ = 2x</span>, not <span class="mono">1·1</span>). The real rule needs one clever move. Write the difference quotient for <span class="mono">fg</span> and <b>add and subtract</b> the same middle term <span class="mono">f(x+h)g(x)</span>:</p>
+    <div class="eqbox"><sup>f(x+h)g(x+h) − f(x)g(x)</sup>⁄<sub>h</sub> = f(x+h)·<sup>g(x+h)−g(x)</sup>⁄<sub>h</sub> + g(x)·<sup>f(x+h)−f(x)</sup>⁄<sub>h</sub></div>
+    <p>As <span class="mono">h → 0</span>: the two difference quotients become <span class="mono">g′</span> and <span class="mono">f′</span>, and <span class="mono">f(x+h) → f(x)</span> (differentiable ⟹ continuous, proven soon). So:</p>
+    <div class="eqbox"><span class="hl">(fg)′ = f′g + f g′</span></div>
+    <p>The <b>quotient rule</b> falls out of the same trick applied to <span class="mono">f/g</span> (add and subtract <span class="mono">f(x)g(x)</span> in the numerator):</p>
+    <div class="eqbox"><span class="hl">(f/g)′ = <sup>f′g − f g′</sup>⁄<sub>g²</sub></span></div>
+    <div class="task"><b>Apply the product rule</b>Let <span class="mono">f(x) = (x² + 1)(x − 2)</span>. Using the product rule (don't expand first), compute <span class="mono">f′(2)</span>.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  numChk(stage.querySelector('.card'),5,()=>{addReveal(`<div class="rh">✓ 5</div><p>With <span class="mono">u=x²+1</span> (<span class="mono">u′=2x</span>) and <span class="mono">v=x−2</span> (<span class="mono">v′=1</span>): <span class="mono">f′ = u′v + uv′ = 2x(x−2) + (x²+1)</span>. At x=2: <span class="mono">2·2·0 + (4+1) = 0 + 5 = 5</span>. (Expanding first and using the power rule gives <span class="mono">3x²−4x+1 → 5</span> — same answer, the product rule just saved the algebra.)</p>`);});
+  setHints([`Product rule: f′ = (first)′·(second) + (first)·(second)′, with first = x²+1, second = x−2.`,`2x(x−2) + (x²+1); at x=2 the first term is 0, leaving 5.`]);
 }
 function c2_chain(){
   stage.innerHTML=`<div class="card"><h2>The chain rule: differentiating a composition</h2>
-    <p>The rule that unlocks everything nested. For a composition <span class="mono">f(g(x))</span> — an outer function of an inner one — the derivative is the <b>outer derivative (at the inner) times the inner derivative</b>:</p>
-    <div class="eqbox">(f∘g)′(x) = f′(g(x)) · g′(x)&nbsp;&nbsp;&nbsp;<span style="color:#5d7186">Leibniz: <sup>dy</sup>⁄<sub>dx</sub> = <sup>dy</sup>⁄<sub>du</sub> · <sup>du</sup>⁄<sub>dx</sub></span></div>
-    <p>The Leibniz form is why this notation earns its keep: the intermediate <span class="mono">du</span> visibly "cancels," making the rule unforgettable. (It's not literally cancellation — it's a theorem — but the notation is designed to look like it.) Read it as: <em>rate of the whole = rate of the outer × rate of the inner</em>, the way gears multiply.</p>
-    <p>Example: <span class="mono">(sin(x²))′</span>. Outer <span class="mono">sin</span>, inner <span class="mono">x²</span>. Outer derivative <span class="mono">cos</span> evaluated at the inner: <span class="mono">cos(x²)</span>; times the inner derivative <span class="mono">2x</span>. Result: <span class="mono">2x·cos(x²)</span>.</p>
+    <p>The rule that unlocks everything nested. For <span class="mono">y = f(g(x))</span> — an outer function of an inner one — set <span class="mono">u = g(x)</span>. Over a small step, the changes multiply like gears: <span class="mono">Δy/Δx = (Δy/Δu)(Δu/Δx)</span>. Taking the limit gives:</p>
+    <div class="eqbox"><span class="hl">(f∘g)′(x) = f′(g(x)) · g′(x)</span>&nbsp;&nbsp;&nbsp;<span style="color:#5d7186">Leibniz: <sup>dy</sup>⁄<sub>dx</sub> = <sup>dy</sup>⁄<sub>du</sub> · <sup>du</sup>⁄<sub>dx</sub></span></div>
+    <p>The Leibniz form is why this notation earns its keep: the intermediate <span class="mono">du</span> visibly "cancels." (Strictly it's a theorem, not literal cancellation — and the one gap in the gear argument, when <span class="mono">Δu = 0</span> for nearby x, is patched by a short separate case; the notation is just built to look inevitable.) Read it as: <em>rate of the whole = rate of the outer × rate of the inner</em>.</p>
+    <p>Example: <span class="mono">((x²+1)³)′</span>. Outer <span class="mono">u³</span> (derivative <span class="mono">3u²</span>) at <span class="mono">u=x²+1</span>, times inner derivative <span class="mono">2x</span>: <span class="mono">3(x²+1)²·2x = 6x(x²+1)²</span>.</p>
     <div class="task"><b>Differentiate a composition</b>Let <span class="mono">f(x) = (3x + 1)⁵</span>. Compute <span class="mono">f′(x)</span> and enter <span class="mono">f′(0)</span>.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
-  numChk(stage.querySelector('.card'),15,()=>{addReveal(`<div class="rh">✓ 15</div><p>Outer <span class="mono">u⁵</span> → <span class="mono">5u⁴</span> at <span class="mono">u = 3x+1</span>, times inner derivative <span class="mono">3</span>: <span class="mono">f′(x) = 5(3x+1)⁴ · 3 = 15(3x+1)⁴</span>. At x = 0: <span class="mono">15·(1)⁴ = 15</span>. Forget the <span class="mono">·3</span> (the inner derivative) and you'd get 5 — the single most common chain-rule slip.</p>`);});
+  numChk(stage.querySelector('.card'),15,()=>{addReveal(`<div class="rh">✓ 15</div><p>Outer <span class="mono">u⁵ → 5u⁴</span> at <span class="mono">u = 3x+1</span>, times inner derivative <span class="mono">3</span>: <span class="mono">f′(x) = 5(3x+1)⁴·3 = 15(3x+1)⁴</span>. At x = 0: <span class="mono">15·1 = 15</span>. Forget the <span class="mono">·3</span> (the inner derivative) and you'd get 5 — the single most common chain-rule slip.</p>`);});
   setHints([`Outer is u⁵ (derivative 5u⁴), inner is 3x+1 (derivative 3). Multiply, then set x=0.`,`f′(x)=5(3x+1)⁴·3 = 15(3x+1)⁴; at 0 that's 15.`]);
+}
+function c2_trig(){
+  stage.innerHTML=`<div class="card"><h2>Deriving (sin x)′ = cos x</h2>
+    <p>The trig derivatives don't fall out of algebra alone — they need one geometric limit and the angle-addition formula. First the limit, proven by the <b>squeeze theorem</b> (Module 1) on the unit circle. For a small angle <span class="mono">h &gt; 0</span>, comparing a triangle, a circular sector, and a larger triangle gives the areas/lengths inequality <span class="mono">sin h &lt; h &lt; tan h</span>. Divide through by <span class="mono">sin h</span> and flip:</p>
+    <div class="eqbox">cos h &lt; <sup>sin h</sup>⁄<sub>h</sub> &lt; 1&nbsp;&nbsp;⟹&nbsp;&nbsp;<span class="hl">lim<sub>h→0</sub> <sup>sin h</sup>⁄<sub>h</sub> = 1</span>&nbsp;&nbsp;<span style="color:#5d7186">(both bounds → 1)</span></div>
+    <p>A companion limit follows from it: <span class="mono">(cos h − 1)/h = −(sin h/h)·(sin h/(cos h+1)) → −(1)(0) = 0</span>. Now differentiate sin from the definition, using <span class="mono">sin(x+h) = sin x cos h + cos x sin h</span> (angle addition):</p>
+    <div class="eqbox"><sup>sin(x+h) − sin x</sup>⁄<sub>h</sub> = sin x·<sup>cos h − 1</sup>⁄<sub>h</sub> + cos x·<sup>sin h</sup>⁄<sub>h</sub> → sin x·0 + cos x·1</div>
+    <p>So <span class="mono"><span class="hl">(sin x)′ = cos x</span></span>, and the identical computation on cosine gives <span class="mono"><span class="hl">(cos x)′ = −sin x</span></span>. Every other trig derivative (tan, sec, …) now follows from the quotient rule.</p>
+    <div class="task"><b>Combine the rules</b>Let <span class="mono">f(x) = 3 sin x − 2 cos x</span>. Compute <span class="mono">f′(0)</span>.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  numChk(stage.querySelector('.card'),3,()=>{addReveal(`<div class="rh">✓ 3</div><p><span class="mono">f′(x) = 3cos x − 2(−sin x) = 3cos x + 2sin x</span>. At x = 0: <span class="mono">3·1 + 2·0 = 3</span>. Both trig derivatives, both earned from the same squeeze limit and angle-addition — no hand-waving.</p>`);});
+  setHints([`(sin x)′ = cos x and (cos x)′ = −sin x. Differentiate each term, then set x = 0.`,`f′(x)=3cos x + 2sin x; at 0 that's 3.`]);
 }
 function c2_diffcont(){
   stage.innerHTML=`<div class="card"><h2>Differentiable ⟹ continuous (but not the reverse)</h2>
-    <p>One clean theorem links this module to the last. <b>If f is differentiable at a, then f is continuous at a.</b> Intuitively, a curve can't have a well-defined tangent line at a break — a jump or hole leaves no single slope to approach. (Proof sketch: if the limit defining f′(a) exists, then <span class="mono">f(x)−f(a) = <sup>f(x)−f(a)</sup>⁄<sub>x−a</sub>·(x−a) → f′(a)·0 = 0</span>, so <span class="mono">f(x) → f(a)</span> — exactly continuity.)</p>
-    <p>The converse <em>fails</em>, and the standard counterexample is <span class="mono">|x|</span> at <span class="mono">0</span>: it's continuous (no break) but has a sharp <b>corner</b> — the slope is −1 coming from the left and +1 from the right, so the two one-sided secant limits disagree and no derivative exists. Continuity is necessary for differentiability but not sufficient; smoothness is the stronger condition.</p>
+    <p>One clean theorem links this module to the last, and it's the fact the product rule quietly used. <b>If f is differentiable at a, then f is continuous at a.</b> A curve can't have a well-defined tangent at a break — a jump or hole leaves no single slope to approach. (Proof: <span class="mono">f(x)−f(a) = <sup>f(x)−f(a)</sup>⁄<sub>x−a</sub>·(x−a) → f′(a)·0 = 0</span>, so <span class="mono">f(x) → f(a)</span> — exactly continuity.)</p>
+    <p>The converse <em>fails</em>. The standard counterexample is <span class="mono">|x|</span> at <span class="mono">0</span>: continuous (no break) but with a sharp <b>corner</b> — slope −1 from the left, +1 from the right, so the one-sided secant limits disagree and no derivative exists. Continuity is necessary for differentiability but not sufficient.</p>
     <div class="eqbox">differentiable at a&nbsp;⟹&nbsp;continuous at a&nbsp;&nbsp;·&nbsp;&nbsp;continuous&nbsp;⇏&nbsp;differentiable&nbsp;<span style="color:#5d7186">(corners, cusps, vertical tangents)</span></div>
     <div class="task"><b>Where does |x| fail to be differentiable?</b></div>
     <div class="choices" id="ch"></div></div>`;
-  const opts=[['at x = 0, where the corner makes the left and right slopes disagree','y'],['nowhere — it\'s a straight line so it\'s smooth','n'],['everywhere, because it\'s not continuous','n'],['only for x &lt; 0','n']];
-  mcChoices(document.getElementById('ch'),opts,()=>{addReveal(`<div class="rh">✓ At the corner, x = 0</div><p>Away from 0, <span class="mono">|x|</span> is just <span class="mono">±x</span> — perfectly differentiable (slope ±1). Only at the corner do the one-sided derivatives (−1 and +1) disagree, so the two-sided limit defining f′(0) doesn't exist. The function is continuous there — you can draw through it — but not smooth. Corners, cusps, and vertical tangents are the three ways continuity survives while differentiability dies.</p>`);});
-  setHints([`|x| is continuous everywhere, so that's not the issue. Look at the sharp point where the slope suddenly flips from −1 to +1.`]);
+  const opts=[['at x = 0, where the corner makes the left and right slopes disagree','y'],['nowhere — it\'s made of straight lines so it\'s smooth','n'],['everywhere, because it\'s not continuous','n'],['only for x &lt; 0','n']];
+  mcChoices(document.getElementById('ch'),opts,()=>{addReveal(`<div class="rh">✓ At the corner, x = 0</div><p>Away from 0, <span class="mono">|x|</span> is just <span class="mono">±x</span> — perfectly differentiable (slope ±1). Only at the corner do the one-sided derivatives (−1 and +1) disagree, so the two-sided limit defining f′(0) doesn't exist. Continuous there, but not smooth. Corners, cusps, and vertical tangents are the three ways continuity survives while differentiability dies.</p>`);});
+  setHints([`|x| is continuous everywhere, so that's not it. Look at the sharp point where the slope flips from −1 to +1.`]);
 }
 function c2_problems(){
   stage.innerHTML=`<div class="card"><h2>Problem set</h2>
-    <p>Within Modules 1–2. Paper first; solutions fold open.</p>
+    <p>Within Modules 1–2 (no eˣ or ln yet — those arrive with integration). Paper first; solutions fold open.</p>
 
     <div class="prob"><span class="lvl">from the definition</span><div class="ph">Problem 1</div>
     <p>Using the limit definition (not the power rule), compute <span class="mono">f′(x)</span> for <span class="mono">f(x) = x²</span>.</p>
     <details><summary>Show solution</summary><div class="sol">
-    <p><span class="mono">f′(x) = lim<sub>h→0</sub> [(x+h)² − x²]/h = lim<sub>h→0</sub> [x² + 2xh + h² − x²]/h = lim<sub>h→0</sub> (2xh + h²)/h = lim<sub>h→0</sub> (2x + h) = 2x</span>. The h cancels because the limit ignores h = 0, then substitution finishes it. This is the power rule for n=2, derived.</p></div></details></div>
+    <p><span class="mono">f′(x) = lim<sub>h→0</sub> [(x+h)² − x²]/h = lim<sub>h→0</sub> [x² + 2xh + h² − x²]/h = lim<sub>h→0</sub> (2xh + h²)/h = lim<sub>h→0</sub> (2x + h) = 2x</span>. The h cancels because the limit ignores h = 0; substitution finishes it. This is the power rule for n=2, derived.</p></div></details></div>
 
-    <div class="prob"><span class="lvl">product rule</span><div class="ph">Problem 2</div>
-    <p>Differentiate <span class="mono">f(x) = x² eˣ</span>.</p>
+    <div class="prob"><span class="lvl">proof</span><div class="ph">Problem 2</div>
+    <p>Prove the product rule <span class="mono">(fg)′ = f′g + fg′</span> from the limit definition.</p>
     <details><summary>Show solution</summary><div class="sol">
-    <p>Product rule <span class="mono">(fg)′ = f′g + fg′</span> with <span class="mono">f=x²</span>, <span class="mono">g=eˣ</span>: <span class="mono">f′ = 2x</span>, <span class="mono">g′ = eˣ</span>. So <span class="mono">(x²eˣ)′ = 2x·eˣ + x²·eˣ = eˣ(x² + 2x)</span>.</p></div></details></div>
+    <p>Start from <span class="mono">(fg)′(x) = lim<sub>h→0</sub> [f(x+h)g(x+h) − f(x)g(x)]/h</span>. Add and subtract <span class="mono">f(x+h)g(x)</span> in the numerator: <span class="mono">= lim [ f(x+h)(g(x+h)−g(x)) + g(x)(f(x+h)−f(x)) ]/h = lim [ f(x+h)·(g(x+h)−g(x))/h + g(x)·(f(x+h)−f(x))/h ]</span>. As h→0: <span class="mono">(g(x+h)−g(x))/h → g′(x)</span>, <span class="mono">(f(x+h)−f(x))/h → f′(x)</span>, and <span class="mono">f(x+h) → f(x)</span> (f is continuous, being differentiable). So the limit is <span class="mono">f(x)g′(x) + g(x)f′(x)</span>. ∎</p></div></details></div>
 
-    <div class="prob"><span class="lvl">quotient rule</span><div class="ph">Problem 3</div>
+    <div class="prob"><span class="lvl">product rule</span><div class="ph">Problem 3</div>
+    <p>Differentiate <span class="mono">f(x) = x² sin x</span>.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Product rule with <span class="mono">u=x²</span> (<span class="mono">u′=2x</span>), <span class="mono">v=sin x</span> (<span class="mono">v′=cos x</span>): <span class="mono">f′(x) = 2x·sin x + x²·cos x = 2x sin x + x² cos x</span>.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">quotient rule</span><div class="ph">Problem 4</div>
     <p>Differentiate <span class="mono">f(x) = x / (x² + 1)</span>.</p>
     <details><summary>Show solution</summary><div class="sol">
-    <p>Quotient rule <span class="mono">(f/g)′ = (f′g − fg′)/g²</span> with <span class="mono">f=x</span>, <span class="mono">g=x²+1</span>: <span class="mono">f′=1</span>, <span class="mono">g′=2x</span>. Numerator <span class="mono">1·(x²+1) − x·2x = x²+1 − 2x² = 1 − x²</span>. So <span class="mono">f′(x) = (1 − x²)/(x² + 1)²</span>.</p></div></details></div>
+    <p>Quotient rule with <span class="mono">f=x</span> (<span class="mono">f′=1</span>), <span class="mono">g=x²+1</span> (<span class="mono">g′=2x</span>): numerator <span class="mono">1·(x²+1) − x·2x = 1 − x²</span>. So <span class="mono">f′(x) = (1 − x²)/(x² + 1)²</span>.</p></div></details></div>
 
-    <div class="prob"><span class="lvl">chain rule</span><div class="ph">Problem 4</div>
-    <p>Differentiate <span class="mono">f(x) = e<sup>3x²</sup></span>.</p>
+    <div class="prob"><span class="lvl">chain rule</span><div class="ph">Problem 5</div>
+    <p>Differentiate <span class="mono">f(x) = sin(3x²)</span>.</p>
     <details><summary>Show solution</summary><div class="sol">
-    <p>Outer <span class="mono">eᵘ</span> (derivative <span class="mono">eᵘ</span>) at <span class="mono">u = 3x²</span>, times inner derivative <span class="mono">6x</span>: <span class="mono">f′(x) = e<sup>3x²</sup> · 6x = 6x e<sup>3x²</sup></span>.</p></div></details></div>
+    <p>Outer <span class="mono">sin</span> (derivative <span class="mono">cos</span>) at the inner <span class="mono">3x²</span>, times the inner derivative <span class="mono">6x</span>: <span class="mono">f′(x) = cos(3x²)·6x = 6x cos(3x²)</span>.</p></div></details></div>
 
-    <div class="prob"><span class="lvl">nested chain</span><div class="ph">Problem 5</div>
+    <div class="prob"><span class="lvl">nested chain</span><div class="ph">Problem 6</div>
     <p>Differentiate <span class="mono">f(x) = sin(cos(x))</span>.</p>
     <details><summary>Show solution</summary><div class="sol">
-    <p>Outer <span class="mono">sin</span> (derivative <span class="mono">cos</span>) at the inner <span class="mono">cos(x)</span>, times the inner derivative <span class="mono">(cos x)′ = −sin x</span>: <span class="mono">f′(x) = cos(cos(x)) · (−sin x) = −sin(x) cos(cos(x))</span>.</p></div></details></div>
+    <p>Outer <span class="mono">sin</span> (derivative <span class="mono">cos</span>) at the inner <span class="mono">cos(x)</span>, times the inner derivative <span class="mono">(cos x)′ = −sin x</span>: <span class="mono">f′(x) = cos(cos(x))·(−sin x) = −sin(x) cos(cos(x))</span>.</p></div></details></div>
 
-    <div class="prob"><span class="lvl">tangent line</span><div class="ph">Problem 6</div>
+    <div class="prob"><span class="lvl">tangent line</span><div class="ph">Problem 7</div>
     <p>Find the equation of the tangent line to <span class="mono">y = x³</span> at <span class="mono">x = 2</span>.</p>
     <details><summary>Show solution</summary><div class="sol">
     <p>Point: <span class="mono">(2, 8)</span>. Slope: <span class="mono">y′ = 3x²</span>, so <span class="mono">y′(2) = 12</span>. Point-slope: <span class="mono">y − 8 = 12(x − 2)</span>, i.e. <span class="mono">y = 12x − 16</span>.</p></div></details></div>
 
-    <div class="prob"><span class="lvl">challenge — non-differentiability</span><div class="ph">Problem 7</div>
-    <p>Show that <span class="mono">f(x) = x^(1/3)</span> (the cube root) is continuous at 0 but not differentiable there. What does the graph do at 0?</p>
+    <div class="prob"><span class="lvl">challenge — non-differentiability</span><div class="ph">Problem 8</div>
+    <p>Show that <span class="mono">f(x) = x^(1/3)</span> (cube root) is continuous at 0 but not differentiable there. What does the graph do at 0?</p>
     <details><summary>Show solution</summary><div class="sol">
-    <p>Continuous: <span class="mono">lim<sub>x→0</sub> x^(1/3) = 0 = f(0)</span> ✓. Differentiability: <span class="mono">f′(x) = ⅓x^(−2/3) = 1/(3 x^(2/3))</span>, which → +∞ as x → 0. The difference quotient <span class="mono">(x^(1/3) − 0)/(x − 0) = x^(−2/3) → ∞</span>, so no finite derivative exists. Geometrically the tangent is <b>vertical</b> at 0 — a vertical tangent, the third way (after corners and cusps) that a continuous function fails to be differentiable.</p></div></details></div>
+    <p>Continuous: <span class="mono">lim<sub>x→0</sub> x^(1/3) = 0 = f(0)</span> ✓. The difference quotient <span class="mono">(x^(1/3) − 0)/(x − 0) = x^(−2/3) → +∞</span> as x → 0, so no finite derivative exists. Geometrically the tangent is <b>vertical</b> at 0 — a vertical tangent, the third way (after corners and cusps) a continuous function fails to be differentiable.</p></div></details></div>
   </div>`;
   setHints([]);unlock();
 }
 function c2_recap(){
-  stage.innerHTML=`<div class="card"><h2>What you refreshed</h2>
-    <div class="eqbox" style="line-height:1.95">f′(a) = lim<sub>h→0</sub> [f(a+h) − f(a)]/h&nbsp;&nbsp;<span style="color:#5d7186">the one definition</span><br>notations: f′(x) = dy/dx&nbsp;&nbsp;(Lagrange = Leibniz)<br>power / product / quotient rules&nbsp;·&nbsp;standard library<br>chain rule: (f∘g)′ = f′(g)·g′ = (dy/du)(du/dx)<br>differentiable ⟹ continuous&nbsp;·&nbsp;continuous ⇏ differentiable</div>
-    <p>The derivative is the secant→tangent limit from Module 1, computed once per function family and packaged into rules. The chain rule composes those packages; differentiability is a strictly stronger condition than continuity.</p>
-    <p><b>Next — Module 3:</b> what the derivative is <em>for</em>. A zero derivative marks flat spots (maxima, minima); its sign tells you where a function rises or falls; the Mean Value Theorem connects average and instantaneous rates; and setting up and solving <b>optimization</b> problems is the whole payoff.</p></div>`;
+  stage.innerHTML=`<div class="card"><h2>What you built</h2>
+    <div class="eqbox" style="line-height:1.95">f′(a) = lim<sub>h→0</sub> [f(a+h) − f(a)]/h&nbsp;&nbsp;<span style="color:#5d7186">the one definition</span><br>notations: f′(x) = dy/dx&nbsp;&nbsp;(Lagrange = Leibniz)<br>power (binomial) · product & quotient (add-subtract) · chain<br>sin/cos (squeeze + angle addition)<br>differentiable ⟹ continuous&nbsp;·&nbsp;continuous ⇏ differentiable</div>
+    <p>Every rule here was <em>derived</em> from the one limit — nothing taken on faith. The transcendentals <span class="mono">eˣ</span> and <span class="mono">ln x</span> are the deliberate exception: defining them rigorously needs the integral, so they wait for Module 6, where <span class="mono">ln x := ∫₁ˣ dt/t</span> defines the logarithm and <span class="mono">eˣ</span> is its inverse — both differentiated cleanly there.</p>
+    <p><b>Next — Module 3:</b> what the derivative is <em>for</em>. A zero derivative marks flat spots (maxima, minima); its sign tells you where a function rises or falls; the Mean Value Theorem connects average and instantaneous rates; and setting up <b>optimization</b> problems is the payoff.</p></div>`;
   setHints([]);unlock();
 }
 
