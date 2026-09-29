@@ -49,6 +49,9 @@
   input[type=range]{flex:1;min-width:140px;accent-color:var(--accent);height:30px;}
   .task{background:rgba(232,184,75,.08);border:1px solid rgba(232,184,75,.28);border-radius:11px;padding:12px 13px;margin:14px 0;font-size:14.5px;line-height:1.55;color:#f0e2c2;}
   .task b{color:var(--gold);font-size:11px;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:5px;}
+  .defn{background:rgba(122,184,255,.07);border:1px solid rgba(122,184,255,.30);border-radius:11px;padding:12px 14px;margin:13px 0;font-size:14.5px;line-height:1.6;color:#dbe6f4;}
+  .defn .dt{color:var(--accent);font-size:11px;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px;font-weight:700;}
+  .defn+.defn{margin-top:9px;}
   .entry{display:flex;gap:9px;align-items:center;margin-top:12px;}
   .entry input{flex:1;background:var(--panel2);border:1.5px solid var(--line);border-radius:11px;color:var(--ink);font-family:var(--mono);font-size:16px;padding:12px 13px;outline:none;min-width:0;}
   .entry input:focus{border-color:var(--accent);}
@@ -131,7 +134,9 @@ const MODULES=[
  {id:'c3',title:'Applications of the Derivative',sub:'Extrema, the Mean Value Theorem, optimization, related rates, L\u2019H\u00f4pital.',ready:true,
   outro:`The derivative's sign maps where a function rises and falls; its zeros locate the peaks and valleys; the second derivative reads concavity. The Mean Value Theorem ties average rate to instantaneous, and optimization, related rates, and L\u2019H\u00f4pital's rule are the payoff. Every result rode on the one limit from Module 3.`,
   beats:[c3_recall,c3_intro,c3_critical,c3_firsttest,c3_concavity,c3_mvt,c3_optimization,c3_relatedrates,c3_lhopital,c3_problems,c3_recap]},
- {id:'c4',title:'Integration & the FTC',sub:'Riemann sums, the definite integral, and the Fundamental Theorem of Calculus.',ready:false},
+ {id:'c4',title:'Integration & the FTC',sub:'Riemann sums, the definite integral, and the Fundamental Theorem of Calculus.',ready:true,
+  outro:`The definite integral is the limit of Riemann sums — accumulated signed area. The Fundamental Theorem ties it to differentiation: the area-so-far function has derivative $f$ (Part 1), so any antiderivative evaluates the integral by $F(b)-F(a)$ (Part 2). That let us define $\\ln x := \\int_1^x \\tfrac{dt}{t}$, fill the $n=-1$ gap in the power rule, and pin down $e$ and $e^x$ at last — rigorously, from area.`,
+  beats:[c4_recall,c4_intro,c4_riemann,c4_defint,c4_ftc1,c4_antideriv,c4_ftc2,c4_lne,c4_problems,c4_recap]},
  {id:'c5',title:'Techniques & Applications of Integration',sub:'Substitution, parts, partial fractions, improper integrals; area, volume, arc length.',ready:false},
  {id:'c6',title:'Sequences & Series',sub:'Convergence tests, power series, and Taylor/Maclaurin expansions.',ready:false},
  {id:'c7',title:'Multivariable Calculus',sub:'Partial derivatives, the gradient, directional derivatives, and multiple integrals.',ready:false},
@@ -258,6 +263,18 @@ const RECALL={
     a:"$(f\\circ g)'(x)=f'(g(x))\\,g'(x)$ — rate of the whole = rate of the outer (at the inner) times rate of the inner. In Leibniz form $\\frac{dy}{dx}=\\frac{dy}{du}\\frac{du}{dx}$.", b:6},
    {q:"What are $(\\sin x)'$ and $(\\cos x)'$, the limit behind them, and how do differentiable and continuous relate?",
     a:"$(\\sin x)'=\\cos x$ and $(\\cos x)'=-\\sin x$, both resting on $\\lim_{h\\to 0}\\frac{\\sin h}{h}=1$ (squeeze theorem) plus angle addition. And: differentiable $\\Rightarrow$ continuous, but not the reverse — corners like $|x|$ are continuous yet not differentiable.", b:7}
+ ]},
+ c3:{title:'Module 4 — Applications of the Derivative', cues:[
+   {q:"What is a critical point, and what does Fermat's theorem guarantee about extrema?",
+    a:"A critical point is a domain point where $f'(c)=0$ or $f'$ is undefined. Fermat: every interior local max or min is a critical point — so critical points are the complete list of candidates for extrema (the converse fails: $x^3$ has $f'(0)=0$ but no extremum).", b:2},
+   {q:"How do the first- and second-derivative tests classify a critical point?",
+    a:"First-derivative test: $f'$ changing $+\\to-$ marks a local max, $-\\to+$ a local min, no change means neither. Second-derivative test: at a critical point, $f''>0$ gives a min, $f''<0$ a max.", b:3},
+   {q:"What does the second derivative say about a graph's shape, and what is an inflection point?",
+    a:"$f''>0$ is concave up ($\\smile$), $f''<0$ concave down ($\\frown$). An inflection point is where concavity switches sign — it needs $f''=0$ there <em>and</em> a genuine sign change.", b:4},
+   {q:"State the Mean Value Theorem and its geometric meaning.",
+    a:"If $f$ is continuous on $[a,b]$ and differentiable on $(a,b)$, some $c$ has $f'(c)=\\frac{f(b)-f(a)}{b-a}$ — a tangent parallel to the secant. Rolle's theorem is the flat special case $f(a)=f(b)$.", b:5},
+   {q:"How does L'Hôpital's rule evaluate a $\\frac{0}{0}$ limit, and why does it work?",
+    a:"For $\\frac{0}{0}$ at $a$, $\\lim\\frac{f}{g}=\\frac{f'(a)}{g'(a)}$. Since $f(a)=g(a)=0$, dividing top and bottom by $x-a$ turns the quotient into a ratio of difference quotients heading to $f'(a)/g'(a)$.", b:8}
  ]}
 };
 const RECALL_HINT=`Run it as one unbroken chain — each cue answers the previous one's "so what?". If a link takes you away to review, one tap on Back returns you to this list.`;
@@ -359,6 +376,7 @@ function c0_trig(){
     <canvas id="cv" width="640" height="360"></canvas>
     <div class="readout"><div class="rdc"><div class="k">θ (radians)</div><div class="v" id="tv">—</div></div><div class="rdc"><div class="k">cos θ</div><div class="v" id="cv2">—</div></div><div class="rdc"><div class="k">sin θ</div><div class="v" id="sv">—</div></div></div>
     <p class="small" style="margin-top:10px"><b>Radians</b> are the key choice: an angle in radians <em>is</em> the arc length it sweeps on the unit circle (a full turn = <span class="mono">2π</span>). That identification is exactly what will make <span class="mono">(sin θ)/θ → 1</span> for small θ — the limit behind the sine derivative. Two facts we'll lean on: the Pythagorean identity <span class="mono">sin²θ + cos²θ = 1</span> (the point is on the unit circle), and the <b>angle-addition formula</b> <span class="mono">sin(A+B) = sin A cos B + cos A sin B</span>.</p>
+    <p class="small" style="margin-top:6px">A handful of <b>exact values</b> recur constantly, read off the 45-45-90 and 30-60-90 triangles inscribed in the circle. For <span class="mono">θ = 0, π/6, π/4, π/3, π/2</span>: &nbsp;<span class="mono">sin θ = 0, ½, √2⁄2, √3⁄2, 1</span> &nbsp;and&nbsp; <span class="mono">cos θ = 1, √3⁄2, √2⁄2, ½, 0</span> (cosine is sine run backwards — the two are a quarter-turn apart).</p>
     <div class="task"><b>Read the circle</b>At a quarter turn, <span class="mono">θ = π/2</span> (about 1.571), what is <span class="mono">sin θ</span>?</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,cx=W/2,cy=H/2,R=130;
@@ -840,9 +858,11 @@ function c3_intro(){
 
 function c3_critical(){
   stage.innerHTML=`<div class="card"><h2>Extrema hide at critical points (Fermat's idea)</h2>
-    <p>If the peaks and valleys are where the curve stops rising and starts falling, then <em>at</em> such an interior point the tangent must be level — otherwise you could still climb. That is <b>Fermat's theorem</b>:</p>
-    <div class="eqbox">$$\\text{if } f \\text{ has a local max or min at an interior } c, \\text{ then } f'(c)=0 \\;\\text{ (or } f'(c) \\text{ doesn't exist).}$$</div>
-    <p>Points where $f'(c)=0$ or $f'$ is undefined are the <b>critical points</b> — the only <em>candidates</em> for extrema. Here $f(x)=\\tfrac{x^3}{3}-x$ has $f'(x)=x^2-1=0$ at the two hollow marks. Drag to one and level the tangent.</p>
+    <p>Calculus's first big payoff is locating a function's peaks and valleys. Start by pinning down exactly what we're hunting for:</p>
+    <div class="defn"><span class="dt">Definition — local maximum / minimum (extremum)</span>$f$ has a <b>local maximum</b> at $c$ if $f(c)\\ge f(x)$ for every $x$ near $c$, and a <b>local minimum</b> if $f(c)\\le f(x)$ nearby. Either one is an <b>extremum</b> — a crest or a trough of the graph.</div>
+    <p>If such a peak or valley sits at an interior point where the curve is smooth, the tangent there must be <em>level</em>: if it tilted, you could still climb higher just to one side. That is <b>Fermat's theorem</b> — at an interior extremum $c$, $f'(c)=0$. (A corner, where $f'$ fails to exist, is the other way a peak can form — picture the point of $|x|$.) Together those two cases name the one term this module hunts for:</p>
+    <div class="defn"><span class="dt">Definition — critical point</span>A point $c$ in the domain of $f$ where either $f'(c)=0$ <em>or</em> $f'(c)$ does not exist. By Fermat, <em>every</em> interior extremum is a critical point — so the critical points are the complete list of candidates, and nowhere else needs checking.</div>
+    <p>Here $f(x)=\\tfrac{x^3}{3}-x$ has $f'(x)=x^2-1=0$ at the two hollow marks. Drag to one and level the tangent.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">f′(x)</div><div class="v" id="sv">—</div></div></div>
     <div class="task"><b>Find the peak</b>One critical point is a local <em>maximum</em> (the curve's crest). Enter its $x$-value.</div>
@@ -888,7 +908,8 @@ function c3_firsttest(){
 function c3_concavity(){
   stage.innerHTML=`<div class="card"><h2>The second derivative reads the bending</h2>
     <p>Take the derivative <em>of the derivative</em>. $f''=(f')'$ measures how the <em>slope</em> is changing — the <b>concavity</b>, or which way the curve bows:</p>
-    <div class="eqbox">$$f''>0 \\;\\Rightarrow\\; \\text{concave up } (\\smile) \\qquad f''<0 \\;\\Rightarrow\\; \\text{concave down } (\\frown) \\qquad f''=0 \\text{ and flips} \\;\\Rightarrow\\; \\text{inflection}$$</div>
+    <div class="eqbox">$$f''>0 \\;\\Rightarrow\\; \\text{concave up } (\\smile) \\qquad f''<0 \\;\\Rightarrow\\; \\text{concave down } (\\frown)$$</div>
+    <div class="defn"><span class="dt">Definition — inflection point</span>A point where concavity switches sign — the curve stops bowing one way and starts bowing the other. This needs $f''=0$ there <em>and</em> a genuine sign change: $f''=0$ on its own isn't enough (for $f(x)=x^4$, $f''(0)=0$ but the curve stays concave up).</div>
     <p>For $f(x)=\\tfrac{x^3}{3}-x$: $f'=x^2-1$, so $f''=2x$. Drag the point — the tangent is drawn, and the curve lies <em>above</em> it where concave up, <em>below</em> where concave down. Watch the bowing flip as you cross the center.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">f″(x) = 2x</div><div class="v" id="sv">—</div></div><div class="rdc"><div class="k">concavity</div><div class="v" id="cvc">—</div></div></div>
@@ -984,9 +1005,13 @@ function c3_relatedrates(){
 
 function c3_lhopital(){
   stage.innerHTML=`<div class="card"><h2>L'Hôpital's rule: a 0/0 limit is a ratio of slopes</h2>
-    <p>Module 2 met limits like $\\frac{0}{0}$ that substitution can't touch. Here is a derivative-powered shortcut. If $f(a)=g(a)=0$, then near $a$ the quotient is secretly a ratio of difference quotients:</p>
-    <div class="eqbox">$$\\frac{f(x)}{g(x)} = \\frac{\\,\\dfrac{f(x)-f(a)}{x-a}\\,}{\\,\\dfrac{g(x)-g(a)}{x-a}\\,} \\;\\xrightarrow{\\,x\\to a\\,}\\; \\frac{f'(a)}{g'(a)}$$</div>
-    <p>That's <b>L'Hôpital's rule</b>: for a $\\frac{0}{0}$ form, differentiate top and bottom <em>separately</em> and re-evaluate. Below, $f(x)=x^2-9$ and $g(x)=x^2-x-6$ both hit $0$ at $x=3$. Drag $x$ toward $3$ and watch the ratio settle.</p>
+    <p>Module 2 met limits like $\\frac{0}{0}$ that substitution can't touch. The derivative gives a clean way through — and we can <em>derive</em> it, not just quote it. Suppose $f(a)=g(a)=0$ (that's the $\\frac{0}{0}$ form) with $f,g$ differentiable at $a$ and $g'(a)\\ne 0$.</p>
+    <p><b>Step 1 — subtract for free.</b> Because $f(a)=g(a)=0$, we may write $f(x)=f(x)-f(a)$ and $g(x)=g(x)-g(a)$ — nothing has changed.</p>
+    <p><b>Step 2 — divide top and bottom by $x-a$.</b> The quotient is untouched, but two difference quotients appear:</p>
+    <div class="eqbox">$$\\frac{f(x)}{g(x)} = \\frac{f(x)-f(a)}{g(x)-g(a)} = \\frac{\\;\\dfrac{f(x)-f(a)}{x-a}\\;}{\\;\\dfrac{g(x)-g(a)}{x-a}\\;}$$</div>
+    <p><b>Step 3 — take the limit.</b> As $x\\to a$ the top $\\to f'(a)$ and the bottom $\\to g'(a)$ — exactly the derivative definition from Module 3. The limit law for a quotient (Module 2) applies since $g'(a)\\ne 0$:</p>
+    <div class="eqbox">$$\\lim_{x\\to a}\\frac{f(x)}{g(x)} = \\color{#e8b84b}{\\frac{f'(a)}{g'(a)}}$$</div>
+    <p>That is <b>L'Hôpital's rule</b>, earned from the definition: for a $\\frac{0}{0}$ form, differentiate top and bottom <em>separately</em> and re-evaluate. Below, $f(x)=x^2-9$ and $g(x)=x^2-x-6$ both hit $0$ at $x=3$. Drag $x$ toward $3$ and watch the ratio settle.</p>
     <canvas id="cv" width="640" height="360"></canvas>
     <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">f/g</div><div class="v" id="qv">—</div></div></div>
     <div class="task"><b>Apply the rule</b>Evaluate $\\displaystyle\\lim_{x\\to 3}\\frac{x^2-9}{x^2-x-6}$ (enter a decimal).</div>
@@ -1055,6 +1080,206 @@ function c3_recap(){
     <div style="text-align:center;line-height:2;color:#dbe6f4;margin-top:6px">1st-deriv test (sign change) &amp; 2nd-deriv test ($f''$) classify extrema<br>$f''$ sign = concavity · flip = inflection<br>MVT: $f'(c)=\\frac{f(b)-f(a)}{b-a}$ (Rolle = flat case)<br>optimization = critical point of the objective · related rates = chain rule in $t$<br>L'Hôpital: $\\frac{0}{0}\\to\\frac{f'}{g'}$</div></div>
     <p>Every tool here is the one derivative from Module 3, aimed at a question — direction, shape, the best value, coupled rates, stubborn limits. Nothing new was assumed.</p>
     <p><b>Next — Module 5:</b> the derivative's mirror image. Integration reverses differentiation and measures accumulated area; the <b>Fundamental Theorem of Calculus</b> is the bridge that makes the two operations inverses — and it's where $\\ln x := \\int_1^x \\tfrac{dt}{t}$ and $e^x$ finally arrive, rigorously.</p></div>`;
+  setHints([]);unlock();
+}
+
+/* ================= MODULE 5 — INTEGRATION & THE FTC ================= */
+function c4_recall(){recallFrom(`Module 5 introduces the derivative's mirror image — so first rebuild the whole toolkit, from the function library through limits, the derivative, and its applications. Integration will lean on all of it.`,['c0','c1','c2','c3'],RECALL_HINT);}
+
+function c4_intro(){
+  stage.innerHTML=`<div class="card"><h2>The second pillar: accumulation</h2>
+    <p>Module 1's intro named calculus's two questions. You've spent three modules on the first — <em>how fast is something changing?</em> — and answered it with the derivative. Now the second: <b>how much accumulates?</b></p>
+    <p>Drive at a known speed and the distance covered is the <em>area</em> under the speed-vs-time graph. Pump water at a varying rate and the total delivered is the <em>area</em> under the rate curve. Accumulation is <b>area under a curve</b> — and that's the trouble. Geometry hands you the area of a rectangle or triangle, but the region under a curve like $y=x^2$ has a curved lid and no formula.</p>
+    <p>The plan mirrors how the derivative was built. There, we approximated a tangent by secants and took a limit; here, we'll approximate a curved area by <b>rectangles</b> and take a limit — the <b>definite integral</b>. Then comes the surprise that names the module: the <b>Fundamental Theorem of Calculus</b>, which reveals that this area problem and the slope problem are <em>inverses</em> of each other. Accumulating and rating-of-change undo one another.</p>
+    <div class="task"><b>Frame it</b>If $v(t)$ is speed at time $t$, what does the area under $v$ between $t=0$ and $t=5$ represent?</div>
+    <div class="choices" id="ch"></div></div>`;
+  const opts=[['the total <b>distance</b> travelled over those 5 seconds','y'],['the <b>acceleration</b> at $t=5$','n'],['the top <b>speed</b> reached','n'],['the <b>slope</b> of the speed graph','n']];
+  mcChoices(document.getElementById('ch'),opts,()=>{addReveal(`<div class="rh">✓ Distance = area under the speed curve</div><p>Speed $\\times$ time is distance; when speed varies, you sum up speed over each tiny slice of time — exactly the area under $v(t)$. Rate integrated over an interval gives the total accumulated. That's the whole idea of the definite integral, and the next beat builds it from rectangles.</p>`);});
+  setHints([`Speed × time = distance. Summing speed over each slice of time accumulates total distance.`]);
+}
+
+function c4_riemann(){
+  stage.innerHTML=`<div class="card"><h2>Riemann sums: pave the area with rectangles</h2>
+    <p>To approximate the area under $f(x)=x^2$ from $0$ to $3$, slice the interval into $n$ equal strips of width $\\Delta x = \\frac{3}{n}$, cap each strip with a rectangle whose height is the curve's value at the strip's right edge, and add them up:</p>
+    <div class="eqbox">$$R_n = \\sum_{i=1}^{n} f(x_i)\\,\\Delta x, \\qquad x_i = i\\,\\Delta x$$</div>
+    <p>Each rectangle is crude, but crank $n$ up and the staircase hugs the curve. Tap to add rectangles and watch the sum settle.</p>
+    <div class="seg" id="seg"></div>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">n rectangles</div><div class="v" id="nv">—</div></div><div class="rdc"><div class="k">Rₙ (sum)</div><div class="v" id="rv">—</div></div></div>
+    <div class="task"><b>Find the limit</b>As $n$ grows, the sums close in on one number — the exact area. Enter it.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.3,xmax:3.3,ymin:-0.6,ymax:9.8});
+  const f=x=>x*x,A=0,B=3;let n=6;
+  const riem=n=>{let s=0;const dx=(B-A)/n;for(let i=1;i<=n;i++)s+=f(A+i*dx)*dx;return s;};
+  function draw(){pl.grid();const{ctx}=pl;const dx=(B-A)/n;
+    for(let i=0;i<n;i++){const xl=A+i*dx,h=f(xl+dx);const X0=pl.px(xl),X1=pl.px(xl+dx),Y0=pl.py(0),Y1=pl.py(h);
+      ctx.fillStyle='rgba(122,184,255,0.16)';ctx.fillRect(X0,Y1,X1-X0,Y0-Y1);
+      ctx.strokeStyle='rgba(122,184,255,0.55)';ctx.lineWidth=1;ctx.strokeRect(X0,Y1,X1-X0,Y0-Y1);}
+    pl.curve(f,'#7ab8ff');
+    document.getElementById('nv').textContent=n;
+    document.getElementById('rv').textContent=riem(n).toFixed(3);}
+  function build(){const ns=[3,6,12,24,48,96];document.getElementById('seg').innerHTML=ns.map(k=>`<span class="segb ${k===n?'on':''}" data-k="${k}">${k}</span>`).join('');
+    document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{n=+b.dataset.k;build();draw();});}
+  build();draw();
+  numChk(stage.querySelector('.card'),9,()=>{addReveal(`<div class="rh">✓ The area is exactly 9</div><p>Right-endpoint rectangles <em>overshoot</em> here (an increasing curve pokes above each strip's left part), so $R_3=14$, but the overshoot shrinks like $\\frac1n$: $R_6=11.4$, $R_{24}=9.6$, $R_{96}\\approx 9.1\\ldots$, homing in on $9$. That limit <em>is</em> the area, and we name it the <b>definite integral</b>: $\\int_0^3 x^2\\,dx = \\lim_{n\\to\\infty} R_n = 9$. (Algebraically $R_n=\\frac{27}{n^3}\\cdot\\frac{n(n+1)(2n+1)}{6}\\to 9$.)</p>`);});
+  setHints([`Read the Rₙ box as you raise n: 14, 11.4, 10.2, 9.6, 9.3, 9.1… what whole number is it converging to?`,`It approaches 9.`]);
+}
+
+function c4_defint(){
+  stage.innerHTML=`<div class="card"><h2>The definite integral: signed area as a limit</h2>
+    <p>That limit of Riemann sums, which exists for any continuous $f$ no matter how you slice, is the <b>definite integral</b>:</p>
+    <div class="eqbox">$$\\int_a^b f(x)\\,dx = \\lim_{n\\to\\infty}\\sum_{i=1}^{n} f(x_i)\\,\\Delta x$$</div>
+    <p>The elongated S is a "sum"; $a,b$ are the limits, $f(x)$ the integrand, $dx$ the vanishing width. One crucial wrinkle: where $f$ dips <em>below</em> the axis, its heights are negative, so those strips subtract. The integral is <b>signed area</b> — area above the axis minus area below. Drag the right edge across $f(x)=x$ and watch the running total; the <span class="rd">red</span> region (below the axis) counts against the <span class="grn">green</span>.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">right edge b</div><div class="v" id="bv">—</div></div><div class="rdc"><div class="k">signed area ∫₋₂ᵇ</div><div class="v" id="av">—</div></div></div>
+    <div class="eqbox">$$\\begin{gathered}\\textstyle\\int_a^a f=0 \\qquad \\int_b^a f=-\\int_a^b f \\\\[2pt] \\textstyle\\int_a^b(cf+g)=c\\!\\int_a^b f+\\int_a^b g \\qquad \\int_a^c f+\\int_c^b f=\\int_a^b f\\end{gathered}$$</div>
+    <div class="task"><b>Signed area</b>What is $\\displaystyle\\int_{-2}^{2} x\\,dx$ — the net signed area of $f(x)=x$ from $-2$ to $2$?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-2.6,xmax:2.6,ymin:-2.6,ymax:2.6});
+  const f=x=>x;let b=1.1;const sarea=b=>b*b/2-2;
+  function draw(){pl.grid();const{ctx}=pl;const lo=-2,step=(b-lo)/200;
+    if(step>0)for(let t=lo;t<b;t+=step){const y=f(t),X0=pl.px(t),X1=pl.px(t+step),Y0=pl.py(0),Y1=pl.py(y);
+      ctx.fillStyle=y>=0?'rgba(63,185,143,0.30)':'rgba(226,102,79,0.30)';ctx.fillRect(X0,Math.min(Y0,Y1),X1-X0,Math.abs(Y0-Y1));}
+    pl.curve(f,'#7ab8ff');pl.vline(b,'#3a4c66',true);pl.point(b,f(b),'#e8b84b',5);
+    document.getElementById('bv').textContent=b.toFixed(2);
+    document.getElementById('av').textContent=sarea(b).toFixed(3);}
+  xdrag(cv,pl,x=>{b=Math.max(-1.9,Math.min(2.5,x));draw();});draw();
+  numChk(stage.querySelector('.card'),0,()=>{addReveal(`<div class="rh">✓ 0 — the halves cancel</div><p>From $-2$ to $0$ the curve is below the axis (a triangle of area $2$, counted <em>negative</em>); from $0$ to $2$ it's an equal triangle above (area $+2$). Net: $-2+2=0$. Signed area is why an integral can be zero over a nonempty region, and why $\\int$ of an odd function over a symmetric interval always vanishes. The four properties boxed above — all inherited from the sums — are the algebra you'll compute with.</p>`);});
+  setHints([`Below the axis counts negative. The triangle on the left ($-2$ to $0$) and the one on the right ($0$ to $2$) are mirror images.`,`Equal negative and positive triangles cancel: 0.`]);
+}
+
+function c4_ftc1(){
+  stage.innerHTML=`<div class="card"><h2>Fundamental Theorem, Part 1: the area function's slope is the height</h2>
+    <p>Freeze the left edge at $a$ and let the right edge $x$ slide — the area becomes a <em>function</em> of $x$, the <b>area-so-far</b> function $A(x)=\\int_a^x f(t)\\,dt$. Now ask its rate of change. Push $x$ right by a sliver $dx$: the area gained is a thin strip of width $dx$ and height $f(x)$, so $dA \\approx f(x)\\,dx$. Divide and take the limit:</p>
+    <div class="eqbox">$$A'(x) = \\frac{d}{dx}\\int_a^x f(t)\\,dt = \\color{#e8b84b}{f(x)}$$</div>
+    <p>The derivative of the area function is the height of the curve. Below, $f(x)=x$ (blue) and its area function $A(x)=\\int_0^x t\\,dt = \\tfrac{x^2}{2}$ (green). Drag $x$: the shaded area is $A(x)$, and the green curve's <em>slope</em> tracks the blue curve's <em>height</em>.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">height f(x)</div><div class="v" id="hv">—</div></div><div class="rdc"><div class="k">area A(x)</div><div class="v" id="av">—</div></div></div>
+    <div class="task"><b>Read the link</b>As the right edge moves, the rate at which accumulated area grows equals which quantity?</div>
+    <div class="choices" id="ch"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.3,xmax:3.2,ymin:-0.4,ymax:5});
+  const f=x=>x,A=x=>x*x/2;let x0=1.5;
+  function draw(){pl.grid();const{ctx}=pl;const step=x0/140;
+    if(step>0)for(let t=0;t<x0;t+=step){const X0=pl.px(t),X1=pl.px(t+step),Y0=pl.py(0),Y1=pl.py(f(t));ctx.fillStyle='rgba(122,184,255,0.18)';ctx.fillRect(X0,Y1,X1-X0,Y0-Y1);}
+    pl.curve(f,'#7ab8ff');pl.curve(A,'#3fb98f');pl.vline(x0,'#3a4c66',true);
+    const m=f(x0);ctx.strokeStyle='rgba(63,185,143,0.6)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.beginPath();
+    const y0=A(x0)+m*(pl.xmin-x0),y1=A(x0)+m*(pl.xmax-x0);ctx.moveTo(pl.px(pl.xmin),pl.py(y0));ctx.lineTo(pl.px(pl.xmax),pl.py(y1));ctx.stroke();ctx.setLineDash([]);
+    pl.point(x0,f(x0),'#7ab8ff',5);pl.point(x0,A(x0),'#3fb98f',5);
+    document.getElementById('hv').textContent=f(x0).toFixed(2);
+    document.getElementById('av').textContent=A(x0).toFixed(2);}
+  xdrag(cv,pl,x=>{x0=Math.max(0,Math.min(3,x));draw();});draw();
+  const opts=[['the <b>height</b> of the curve there, $f(x)$','y'],['the area itself, $A(x)$','n'],['zero — area accumulates at a constant rate','n'],['the width $dx$','n']];
+  mcChoices(document.getElementById('ch'),opts,()=>{addReveal(`<div class="rh">✓ The rate equals the height, f(x)</div><p>Watch it on screen: at $x=2$ the blue height is $2$, and the green area curve is climbing with slope $2$. The new area added per step is exactly a strip of the current height — so $A'(x)=f(x)$. This is <b>FTC Part 1</b>, and its consequence is enormous: the area function is an <em>antiderivative</em> of $f$. Differentiation and area-accumulation are inverse operations. The next two beats cash that in.</p>`);});
+  setHints([`The strip of area added at each step is a rectangle of width dx and height equal to the curve there.`]);
+}
+
+function c4_antideriv(){
+  stage.innerHTML=`<div class="card"><h2>Antiderivatives and the reverse power rule</h2>
+    <p>FTC Part 1 makes the area function an <b>antiderivative</b>: a function $F$ whose derivative is $f$. Since adding a constant doesn't change a derivative, antiderivatives come in a family $F(x)+C$ — and by the MVT that constant is the <em>only</em> freedom (two functions with equal derivatives differ by a constant). The family is written as the <b>indefinite integral</b> $\\int f(x)\\,dx = F(x)+C$.</p>
+    <p>Running the power rule backwards gives the workhorse formula — bump the exponent up by one and divide by it:</p>
+    <div class="eqbox">$$\\int x^n\\,dx = \\frac{x^{n+1}}{n+1} + C \\qquad (n \\ne -1)$$</div>
+    <p>Check it by differentiating the right side: $\\frac{d}{dx}\\frac{x^{n+1}}{n+1} = \\frac{(n+1)x^n}{n+1} = x^n$ ✓. The one exponent it can't touch is $n=-1$ (it would divide by zero) — that's $\\int \\frac{dx}{x}$, the gap flagged since Module 3, which the last beat finally fills.</p>
+    <div class="task"><b>Recover a function from its rate</b>If $F'(x) = 3x^2$ and $F(0) = 5$, find $F(2)$.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  numChk(stage.querySelector('.card'),13,()=>{addReveal(`<div class="rh">✓ F(2) = 13</div><p>Antidifferentiate: $\\int 3x^2\\,dx = x^3 + C$, so $F(x)=x^3+C$. The condition $F(0)=5$ pins the constant: $0+C=5$, so $C=5$ and $F(x)=x^3+5$. Then $F(2)=8+5=13$. The $+C$ isn't a formality — you need one data point (an "initial condition") to select the one antiderivative you want from the family.</p>`);});
+  setHints([`Antiderivative of 3x² is x³ + C. Use F(0)=5 to find C, then evaluate at 2.`,`F(x)=x³+5, so F(2)=8+5=13.`]);
+}
+
+function c4_ftc2(){
+  stage.innerHTML=`<div class="card"><h2>Fundamental Theorem, Part 2: evaluate by antiderivative</h2>
+    <p>Part 1 gave one antiderivative — the area function $A(x)=\\int_a^x f$. Part 2 turns that into a computational miracle. Since <em>any</em> antiderivative $F$ differs from $A$ only by a constant, the constant cancels in a difference, and:</p>
+    <div class="eqbox">$$\\int_a^b f(x)\\,dx = F(b) - F(a), \\qquad \\text{where } F' = f$$</div>
+    <p>Written $\\big[F(x)\\big]_a^b$. No limits of sums, no rectangles — just find an antiderivative and subtract its values at the endpoints. The area shaded below is $\\int_0^3 x^2\\,dx$, the very number you squeezed out of Riemann sums earlier. Now watch it fall out in one line.</p>
+    <canvas id="cv" width="640" height="360"></canvas>
+    <div class="task"><b>Evaluate</b>Using $F(x)=\\tfrac{x^3}{3}$ (an antiderivative of $x^2$), compute $\\displaystyle\\int_0^3 x^2\\,dx$.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.3,xmax:3.3,ymin:-0.6,ymax:9.8});
+  const f=x=>x*x;
+  function draw(){pl.grid();const{ctx}=pl;const step=3/200;
+    for(let t=0;t<3;t+=step){const X0=pl.px(t),X1=pl.px(t+step),Y0=pl.py(0),Y1=pl.py(f(t));ctx.fillStyle='rgba(122,184,255,0.18)';ctx.fillRect(X0,Y1,X1-X0,Y0-Y1);}
+    pl.curve(f,'#7ab8ff');pl.label(1.05,7.4,'∫₀³ x² dx','#9fb0c4');}
+  draw();
+  numChk(stage.querySelector('.card'),9,()=>{addReveal(`<div class="rh">✓ 9, in one line</div><p>$\\int_0^3 x^2\\,dx = \\big[\\tfrac{x^3}{3}\\big]_0^3 = \\tfrac{27}{3} - 0 = 9$. The limit of sums you laboured over is now a single subtraction. <b>This is the theorem the whole subject is named for</b>: the area problem (integration) and the slope problem (differentiation) are inverse operations, so every derivative rule from Modules 3–4, read backwards, becomes an integration formula. Curves whose antiderivative you can name are suddenly trivial to integrate.</p>`);});
+  setHints([`FTC Part 2: evaluate the antiderivative at 3 and at 0, then subtract.`,`[x³/3] from 0 to 3 = 27/3 − 0 = 9.`]);
+}
+
+function c4_lne(){
+  stage.innerHTML=`<div class="card"><h2>Defining ln, e, and eˣ — at last, from area</h2>
+    <p>The reverse power rule missed exactly one case: $n=-1$, the integral $\\int\\frac{dx}{x}$. Rather than a gap, make it a <em>definition</em>. Define the <b>natural logarithm</b> as the area under $\\frac1t$ starting at $1$:</p>
+    <div class="eqbox">$$\\ln x := \\int_1^x \\frac{dt}{t} \\quad (x>0) \\qquad\\Rightarrow\\qquad (\\ln x)' = \\color{#e8b84b}{\\frac{1}{x}}$$</div>
+    <p>The derivative is immediate from FTC Part 1 — so $\\ln$ is the missing antiderivative of $\\frac1x$, now rigorous. Its properties follow from the integral: $\\ln 1 = 0$ (empty interval), $\\ln$ is increasing (the integrand $\\frac1t>0$), and a substitution gives the log law $\\ln(ab)=\\ln a + \\ln b$. Drag $x$ and read $\\ln x$ straight off the shaded area — then find where the area equals exactly $1$.</p>
+    <canvas id="cv" width="640" height="360"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">ln x = shaded area</div><div class="v" id="lv">—</div></div></div>
+    <div class="task"><b>Apply FTC to ln</b>Since $(\\ln x)' = \\tfrac1x$, what is $(\\ln x)'$ at $x = 2$? (Enter a decimal.)</div>
+    <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:0,xmax:5,ymin:-0.4,ymax:3.6});
+  const f=t=>t>0.06?1/t:NaN;let x0=2;
+  const lnA=x=>{const n=500,dx=(x-1)/n;let s=0;for(let i=0;i<n;i++){const t=1+(i+0.5)*dx;s+=(1/t)*dx;}return s;};
+  function draw(){pl.grid();const{ctx}=pl;const lo=Math.min(1,x0),hi=Math.max(1,x0),step=(hi-lo)/220;
+    if(step>0)for(let t=lo;t<hi;t+=step){const X0=pl.px(t),X1=pl.px(t+step),Y0=pl.py(0),Y1=pl.py(1/t);ctx.fillStyle=x0>=1?'rgba(63,185,143,0.26)':'rgba(226,102,79,0.26)';ctx.fillRect(X0,Y1,X1-X0,Y0-Y1);}
+    pl.curve(f,'#7ab8ff');pl.vline(1,'#2b3a4f',true);pl.vline(x0,'#3a4c66',true);
+    const ln=lnA(x0);
+    document.getElementById('xv').textContent=x0.toFixed(3);
+    document.getElementById('lv').textContent=ln.toFixed(3);
+    if(!draw.hitE&&x0>1&&ln>=1){draw.hitE=true;flash('✓ area = 1 → x = e ≈ 2.718');}}
+  xdrag(cv,pl,x=>{x0=Math.max(0.3,Math.min(5,x));draw();});draw();
+  numChk(stage.querySelector('.card'),0.5,()=>{addReveal(`<div class="rh">✓ (ln 2)′ = ½ = 0.5</div><p>$(\\ln x)'=\\tfrac1x$, so at $x=2$ it's $\\tfrac12$. Now define <b>$e$</b> as the unique number where the area equals $1$: $\\ln e = 1$, which lands at $e \\approx 2.71828$ (you drag past it above). Define $e^x$ as the <em>inverse</em> of $\\ln$. Differentiating that inverse settles everything: if $y=e^x$ then $\\ln y = x$; differentiate both sides, $\\tfrac1y\\,y' = 1$, so $\\color{#e8b84b}{(e^x)' = e^x}$ — the function that is its own derivative, exactly the growth property teased in Module 1. The transcendentals are now built, rigorously, from area.</p>`);},s=>parseFloat(s));
+  setHints([`The derivative of ln x is 1/x. Put x = 2.`,`1/2 = 0.5.`]);
+}
+
+function c4_problems(){
+  stage.innerHTML=`<div class="card"><h2>Problem set</h2>
+    <p>Uses Modules 1–5 — and now $\\ln$ and $e^x$ are fair game. Paper first; solutions fold open.</p>
+
+    <div class="prob"><span class="lvl">Riemann sum</span><div class="ph">Problem 1</div>
+    <p>Estimate $\\displaystyle\\int_0^2 x^2\\,dx$ with $n=4$ right-endpoint rectangles, and compare to the exact value.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\Delta x = \\tfrac12$; right endpoints $0.5,1,1.5,2$ with heights $0.25,1,2.25,4$. $R_4 = \\tfrac12(0.25+1+2.25+4) = \\tfrac12(7.5) = 3.75$. Exact: $\\big[\\tfrac{x^3}{3}\\big]_0^2 = \\tfrac{8}{3} \\approx 2.67$. The estimate overshoots (increasing curve, right endpoints), as expected.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">FTC evaluation</span><div class="ph">Problem 2</div>
+    <p>Evaluate $\\displaystyle\\int_1^3 2x\\,dx$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Antiderivative of $2x$ is $x^2$. So $\\big[x^2\\big]_1^3 = 9 - 1 = 8$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">trig integral</span><div class="ph">Problem 3</div>
+    <p>Evaluate $\\displaystyle\\int_0^{\\pi} \\sin x\\,dx$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Since $(\\cos x)' = -\\sin x$, an antiderivative of $\\sin x$ is $-\\cos x$. So $\\big[-\\cos x\\big]_0^{\\pi} = -\\cos\\pi - (-\\cos 0) = -(-1) + 1 = 2$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">initial condition</span><div class="ph">Problem 4</div>
+    <p>Find $F$ with $F'(x) = x^2 + 1$ and $F(0) = 2$, then compute $F(3)$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$F(x) = \\tfrac{x^3}{3} + x + C$. From $F(0)=2$: $C=2$. So $F(x) = \\tfrac{x^3}{3} + x + 2$, and $F(3) = 9 + 3 + 2 = 14$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">signed area</span><div class="ph">Problem 5</div>
+    <p>Evaluate $\\displaystyle\\int_{-2}^{2} x^3\\,dx$, and explain the result geometrically.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\big[\\tfrac{x^4}{4}\\big]_{-2}^{2} = \\tfrac{16}{4} - \\tfrac{16}{4} = 0$. Geometrically, $x^3$ is odd: the negative signed area on $[-2,0]$ exactly cancels the positive area on $[0,2]$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">FTC Part 1</span><div class="ph">Problem 6</div>
+    <p>Compute $\\displaystyle\\frac{d}{dx}\\int_0^x (t^2 + 1)\\,dt$ <em>without</em> evaluating the integral.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>FTC Part 1 says the derivative of the area function is the integrand at the top limit: $\\frac{d}{dx}\\int_0^x (t^2+1)\\,dt = x^2 + 1$. (No antiderivative needed — that's the point of Part 1.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">logarithm</span><div class="ph">Problem 7</div>
+    <p>Using $\\ln x = \\int_1^x \\tfrac{dt}{t}$: state $\\ln 1$, and find $\\frac{d}{dx}\\ln(x^2)$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\ln 1 = \\int_1^1 \\tfrac{dt}{t} = 0$ (empty interval). For the derivative, chain rule with $(\\ln u)' = \\tfrac1u$: $\\frac{d}{dx}\\ln(x^2) = \\tfrac{1}{x^2}\\cdot 2x = \\tfrac{2}{x}$. (Or note $\\ln(x^2)=2\\ln x$, derivative $\\tfrac{2}{x}$ — same answer.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">challenge — defining e</span><div class="ph">Problem 8</div>
+    <p>Evaluate $\\displaystyle\\int_1^{e} \\frac{dt}{t}$, and say what it reveals about $e$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\int_1^{e}\\tfrac{dt}{t} = \\ln e - \\ln 1 = 1 - 0 = 1$. This is the <em>definition</em> of $e$ read as area: $e$ is precisely the upper limit at which the area under $\\tfrac1t$ (starting at $1$) first equals $1$. The number $e\\approx 2.718$ isn't pulled from nowhere — it's where that area hits one.</p></div></details></div>
+  </div>`;
+  setHints([]);unlock();
+}
+
+function c4_recap(){
+  stage.innerHTML=`<div class="card"><h2>What you built</h2>
+    <div class="eqbox" style="line-height:2.3">$$\\int_a^b f(x)\\,dx = \\lim_{n\\to\\infty}\\sum_{i=1}^n f(x_i)\\,\\Delta x \\quad \\color{#5d7186}{\\text{(signed area)}}$$
+    <div style="text-align:center;line-height:2;color:#dbe6f4;margin-top:6px">FTC Part 1: $\\frac{d}{dx}\\int_a^x f = f(x)$ — area function's slope is the height<br>FTC Part 2: $\\int_a^b f = F(b)-F(a)$ — evaluate by any antiderivative<br>reverse power rule: $\\int x^n dx = \\frac{x^{n+1}}{n+1}+C\\ (n\\ne -1)$<br>$\\ln x := \\int_1^x \\frac{dt}{t}$, so $(\\ln x)'=\\frac1x$ · $\\ln e=1$ · $(e^x)'=e^x$</div></div>
+    <p>Integration is accumulation, and the Fundamental Theorem is the whole subject's keystone: it welds area to slope, making them inverse operations. That single link let us define $\\ln$ and $e^x$ from area and close the $n=-1$ gap left open since Module 3 — nothing assumed, everything derived.</p>
+    <p><b>Next — Module 6:</b> the FTC turns integration into "guess the antiderivative," so the game becomes technique. <b>Substitution</b> reverses the chain rule, <b>integration by parts</b> reverses the product rule, and partial fractions and trig methods round out the toolkit — plus area, volume, and arc-length payoffs.</p></div>`;
   setHints([]);unlock();
 }
 
