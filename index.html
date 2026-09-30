@@ -137,7 +137,9 @@ const MODULES=[
  {id:'c4',title:'Integration & the FTC',sub:'Riemann sums, the definite integral, and the Fundamental Theorem of Calculus.',ready:true,
   outro:`The definite integral is the limit of Riemann sums — accumulated signed area. The Fundamental Theorem ties it to differentiation: the area-so-far function has derivative $f$ (Part 1), so any antiderivative evaluates the integral by $F(b)-F(a)$ (Part 2). That let us define $\\ln x := \\int_1^x \\tfrac{dt}{t}$, fill the $n=-1$ gap in the power rule, and pin down $e$ and $e^x$ at last — rigorously, from area.`,
   beats:[c4_recall,c4_intro,c4_riemann,c4_defint,c4_ftc1,c4_antideriv,c4_ftc2,c4_ln,c4_e,c4_problems,c4_recap]},
- {id:'c5',title:'Techniques & Applications of Integration',sub:'Substitution, parts, partial fractions, improper integrals; area, volume, arc length.',ready:false},
+ {id:'c5',title:'Techniques & Applications of Integration',sub:'Substitution, parts, partial fractions, improper integrals; area, volume, arc length.',ready:true,
+  outro:`Integration is a craft, and now you have the toolbox: substitution reverses the chain rule, parts reverses the product rule, partial fractions breaks a hard rational into easy pieces, and improper integrals extend the idea to infinite regions via limits. Then the payoff — area between curves, volumes of revolution, and arc length — is all one move: slice, express the piece as an integrand, and integrate.`,
+  beats:[c5_recall,c5_intro,c5_usub,c5_parts,c5_partialfrac,c5_improper,c5_area,c5_volume,c5_arclength,c5_problems,c5_recap]},
  {id:'c6',title:'Sequences & Series',sub:'Convergence tests, power series, and Taylor/Maclaurin expansions.',ready:false},
  {id:'c7',title:'Multivariable Calculus',sub:'Partial derivatives, the gradient, directional derivatives, and multiple integrals.',ready:false},
  {id:'c8',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:false},
@@ -279,6 +281,18 @@ const RECALL={
     a:"If $f$ is continuous on $[a,b]$ and differentiable on $(a,b)$, some $c$ has $f'(c)=\\frac{f(b)-f(a)}{b-a}$ — a tangent parallel to the secant. Rolle's theorem is the flat special case $f(a)=f(b)$.", b:5},
    {q:"How does L'Hôpital's rule evaluate a $\\frac{0}{0}$ limit, and why does it work?",
     a:"For $\\frac{0}{0}$ at $a$, $\\lim\\frac{f}{g}=\\frac{f'(a)}{g'(a)}$. Since $f(a)=g(a)=0$, dividing top and bottom by $x-a$ turns the quotient into a ratio of difference quotients heading to $f'(a)/g'(a)$.", b:8}
+ ]},
+ c4:{title:'Module 5 — Integration & the FTC', cues:[
+   {q:"What is the definite integral $\\int_a^b f(x)\\,dx$, and what does 'signed area' mean?",
+    a:"The limit of Riemann sums $\\lim\\sum f(x_i)\\,\\Delta x$ as the slices shrink — the accumulated area between the curve and the axis, counting area below the axis as negative.", b:3},
+   {q:"State Fundamental Theorem Part 1 — the area-so-far function.",
+    a:"If $A(x)=\\int_a^x f(t)\\,dt$, then $A'(x)=f(x)$: the derivative of the area function is the height of the curve. (Proven by the difference quotient = average value, squeezed between the min and max on the shrinking sliver.)", b:4},
+   {q:"State Fundamental Theorem Part 2, and how it evaluates a definite integral.",
+    a:"$\\int_a^b f = F(b)-F(a)$ for any antiderivative $F$ (proven by telescoping + MVT over a partition). So you evaluate an integral by finding an antiderivative and subtracting — no limits of sums.", b:6},
+   {q:"What is an antiderivative / indefinite integral, the reverse power rule, and why the $+C$?",
+    a:"$F$ with $F'=f$; the family is $\\int f\\,dx=F+C$. Reverse power rule: $\\int x^n dx=\\frac{x^{n+1}}{n+1}+C$ ($n\\ne-1$). The $+C$ is there because constants vanish under $d/dx$, so an initial condition is needed to pin it.", b:5},
+   {q:"How are $\\ln$, $e$, and $e^x$ defined from the integral, and what are $(\\ln x)'$ and $(e^x)'$?",
+    a:"$\\ln x:=\\int_1^x \\frac{dt}{t}$, so $(\\ln x)'=\\frac1x$ (FTC Part 1); $e$ is defined by $\\ln e=1$; $e^x$ is the inverse of $\\ln$, and $(e^x)'=e^x$.", b:7}
  ]}
 };
 const RECALL_HINT=`Run it as one unbroken chain — each cue answers the previous one's "so what?". If a link takes you away to review, one tap on Back returns you to this list.`;
@@ -1154,13 +1168,23 @@ function c4_defint(){
 
 function c4_ftc1(){
   stage.innerHTML=`<div class="card"><h2>Fundamental Theorem, Part 1: the area function's slope is the height</h2>
-    <p>Freeze the left edge at $a$ and let the right edge $x$ slide — the area becomes a <em>function</em>, the <b>area-so-far</b> $A(x)=\\int_a^x f(t)\\,dt$. The claim is that its derivative is simply the height of the curve, $A'(x)=f(x)$. We prove it straight from the limit definition, $A'(x)=\\lim_{h\\to0}\\frac{A(x+h)-A(x)}{h}$ — no "infinitesimal strips," every step checkable:</p>
-    <p><b>1. The top of the fraction is one thin sliver of area.</b> Growing the right edge from $x$ to $x+h$ adds exactly the area over the little interval $[x,x+h]$. In symbols (additivity of the integral): $\\;A(x+h)-A(x)=\\int_a^{x+h} f-\\int_a^x f=\\int_x^{x+h} f(t)\\,dt$.</p>
-    <p><b>2. So the whole fraction is an average height.</b> Divide that sliver of area by its width $h$ and you get the <em>average value</em> of $f$ across the sliver: $\\;\\dfrac{A(x+h)-A(x)}{h}=\\dfrac{1}{h}\\int_x^{x+h} f(t)\\,dt$.</p>
-    <p><b>3. An average is boxed in by the lowest and highest heights.</b> On the little interval $[x,x+h]$, continuous $f$ has a smallest value $m$ and a largest value $M$. The sliver's area can't beat the tall rectangle $M\\cdot h$ or fall below the short one $m\\cdot h$, so its average height lies between them: $\\;m\\le \\dfrac{1}{h}\\int_x^{x+h} f\\le M$.</p>
-    <p><b>4. Shrink the width and squeeze.</b> As $h\\to 0$ the interval collapses onto $x$, so its lowest and highest values both close in on $f(x)$: $m\\to f(x)$ and $M\\to f(x)$. The average is trapped between two quantities heading to the same place, so by the squeeze theorem (Module 2) it has nowhere else to land:</p>
-    <div class="eqbox">$$A'(x) = \\lim_{h\\to 0}\\frac{1}{h}\\int_x^{x+h} f(t)\\,dt = \\color{#e8b84b}{f(x)}$$</div>
-    <p>The derivative of the area function is the height of the curve — earned from the limit definition and the squeeze theorem, not an infinitesimal picture. Below, $f(x)=x$ (blue) and its area function $A(x)=\\int_0^x t\\,dt = \\tfrac{x^2}{2}$ (green). Drag $x$: the shaded area is $A(x)$, and the green curve's <em>slope</em> tracks the blue curve's <em>height</em>.</p>
+    <p>Fix the left endpoint at $a$ and let the right endpoint $x$ move. The area swept out becomes a function of $x$ — the <b>area-so-far function</b>:</p>
+    <div class="eqbox">$$A(x)=\\int_a^x f(t)\\,dt$$</div>
+    <p>We're going to compute its derivative $A'(x)$, and the punchline is remarkable: it comes out to be $f(x)$, the height of the original curve at $x$. Let's earn it straight from the definition of the derivative — the same difference quotient from Module 3, nothing smuggled in.</p>
+    <p><b>Start from the definition.</b> The derivative is, by definition, the limit of a difference quotient:</p>
+    <div class="eqbox">$$A'(x)=\\lim_{h\\to 0}\\frac{A(x+h)-A(x)}{h}$$</div>
+    <p>The whole task is to work out what that fraction becomes as $h$ shrinks. Three moves: identify the top, reinterpret the fraction, then trap it.</p>
+    <p><b>Step 1 — the top is one thin sliver of area.</b> $A(x+h)$ is the area from $a$ out to $x+h$; $A(x)$ is the area from $a$ to $x$. Subtracting cancels the shared part and leaves only the strip from $x$ to $x+h$. This is the <em>additivity</em> of the integral (area over $[a,x+h]$ = area over $[a,x]$ + area over $[x,x+h]$):</p>
+    <div class="eqbox">$$A(x+h)-A(x)=\\int_a^{x+h} f\\;-\\;\\int_a^{x} f=\\int_x^{x+h} f(t)\\,dt$$</div>
+    <p><b>Step 2 — so the fraction is an average height.</b> Divide that sliver of area by its width $h$. Area $\\div$ width is a height — the <em>average height</em> of $f$ across $[x,x+h]$ (a rectangle of that height and width $h$ would have the same area as the sliver):</p>
+    <div class="eqbox">$$\\frac{A(x+h)-A(x)}{h}=\\frac{1}{h}\\int_x^{x+h} f(t)\\,dt=\\big(\\text{average of } f \\text{ on } [x,x+h]\\big)$$</div>
+    <p><b>Step 3 — trap that average between two rectangles.</b> On the closed interval $[x,x+h]$ a continuous $f$ has a lowest value $m$ and a highest value $M$. Every value of $f$ on the strip lies between them, so the strip's area lies between the short rectangle (height $m$) and the tall one (height $M$), both of width $h$:</p>
+    <div class="eqbox">$$m\\cdot h\\;\\le\\;\\int_x^{x+h} f(t)\\,dt\\;\\le\\;M\\cdot h$$</div>
+    <p>Divide through by $h$ (positive, so the inequalities keep their direction). The middle is exactly our difference quotient:</p>
+    <div class="eqbox">$$m\\;\\le\\;\\frac{1}{h}\\int_x^{x+h} f(t)\\,dt\\;\\le\\;M$$</div>
+    <p><b>Step 4 — shrink the width and squeeze.</b> Let $h\\to 0$. The interval $[x,x+h]$ collapses onto the single point $x$, so the lowest and highest values of $f$ on it, $m$ and $M$, are both forced to $f(x)$ — that is exactly what it means for $f$ to be continuous at $x$. The difference quotient is sandwiched between $m$ and $M$, and both ends head to the same number $f(x)$, so by the <b>squeeze theorem</b> (Module 2) the middle has nowhere else to go:</p>
+    <div class="eqbox">$$A'(x)=\\lim_{h\\to 0}\\frac{1}{h}\\int_x^{x+h} f(t)\\,dt=\\color{#e8b84b}{f(x)}$$</div>
+    <p>That's the theorem: <b>the rate at which area accumulates equals the current height of the curve.</b> Read the other way, it says $A$ is an <em>antiderivative</em> of $f$ — differentiating "area so far" hands back $f$. Below, take $f(x)=x$ (blue); its area function is $A(x)=\\int_0^x t\\,dt=\\tfrac{x^2}{2}$ (green). Drag $x$ and watch the green curve's <em>slope</em> match the blue curve's <em>height</em> at every point.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">height f(x)</div><div class="v" id="hv">—</div></div><div class="rdc"><div class="k">area A(x)</div><div class="v" id="av">—</div></div></div>
     <div class="task"><b>Read the link</b>As the right edge moves, the rate at which accumulated area grows equals which quantity?</div>
@@ -1177,32 +1201,48 @@ function c4_ftc1(){
     document.getElementById('av').textContent=A(x0).toFixed(2);}
   xdrag(cv,pl,x=>{x0=Math.max(0,Math.min(3,x));draw();});draw();
   const opts=[['the <b>height</b> of the curve there, $f(x)$','y'],['the area itself, $A(x)$','n'],['zero — area accumulates at a constant rate','n'],['the width $dx$','n']];
-  mcChoices(document.getElementById('ch'),opts,()=>{addReveal(`<div class="rh">✓ The rate equals the height, f(x)</div><p>Watch it on screen: at $x=2$ the blue height is $2$, and the green area curve is climbing with slope $2$. The new area added per step is exactly a strip of the current height — so $A'(x)=f(x)$. This is <b>FTC Part 1</b>, and its consequence is enormous: the area function is an <em>antiderivative</em> of $f$. Differentiation and area-accumulation are inverse operations. The next two beats cash that in.</p>`);});
+  mcChoices(document.getElementById('ch'),opts,()=>{addReveal(`<div class="rh">✓ The rate equals the height, f(x)</div><p>On screen: at $x=2$ the blue height is $2$, and the green area curve climbs with slope $2$. The strip of area added at each step has the current height, so the rate of accumulation is that height — $A'(x)=f(x)$. Its consequence is enormous: the area function is an <em>antiderivative</em> of $f$, so differentiation and area-accumulation are inverse operations. The next two beats cash that in.</p>`);});
   setHints([`Per step, the area added divided by the step width is the average height of f over that sliver — and as the sliver shrinks, that average is squeezed to f(x) itself.`]);
 }
 
 function c4_antideriv(){
   stage.innerHTML=`<div class="card"><h2>Antiderivatives and the reverse power rule</h2>
-    <p>FTC Part 1 makes the area function an <b>antiderivative</b>: a function $F$ whose derivative is $f$. Since adding a constant doesn't change a derivative, antiderivatives come in a family $F(x)+C$ — and by the MVT that constant is the <em>only</em> freedom (two functions with equal derivatives differ by a constant). The family is written as the <b>indefinite integral</b> $\\int f(x)\\,dx = F(x)+C$.</p>
-    <p>Running the power rule backwards gives the workhorse formula — bump the exponent up by one and divide by it:</p>
-    <div class="eqbox">$$\\int x^n\\,dx = \\frac{x^{n+1}}{n+1} + C \\qquad (n \\ne -1)$$</div>
-    <p>Check it by differentiating the right side: $\\frac{d}{dx}\\frac{x^{n+1}}{n+1} = \\frac{(n+1)x^n}{n+1} = x^n$ ✓. The one exponent it can't touch is $n=-1$ (it would divide by zero) — that's $\\int \\frac{dx}{x}$, the gap flagged since Module 3, which the last beat finally fills.</p>
-    <div class="task"><b>Recover a function from its rate</b>If $F'(x) = 3x^2$ and $F(0) = 5$, find $F(2)$.</div>
+    <p>Part 1 showed the area function satisfies $A'=f$. A function whose derivative is $f$ earns a name:</p>
+    <div class="defn"><span class="dt">Definition — antiderivative</span>$F$ is an <b>antiderivative</b> of $f$ if $F'(x)=f(x)$.</div>
+    <p><b>Why "$+C$": there is exactly one degree of freedom.</b> Suppose $F$ and $G$ are <em>both</em> antiderivatives of the same $f$, so $F'=f$ and $G'=f$. Look at their difference $D=F-G$ and differentiate:</p>
+    <div class="eqbox">$$D'(x)=F'(x)-G'(x)=f(x)-f(x)=0$$</div>
+    <p>A function whose derivative is zero on an interval must be <b>constant</b> there — the Mean Value Theorem corollary from Module 4 (between any two points, $D(b)-D(a)=D'(c)(b-a)=0$, so $D$ never changes). Hence $F-G=C$: any two antiderivatives of $f$ differ only by a constant. So once you find <em>one</em> antiderivative $F$, the whole family is $F(x)+C$, written as the <b>indefinite integral</b>:</p>
+    <div class="eqbox">$$\\int f(x)\\,dx = F(x)+C$$</div>
+    <p><b>The reverse power rule, by guess-and-check.</b> We want a function whose derivative is $x^n$. The power rule <em>lowers</em> an exponent by one, so to undo it we should <em>raise</em> the exponent by one. Guess $x^{n+1}$ and differentiate to see what comes out:</p>
+    <div class="eqbox">$$\\frac{d}{dx}\\,x^{n+1}=(n+1)\\,x^{n}$$</div>
+    <p>That's $x^n$, but with an unwanted factor of $(n+1)$ in front. Cancel it by dividing the guess by $(n+1)$:</p>
+    <div class="eqbox">$$\\frac{d}{dx}\\!\\left[\\frac{x^{n+1}}{n+1}\\right]=\\frac{(n+1)\\,x^{n}}{n+1}=x^{n}\\quad ✓$$</div>
+    <p>So the antiderivative of $x^n$ is $\\dfrac{x^{n+1}}{n+1}$, plus the constant:</p>
+    <div class="eqbox">$$\\int x^{n}\\,dx=\\frac{x^{n+1}}{n+1}+C\\qquad(n\\ne -1)$$</div>
+    <p>The lone exception is $n=-1$: raising the exponent gives $x^0$ and dividing by $n+1=0$ is illegal. That missing case is $\\int\\frac{dx}{x}$ — the gap flagged since Module 3, filled two beats from now.</p>
+    <p><b>Worked example.</b> Suppose all you know about $F$ is its rate, $F'(x)=3x^2$, and one value, $F(0)=5$. Antidifferentiate: $\\int 3x^2\\,dx=3\\cdot\\frac{x^3}{3}+C=x^3+C$, so $F(x)=x^3+C$. The one data point fixes the constant: $F(0)=0^3+C=C$, and that equals $5$, so $C=5$ and $F(x)=x^3+5$. Now every value is available — find $F(2)$.</p>
+    <div class="task"><b>Recover the value</b>With $F'(x)=3x^2$ and $F(0)=5$, compute $F(2)$.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
-  numChk(stage.querySelector('.card'),13,()=>{addReveal(`<div class="rh">✓ F(2) = 13</div><p>Antidifferentiate: $\\int 3x^2\\,dx = x^3 + C$, so $F(x)=x^3+C$. The condition $F(0)=5$ pins the constant: $0+C=5$, so $C=5$ and $F(x)=x^3+5$. Then $F(2)=8+5=13$. The $+C$ isn't a formality — you need one data point (an "initial condition") to select the one antiderivative you want from the family.</p>`);});
+  numChk(stage.querySelector('.card'),13,()=>{addReveal(`<div class="rh">✓ F(2) = 13</div><p>$F(x)=x^3+5$, so $F(2)=8+5=13$. Notice the $+C$ doing real work: without the datum $F(0)=5$ you'd only know $F$ up to a constant — the initial condition is what selects the one antiderivative you want from the whole vertical family of parallel curves.</p>`);});
   setHints([`Antiderivative of 3x² is x³ + C. Use F(0)=5 to find C, then evaluate at 2.`,`F(x)=x³+5, so F(2)=8+5=13.`]);
 }
 
 function c4_ftc2(){
   stage.innerHTML=`<div class="card"><h2>Fundamental Theorem, Part 2: evaluate by antiderivative</h2>
-    <p>Part 2 evaluates any definite integral from an antiderivative — and it drops out directly from the <em>discrete</em> Riemann sum and the Mean Value Theorem, welding the two halves of the course together. Let $F$ be any antiderivative of $f$ (so $F'=f$), and cut $[a,b]$ into $n$ slices at $a=x_0&lt;x_1&lt;\\dots&lt;x_n=b$.</p>
-    <p><b>1. Telescope the total change in $F$.</b> Add up $F$'s change across the slices. Each interior value gets added once and subtracted once, so they all cancel, leaving only the endpoints:</p>
-    <div class="eqbox">$$\\underbrace{(F(x_1)\\!-\\!F(x_0))+(F(x_2)\\!-\\!F(x_1))+\\cdots+(F(x_n)\\!-\\!F(x_{n-1}))}_{\\text{every interior } F(x_i) \\text{ cancels}}=F(b)-F(a)$$</div>
-    <p><b>2. Rewrite each slice's change with the MVT.</b> Over one slice $[x_{i-1},x_i]$, the Mean Value Theorem (Module 4) gives a point $c_i$ inside where the slope equals the slice's average slope. Multiply that slope by the slice's width and you get the slice's <em>exact</em> change: $\\;F(x_i)-F(x_{i-1})=F'(c_i)\\,\\Delta x_i=f(c_i)\\,\\Delta x_i$ (using $F'=f$).</p>
-    <p><b>3. The total is now a Riemann sum.</b> Drop those into step 1: $\\;F(b)-F(a)=\\sum_{i=1}^{n} f(c_i)\\,\\Delta x_i$. The right side is a Riemann sum for $f$ — and this equation is <em>exact</em> for any slicing, coarse or fine.</p>
-    <p><b>4. Refine, and read off the answer.</b> Let the slices shrink ($\\Delta x_i\\to 0$). The Riemann sum on the right converges to $\\int_a^b f$ (that's the definition of the integral), while the left side, $F(b)-F(a)$, doesn't depend on the slicing at all — it never budges. A fixed number that equals something converging must equal the limit:</p>
-    <div class="eqbox">$$\\int_a^b f(x)\\,dx = F(b)-F(a) \\qquad \\color{#5d7186}{\\text{written }\\big[F(x)\\big]_a^b}$$</div>
-    <p>No limits of sums to grind by hand — find an antiderivative and subtract. The area shaded below is $\\int_0^3 x^2\\,dx$, the number you squeezed out of Riemann sums earlier; now watch it fall out in one line.</p>
+    <p>Part 1 told us antiderivatives <em>exist</em> (the area function is one). Part 2 is the harvest: to compute a definite integral, evaluate <em>any</em> antiderivative at the two endpoints and subtract — no Riemann sums at all. And it follows directly from the discrete sum plus the Mean Value Theorem, welding the two halves of the course together.</p>
+    <p><b>The claim.</b> If $F'=f$ on $[a,b]$, then $\\displaystyle\\int_a^b f(x)\\,dx=F(b)-F(a)$.</p>
+    <p><b>Setup.</b> Cut $[a,b]$ into $n$ slices at $a=x_0&lt;x_1&lt;\\dots&lt;x_n=b$, with widths $\\Delta x_i=x_i-x_{i-1}$.</p>
+    <p><b>Step 1 — telescope the total change in $F$.</b> Build $F(b)-F(a)$ up one slice at a time. Adding the change across each slice, every interior value $F(x_i)$ (for $0&lt;i&lt;n$) shows up once with a $+$ and once with a $-$, so they all cancel:</p>
+    <div class="eqbox">$$F(b)-F(a)=\\big(F(x_1)-F(x_0)\\big)+\\big(F(x_2)-F(x_1)\\big)+\\cdots+\\big(F(x_n)-F(x_{n-1})\\big)$$</div>
+    <p>which collapses to the sum of the per-slice changes, $\\displaystyle F(b)-F(a)=\\sum_{i=1}^{n}\\big(F(x_i)-F(x_{i-1})\\big)$.</p>
+    <p><b>Step 2 — rewrite each slice's change with the MVT.</b> On one slice $[x_{i-1},x_i]$, the Mean Value Theorem (Module 4) hands you a point $c_i$ inside where the instantaneous slope equals the slice's average slope. Multiplying that slope by the slice width recovers the change across the slice exactly — and $F'=f$:</p>
+    <div class="eqbox">$$F(x_i)-F(x_{i-1})=F'(c_i)\\,\\Delta x_i=f(c_i)\\,\\Delta x_i$$</div>
+    <p><b>Step 3 — the total is a Riemann sum.</b> Substitute step 2 into step 1:</p>
+    <div class="eqbox">$$F(b)-F(a)=\\sum_{i=1}^{n} f(c_i)\\,\\Delta x_i$$</div>
+    <p>The right-hand side is precisely a Riemann sum for $f$ — heights $f(c_i)$ at sample points $c_i$, times widths $\\Delta x_i$. And this equation is <em>exact</em> for any slicing, coarse or fine; the number of slices never mattered.</p>
+    <p><b>Step 4 — refine and take the limit.</b> Let the slices shrink, $\\Delta x_i\\to 0$. Being Riemann sums of the (continuous, hence integrable) $f$, the right side converges to the definite integral by definition. The left side, $F(b)-F(a)$, involves no slicing at all — it is a fixed number that never moves. A fixed number equal to something converging must equal the limit:</p>
+    <div class="eqbox">$$\\int_a^b f(x)\\,dx = F(b)-F(a)\\qquad\\color{#5d7186}{\\text{written }\\big[F(x)\\big]_a^b}$$</div>
+    <p><b>Watch it work.</b> The shaded area below is $\\int_0^3 x^2\\,dx$ — the number you ground out of Riemann sums earlier. An antiderivative of $x^2$ is $F(x)=\\tfrac{x^3}{3}$, so it should be $F(3)-F(0)=\\tfrac{27}{3}-0$, in a single line. Compute it:</p>
     <canvas id="cv" width="640" height="360"></canvas>
     <div class="task"><b>Evaluate</b>Using $F(x)=\\tfrac{x^3}{3}$ (an antiderivative of $x^2$), compute $\\displaystyle\\int_0^3 x^2\\,dx$.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
@@ -1212,22 +1252,28 @@ function c4_ftc2(){
     for(let t=0;t<3;t+=step){const X0=pl.px(t),X1=pl.px(t+step),Y0=pl.py(0),Y1=pl.py(f(t));ctx.fillStyle='rgba(122,184,255,0.18)';ctx.fillRect(X0,Y1,X1-X0,Y0-Y1);}
     pl.curve(f,'#7ab8ff');pl.label(1.05,7.4,'∫₀³ x² dx','#9fb0c4');}
   draw();
-  numChk(stage.querySelector('.card'),9,()=>{addReveal(`<div class="rh">✓ 9, in one line</div><p>$\\int_0^3 x^2\\,dx = \\big[\\tfrac{x^3}{3}\\big]_0^3 = \\tfrac{27}{3} - 0 = 9$. The limit of sums you laboured over is now a single subtraction. <b>This is the theorem the whole subject is named for</b>: the area problem (integration) and the slope problem (differentiation) are inverse operations, so every derivative rule from Modules 3–4, read backwards, becomes an integration formula. Curves whose antiderivative you can name are suddenly trivial to integrate.</p>`);});
-  setHints([`FTC Part 2: evaluate the antiderivative at 3 and at 0, then subtract.`,`[x³/3] from 0 to 3 = 27/3 − 0 = 9.`]);
+  numChk(stage.querySelector('.card'),9,()=>{addReveal(`<div class="rh">✓ 9, in one line</div><p>$\\int_0^3 x^2\\,dx=\\big[\\tfrac{x^3}{3}\\big]_0^3=\\tfrac{27}{3}-0=9$ — the same $9$ the Riemann sums crawled toward, now a single subtraction. <b>This is the theorem the whole subject is named for:</b> integration (area) and differentiation (slope) are inverse operations, so every derivative rule from Modules 3–4, read backwards, becomes an integration formula. Any curve whose antiderivative you can name is suddenly trivial to integrate.</p>`);});
+  setHints([`FTC Part 2: evaluate the antiderivative x³/3 at 3 and at 0, then subtract.`,`27/3 − 0 = 9.`]);
 }
 
 function c4_ln(){
   stage.innerHTML=`<div class="card"><h2>Defining the natural logarithm from area</h2>
     <p>The reverse power rule left exactly one hole: $n=-1$, the integral $\\int\\frac{dx}{x}$. It's tempting to say "that's just $\\ln x$, the log base $e$" and move on — but that would be circular. To lean on $\\log_e$ we'd first need $e^x$ defined for <em>every</em> real $x$ (irrational exponents need a limit we haven't built) and the fact $(e^x)'=e^x$ (which needs $e$ pinned down so precisely that the argument eats its own tail). We already own a tool that needs nothing new — the integral — so we turn the gap into a <em>definition</em>.</p>
     <div class="defn"><span class="dt">Definition — natural logarithm</span>$\\displaystyle \\ln x := \\int_1^x \\frac{dt}{t} \\quad (x>0)$ — the signed area under $\\tfrac1t$ from $1$ out to $x$.</div>
-    <p>This is not a modern trick; it retraces history. Logarithms (Napier, <b>1614</b>) were in daily use long before $e$ was a named number, and in <b>1649</b> de Sarasa recognized that the area under the hyperbola $y=\\tfrac1t$ <em>behaves</em> like a logarithm — decades before Euler identified $e$ in the 1700s. Two things make this definition inevitable rather than arbitrary:</p>
-    <p><b>Why start at 1?</b> A logarithm must send $1\\mapsto 0$. Starting the area at $1$ delivers exactly that: $\\ln 1 = \\int_1^1 \\tfrac{dt}{t} = 0$ (an empty interval has no area). Start anywhere else and you'd shift everything by a constant, breaking $\\ln 1 = 0$.</p>
-    <p><b>The derivative, for free.</b> FTC Part 1, applied to this definition, fills the $n=-1$ hole in the power rule immediately:</p>
+    <p>This is not a modern trick; it retraces history. Logarithms (Napier, <b>1614</b>) were in daily use long before $e$ was a named number, and in <b>1649</b> de Sarasa recognized that the area under the hyperbola $y=\\tfrac1t$ <em>behaves</em> like a logarithm — decades before Euler identified $e$ in the 1700s. Two things make this definition inevitable rather than arbitrary.</p>
+    <p><b>Why start at 1?</b> A logarithm must send $1\\mapsto 0$. Starting the area at $1$ delivers exactly that, because an interval of zero width encloses no area:</p>
+    <div class="eqbox">$$\\ln 1 = \\int_1^1 \\frac{dt}{t} = 0$$</div>
+    <p>Start anywhere else and every value shifts by a constant, breaking $\\ln 1 = 0$.</p>
+    <p><b>The derivative, for free.</b> This is just FTC Part 1 with lower limit $a=1$ and integrand $f(t)=\\tfrac1t$. The derivative of an area function is its integrand's height, so:</p>
     <div class="eqbox">$$(\\ln x)' = \\frac{d}{dx}\\int_1^x \\frac{dt}{t} = \\color{#e8b84b}{\\frac{1}{x}}$$</div>
-    <p><b>Why it really is a logarithm.</b> Calling it a log takes more than $\\ln 1 = 0$ — the defining property is that it turns products into sums, $\\ln(ab)=\\ln a+\\ln b$. We can <em>prove</em> our area function does this, using only the chain rule and the MVT. Fix $a&gt;0$ and let $g(x)=\\ln(ax)-\\ln x$. Differentiate (chain rule on the first term, and $(\\ln x)'=\\tfrac1x$ from just above):</p>
-    <div class="eqbox">$$g'(x) = a\\cdot\\frac{1}{ax} - \\frac{1}{x} = \\frac{1}{x}-\\frac{1}{x} = 0$$</div>
-    <p>A function with zero derivative on an interval is constant (a corollary of the MVT, Module 4), so $g(x)=g(1)=\\ln a-\\ln 1=\\ln a$ for all $x$. That says $\\ln(ax)=\\ln x+\\ln a$; set $x=b$ and you have $\\color{#e8b84b}{\\ln(ab)=\\ln a+\\ln b}$ — proven, not asserted. (The same trick on $h(x)=\\ln(x^p)-p\\ln x$ gives $h'=0$, hence $\\ln(x^p)=p\\ln x$.) So this integral genuinely <em>is</em> a logarithm.</p>
-    <p>Drag $x$ and read $\\ln x$ off the shaded area: positive to the right of $1$, negative to the left (the area is swept backwards).</p>
+    <p>That is the missing antiderivative of $\\tfrac1x$ — the $n=-1$ hole, now filled rigorously.</p>
+    <p><b>Why it really is a logarithm.</b> Calling it a log takes more than $\\ln 1=0$: the defining property of a logarithm is that it turns products into sums, $\\ln(ab)=\\ln a+\\ln b$. We can <em>prove</em> our area function does this, using only the chain rule and the MVT. Fix a constant $a&gt;0$ and define $g(x)=\\ln(ax)-\\ln x$. Differentiate the first term with the chain rule — inner function $ax$, whose derivative is $a$:</p>
+    <div class="eqbox">$$\\frac{d}{dx}\\ln(ax)=\\frac{1}{ax}\\cdot a=\\frac{1}{x}$$</div>
+    <p>So the two pieces of $g'$ cancel:</p>
+    <div class="eqbox">$$g'(x)=\\frac{1}{x}-\\frac{1}{x}=0$$</div>
+    <p>A function with zero derivative on an interval is constant (the MVT corollary, Module 4), so $g$ has the same value everywhere — evaluate it at the easy point $x=1$: $\\;g(1)=\\ln(a)-\\ln(1)=\\ln a$. Therefore $g(x)=\\ln a$ for all $x$, i.e. $\\ln(ax)-\\ln x=\\ln a$. Rearranged, and then setting $x=b$:</p>
+    <div class="eqbox">$$\\ln(ax)=\\ln x+\\ln a \\quad\\xrightarrow{\\,x=b\\,}\\quad \\color{#e8b84b}{\\ln(ab)=\\ln a+\\ln b}$$</div>
+    <p>Proven, not asserted. (The same trick on $h(x)=\\ln(x^p)-p\\ln x$ gives $h'=0$, hence $\\ln(x^p)=p\\ln x$.) So this integral genuinely <em>is</em> a logarithm. Drag $x$ and read $\\ln x$ off the shaded area — positive right of $1$, negative left of it (the area is swept backwards).</p>
     <canvas id="cv" width="640" height="360"></canvas>
     <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">ln x = shaded area</div><div class="v" id="lv">—</div></div></div>
     <div class="task"><b>Apply FTC to ln</b>Since $(\\ln x)' = \\tfrac1x$, what is $(\\ln x)'$ at $x = 2$? (Enter a decimal.)</div>
@@ -1241,18 +1287,22 @@ function c4_ln(){
     document.getElementById('xv').textContent=x0.toFixed(3);
     document.getElementById('lv').textContent=lnA(x0).toFixed(3);}
   xdrag(cv,pl,x=>{x0=Math.max(0.3,Math.min(5,x));draw();});draw();
-  numChk(stage.querySelector('.card'),0.5,()=>{addReveal(`<div class="rh">✓ (ln 2)′ = ½ = 0.5</div><p>$(\\ln x)'=\\tfrac1x$, so at $x=2$ it is $\\tfrac12$. The picture confirms the shape: $\\ln 1 = 0$, $\\ln x > 0$ for $x > 1$, $\\ln x &lt; 0$ for $0 &lt; x &lt; 1$, and because the integrand $\\tfrac1t$ is always positive, $\\ln$ is <b>strictly increasing</b> everywhere. That single fact — strictly increasing, running over all real values — is what guarantees it has an inverse, and that inverse is the doorway to $e$ and $e^x$, next.</p>`);},s=>parseFloat(s));
+  numChk(stage.querySelector('.card'),0.5,()=>{addReveal(`<div class="rh">✓ (ln 2)′ = ½ = 0.5</div><p>$(\\ln x)'=\\tfrac1x$, so at $x=2$ it is $\\tfrac12$. The picture confirms the shape: $\\ln 1 = 0$, $\\ln x > 0$ for $x > 1$, $\\ln x &lt; 0$ for $0 &lt; x &lt; 1$, and because the integrand $\\tfrac1t$ is always positive, $\\ln$ is <b>strictly increasing</b> everywhere. That single fact — strictly increasing, running over all real values — is what guarantees it has an inverse, the doorway to $e$ and $e^x$, next.</p>`);},s=>parseFloat(s));
   setHints([`The derivative of ln x is 1/x. Put x = 2.`,`1/2 = 0.5.`]);
 }
 function c4_e(){
   stage.innerHTML=`<div class="card"><h2>The number e and the function eˣ</h2>
-    <p>From the last beat, $\\ln$ is strictly increasing and sweeps through every real value — from $-\\infty$ as $x\\to 0^+$ up to $+\\infty$. So it hits each height exactly once; in particular there is a <em>single</em> input where the accumulated area equals precisely $1$. That number is how we define $e$.</p>
+    <p>The last beat established that $\\ln$ is <b>continuous</b> (it's differentiable, with $(\\ln x)'=\\tfrac1x$) and <b>strictly increasing</b>. It also runs over every real value — its area grows without bound as $x\\to\\infty$ and plunges to $-\\infty$ as $x\\to 0^+$. A continuous function that climbs from $-\\infty$ to $+\\infty$ hits every height exactly once (Intermediate Value Theorem, Module 2, plus strict increase for uniqueness). In particular there is a <em>single</em> input where the value is $1$ — and that number is how we define $e$.</p>
     <div class="defn"><span class="dt">Definition — the number e</span>$e$ is the unique number with $\\ln e = 1$: the point where the area under $\\tfrac1t$ (starting at $1$) first reaches $1$. Numerically $e \\approx 2.71828$.</div>
-    <p>Because $\\ln$ is one-to-one, it has an inverse — and that inverse is precisely what the symbol $e^x$ will <em>mean</em>:</p>
-    <div class="defn"><span class="dt">Definition — the exponential function</span>$e^x$ is the inverse of $\\ln$: $\\ln(e^x)=x$ and $e^{\\ln x}=x$. This finally defines $e^x$ for every real $x$ — irrational exponents included — with no appeal to "repeated multiplication."</div>
-    <p>Its derivative — the self-replicating property teased back in Module 1 — now falls out by differentiating the inverse relationship. Let $y=e^x$, so $\\ln y = x$. Differentiate both sides in $x$ (chain rule on the left, since $y$ depends on $x$):</p>
-    <div class="eqbox">$$\\frac{1}{y}\\,\\frac{dy}{dx} = 1 \\;\\Longrightarrow\\; \\frac{dy}{dx} = y \\;\\Longrightarrow\\; \\color{#e8b84b}{(e^x)' = e^x}$$</div>
-    <p>$e^x$ is its own derivative — the one function (up to scaling) whose growth rate equals its own height, which is why every growth or decay law is written $e^{kt}$. Every other exponential reduces to it: $a^x = e^{x\\ln a}$, so $(a^x)' = a^x\\ln a$. Drag $x$ until the shaded area hits exactly $1$ — the spot where it does is $e$.</p>
+    <p>Because $\\ln$ is one-to-one, it has an inverse function — and that inverse is precisely what the symbol $e^x$ will <em>mean</em>:</p>
+    <div class="defn"><span class="dt">Definition — the exponential function</span>$e^x$ is the inverse of $\\ln$: the two relations $\\ln(e^x)=x$ and $e^{\\ln x}=x$ hold. This at last defines $e^x$ for <em>every</em> real $x$ — irrational exponents included — with no appeal to "repeated multiplication."</div>
+    <p><b>Its derivative, step by step.</b> The self-replicating property teased back in Module 1 now falls out by differentiating the inverse relationship. Set $y=e^x$. By the definition just above, applying $\\ln$ to both sides gives</p>
+    <div class="eqbox">$$\\ln y = x.$$</div>
+    <p>Differentiate both sides with respect to $x$. On the right, $\\frac{d}{dx}x=1$. On the left, $y$ is a function of $x$, so the chain rule applies — the outer derivative of $\\ln$ is $\\tfrac1y$, times the inner derivative $\\tfrac{dy}{dx}$:</p>
+    <div class="eqbox">$$\\frac{1}{y}\\cdot\\frac{dy}{dx}=1.$$</div>
+    <p>Solve for $\\tfrac{dy}{dx}$ by multiplying both sides by $y$, then recall $y=e^x$:</p>
+    <div class="eqbox">$$\\frac{dy}{dx}=y \\quad\\Longrightarrow\\quad \\color{#e8b84b}{(e^x)'=e^x}.$$</div>
+    <p>$e^x$ is its own derivative — the one function (up to scaling) whose growth rate equals its own height, which is why every growth or decay law is written $e^{kt}$. Every other exponential reduces to it: $a^x=e^{x\\ln a}$, so by the chain rule $(a^x)'=a^x\\ln a$. Drag $x$ until the shaded area hits exactly $1$ — the spot where it does is $e$.</p>
     <canvas id="cv" width="640" height="360"></canvas>
     <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">area = ln x</div><div class="v" id="lv">—</div></div></div>
     <div class="task"><b>Use the derivative</b>Since $(e^x)' = e^x$ and $e^0 = 1$, what is the slope of $e^x$ at $x = 0$?</div>
@@ -1325,6 +1375,211 @@ function c4_recap(){
     <div style="text-align:center;line-height:2;color:#dbe6f4;margin-top:6px">FTC Part 1: $\\frac{d}{dx}\\int_a^x f = f(x)$ — area function's slope is the height<br>FTC Part 2: $\\int_a^b f = F(b)-F(a)$ — evaluate by any antiderivative<br>reverse power rule: $\\int x^n dx = \\frac{x^{n+1}}{n+1}+C\\ (n\\ne -1)$<br>$\\ln x := \\int_1^x \\frac{dt}{t}$, so $(\\ln x)'=\\frac1x$ · $\\ln e=1$ · $(e^x)'=e^x$</div></div>
     <p>Integration is accumulation, and the Fundamental Theorem is the whole subject's keystone: it welds area to slope, making them inverse operations. That single link let us define $\\ln$ and $e^x$ from area and close the $n=-1$ gap left open since Module 3 — nothing assumed, everything derived.</p>
     <p><b>Next — Module 6:</b> the FTC turns integration into "guess the antiderivative," so the game becomes technique. <b>Substitution</b> reverses the chain rule, <b>integration by parts</b> reverses the product rule, and partial fractions and trig methods round out the toolkit — plus area, volume, and arc-length payoffs.</p></div>`;
+  setHints([]);unlock();
+}
+
+/* ================= MODULE 6 — TECHNIQUES & APPLICATIONS OF INTEGRATION ================= */
+function c5_recall(){recallFrom(`Module 6 is where you cash in the Fundamental Theorem — so rebuild the whole machine first, from functions and limits through the derivative, its applications, and the integral that ties them together.`,['c0','c1','c2','c3','c4'],RECALL_HINT);}
+
+function c5_intro(){
+  stage.innerHTML=`<div class="card"><h2>Integration is a craft, not an algorithm</h2>
+    <p>The Fundamental Theorem recast integration as <em>antidifferentiation</em>: to compute $\\int f$, find a function whose derivative is $f$. But there's an asymmetry worth naming. Differentiation is mechanical — the power, product, quotient, and chain rules crank out the derivative of <em>anything</em> you can write down. Integration runs those rules <em>backwards</em>, and reversing isn't mechanical: you have to recognize which rule could have produced the integrand.</p>
+    <p>So this module is a toolbox, and each tool is one differentiation rule read in reverse:</p>
+    <div class="eqbox" style="line-height:2">substitution &nbsp;$\\longleftarrow$&nbsp; the chain rule<br>integration by parts &nbsp;$\\longleftarrow$&nbsp; the product rule<br>partial fractions &nbsp;$\\longleftarrow$&nbsp; algebra, to expose those forms</div>
+    <p>Then we spend the second half turning integrals into geometry — area between curves, volumes, arc length. First, the mindset:</p>
+    <div class="task"><b>Why is integration harder than differentiation?</b></div>
+    <div class="choices" id="ch"></div></div>`;
+  const opts=[['Reversing a rule means <em>recognizing</em> what could have produced the integrand — and some functions have no elementary antiderivative at all','y'],['Integrals are always larger numbers, so they are harder to compute','n'],['Differentiation is actually the harder of the two','n'],['There is a single master formula for integrals we simply haven\'t covered yet','n']];
+  mcChoices(document.getElementById('ch'),opts,()=>{addReveal(`<div class="rh">✓ Reversing requires recognition</div><p>Differentiation is a forward crank; integration is pattern-matching in reverse, and it genuinely runs out — functions like $e^{-x^2}$ (the bell curve) have <em>no</em> antiderivative expressible in elementary functions, so no technique will ever give a closed form. That's not a gap in your training; it's a theorem. The tools here handle the large, important class that <em>does</em> submit — and for the rest, the definite integral still exists and is computed numerically (the Riemann sums of Module 5).</p>`);});
+  setHints([`Think about what "run the chain rule backwards" actually demands of you compared to just applying it forwards.`]);
+}
+
+function c5_usub(){
+  stage.innerHTML=`<div class="card"><h2>Substitution: the chain rule, reversed</h2>
+    <p>The chain rule says $\\frac{d}{dx}F(g(x)) = F'(g(x))\\,g'(x)$. Read that as an antiderivative statement and you have <b>substitution</b>: if an integrand looks like "(a function of $g$) times $g'$," you can collapse it back into the outer function.</p>
+    <div class="eqbox">$$\\int f(g(x))\\,g'(x)\\,dx = \\int f(u)\\,du \\qquad \\text{where } u=g(x),\\ du=g'(x)\\,dx$$</div>
+    <p>The move: spot an inner function $u=g(x)$ whose derivative $g'(x)$ is also sitting in the integrand, rename it, and the integral simplifies. For a <em>definite</em> integral, convert the limits too — they're $x$-values, so translate them into $u$-values.</p>
+    <p>Worked example: $\\displaystyle\\int_0^1 2x\\,(x^2+1)^3\\,dx$. Let $u=x^2+1$, so $du=2x\\,dx$ — and the $2x\\,dx$ is right there. Limits: $x=0\\Rightarrow u=1$, $x=1\\Rightarrow u=2$. The integral becomes $\\int_1^2 u^3\\,du = \\big[\\tfrac{u^4}{4}\\big]_1^2 = \\tfrac{16-1}{4}$.</p>
+    <div class="task"><b>Finish it</b>Evaluate $\\displaystyle\\int_1^2 u^3\\,du = \\frac{16-1}{4}$. (Enter a decimal.)</div>
+    <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  numChk(stage.querySelector('.card'),3.75,()=>{addReveal(`<div class="rh">✓ 15/4 = 3.75</div><p>$\\big[\\tfrac{u^4}{4}\\big]_1^2 = \\tfrac{16}{4}-\\tfrac14 = \\tfrac{15}{4} = 3.75$. Substitution worked because the integrand was <em>exactly</em> a chain-rule output: the outer $u^3$ times the inner derivative $2x$. The whole skill is training your eye to see that structure — "is a piece of this integrand the derivative of another piece?" When yes, rename and collapse.</p>`);},s=>parseFloat(s));
+  setHints([`u = x²+1 turned it into ∫₁² u³ du. Now use the reverse power rule and evaluate.`,`[u⁴/4] from 1 to 2 = (16−1)/4 = 15/4.`]);
+}
+
+function c5_parts(){
+  stage.innerHTML=`<div class="card"><h2>Integration by parts: the product rule, reversed</h2>
+    <p>The product rule says $(uv)' = u'v + uv'$. Integrate both sides over the whole thing — the left becomes $uv$ — and rearrange to solve for one of the two pieces on the right:</p>
+    <div class="eqbox">$$\\int u\\,dv = uv - \\int v\\,du$$</div>
+    <p>It trades one integral for another. The art is choosing $u$ and $dv$ so the <em>new</em> integral $\\int v\\,du$ is easier than the one you started with — usually by picking $u$ to be the part that gets simpler when differentiated.</p>
+    <p>Worked example: $\\displaystyle\\int_0^1 x\\,e^x\\,dx$. Choose $u=x$ (its derivative $du=dx$ is simpler) and $dv=e^x dx$ (so $v=e^x$). Then</p>
+    <div class="eqbox">$$\\int_0^1 x e^x dx = \\big[x e^x\\big]_0^1 - \\int_0^1 e^x dx = \\big[x e^x - e^x\\big]_0^1.$$</div>
+    <p>The $\\int v\\,du = \\int e^x dx$ is one we now know cold (from Module 5).</p>
+    <div class="task"><b>Evaluate it</b>Compute $\\big[x e^x - e^x\\big]_0^1$. (Use $e^0=1$; the $e$'s at $x=1$ cancel.)</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ 1</div><p>At $x=1$: $1\\cdot e - e = 0$. At $x=0$: $0\\cdot 1 - 1 = -1$. So the integral is $0 - (-1) = 1$. Parts turned $\\int x e^x$, which no basic rule handles, into $uv$ minus an integral we already owned. Picking $u=x$ was the key: differentiating it to $1$ made the leftover integral trivial. (Had we picked $u=e^x$, the new integral would have been <em>worse</em> — choice matters.)</p>`);});
+  setHints([`Plug in the endpoints: at x=1 the two e terms cancel to 0; at x=0 you get 0 − 1 = −1.`,`0 − (−1) = 1.`]);
+}
+
+function c5_partialfrac(){
+  stage.innerHTML=`<div class="card"><h2>Partial fractions: split a hard rational into easy ones</h2>
+    <p>A ratio of polynomials often looks unintegrable as written — but algebra can break it into a <em>sum</em> of simpler fractions, each of which integrates to a logarithm. The trick is to reverse the "common denominator" step you learned in algebra.</p>
+    <p>Take $\\dfrac{1}{x^2-1}=\\dfrac{1}{(x-1)(x+1)}$. Assume it splits as</p>
+    <div class="eqbox">$$\\frac{1}{(x-1)(x+1)} = \\frac{A}{x-1} + \\frac{B}{x+1}.$$</div>
+    <p>Multiply through by $(x-1)(x+1)$: $\\;1 = A(x+1) + B(x-1)$. Set $x=1$: $\\;1 = A(2)$, so $A=\\tfrac12$. Set $x=-1$: $\\;1 = B(-2)$, so $B=-\\tfrac12$. Now each piece integrates: $\\int\\frac{dx}{x^2-1} = \\tfrac12\\ln|x-1| - \\tfrac12\\ln|x+1| + C$.</p>
+    <div class="task"><b>Find the coefficient</b>In $\\dfrac{1}{(x-1)(x+1)} = \\dfrac{A}{x-1}+\\dfrac{B}{x+1}$, what is $A$? (Enter a decimal.)</div>
+    <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  numChk(stage.querySelector('.card'),0.5,()=>{addReveal(`<div class="rh">✓ A = ½ = 0.5</div><p>The fast route (the "cover-up" method): to get $A$, cover the $(x-1)$ factor and evaluate what's left at $x=1$: $\\tfrac{1}{x+1}\\big|_{x=1}=\\tfrac12$. Likewise $B=\\tfrac{1}{x-1}\\big|_{x=-1}=-\\tfrac12$. Once split, the integral is just two logarithms — which is why partial fractions and $\\ln$ are a package deal. Any rational function with distinct linear factors integrates this way.</p>`);},s=>parseFloat(s));
+  setHints([`Multiply both sides by (x−1)(x+1) to get 1 = A(x+1)+B(x−1), then substitute x=1 to isolate A.`,`1 = A(1+1) = 2A, so A = 1/2.`]);
+}
+
+function c5_improper(){
+  stage.innerHTML=`<div class="card"><h2>Improper integrals: finite area over an infinite region</h2>
+    <p>What is the area under a curve stretching to infinity? You can't plug $\\infty$ into an antiderivative, so you take a <b>limit</b>: integrate up to $b$, then let $b\\to\\infty$.</p>
+    <div class="eqbox">$$\\int_1^{\\infty} f(x)\\,dx = \\lim_{b\\to\\infty}\\int_1^{b} f(x)\\,dx$$</div>
+    <p>Below is $f(x)=\\tfrac{1}{x^2}$. Drag the right edge $b$ outward and watch the shaded area: it equals $1-\\tfrac1b$, so it climbs toward $1$ but never passes it. The region is infinitely long, yet its area is finite — the integral <b>converges</b>.</p>
+    <canvas id="cv" width="640" height="360"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">b</div><div class="v" id="bv">—</div></div><div class="rdc"><div class="k">area = 1 − 1/b</div><div class="v" id="av">—</div></div></div>
+    <div class="task"><b>Take the limit</b>As $b\\to\\infty$, $1-\\tfrac1b\\to$ ? That value is $\\displaystyle\\int_1^{\\infty}\\tfrac{1}{x^2}\\,dx$.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:0.4,xmax:12,ymin:-0.15,ymax:1.5});
+  const f=x=>x>0.2?1/(x*x):NaN;let b=3;
+  function draw(){pl.grid();const{ctx}=pl;const step=(b-1)/240;
+    if(step>0)for(let t=1;t<b;t+=step){const X0=pl.px(t),X1=pl.px(t+step),Y0=pl.py(0),Y1=pl.py(1/(t*t));ctx.fillStyle='rgba(122,184,255,0.20)';ctx.fillRect(X0,Y1,X1-X0,Y0-Y1);}
+    pl.curve(f,'#7ab8ff');pl.hline(1,'#3fb98f',true);pl.vline(1,'#2b3a4f',true);pl.vline(b,'#3a4c66',true);
+    document.getElementById('bv').textContent=b.toFixed(2);
+    document.getElementById('av').textContent=(1-1/b).toFixed(4);}
+  xdrag(cv,pl,x=>{b=Math.max(1.05,Math.min(12,x));draw();});draw();
+  numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ Converges to 1</div><p>$\\int_1^b \\tfrac{1}{x^2}dx = \\big[-\\tfrac1x\\big]_1^b = 1-\\tfrac1b \\to 1$. Infinite length, area exactly $1$. But convergence is not automatic — contrast $\\int_1^\\infty \\tfrac1x\\,dx = \\lim_{b\\to\\infty}\\ln b = \\infty$, which <b>diverges</b>. Same-looking curves, opposite fates: $\\tfrac1{x^2}$ decays fast enough to enclose finite area, $\\tfrac1x$ doesn't. That knife-edge (which powers of $x$ converge) is exactly what the series tests in Module 7 will hinge on.</p>`);});
+  setHints([`Drag b far right. The area reads 1 − 1/b: at b=10 it's 0.9, at b=100 it's 0.99… what's it heading to?`,`1 − 1/b → 1 as b → ∞.`]);
+}
+
+function c5_area(){
+  stage.innerHTML=`<div class="card"><h2>Area between two curves</h2>
+    <p>The definite integral gives area between a curve and the axis. Between <em>two</em> curves it's the same idea applied to the gap: at each $x$, the vertical strip has height (top curve − bottom curve), so integrate that difference.</p>
+    <div class="eqbox">$$\\text{Area} = \\int_a^b \\big(\\,y_{\\text{top}} - y_{\\text{bottom}}\\,\\big)\\,dx$$</div>
+    <p>Here are $y=x$ and $y=x^3$ on $[0,1]$, where the line sits above the cubic. Drag the sweep line and read the gap $x-x^3$ you're integrating; the shaded region is the total area.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">gap x − x³</div><div class="v" id="gv">—</div></div></div>
+    <div class="task"><b>Compute the area</b>Evaluate $\\displaystyle\\int_0^1 (x-x^3)\\,dx$. (Enter a decimal.)</div>
+    <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.15,xmax:1.2,ymin:-0.15,ymax:1.2});
+  const top=x=>x, bot=x=>x*x*x;let xs=0.5;
+  function draw(){pl.grid();const{ctx}=pl;const step=1/200;
+    for(let t=0;t<1;t+=step){const X0=pl.px(t),X1=pl.px(t+step),Yt=pl.py(top(t)),Yb=pl.py(bot(t));ctx.fillStyle='rgba(122,184,255,0.18)';ctx.fillRect(X0,Yt,X1-X0,Yb-Yt);}
+    pl.curve(top,'#7ab8ff');pl.curve(bot,'#3fb98f');
+    ctx.strokeStyle='#e8b84b';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(pl.px(xs),pl.py(bot(xs)));ctx.lineTo(pl.px(xs),pl.py(top(xs)));ctx.stroke();
+    pl.point(xs,top(xs),'#7ab8ff',4);pl.point(xs,bot(xs),'#3fb98f',4);
+    document.getElementById('xv').textContent=xs.toFixed(2);
+    document.getElementById('gv').textContent=(top(xs)-bot(xs)).toFixed(3);}
+  xdrag(cv,pl,x=>{xs=Math.max(0,Math.min(1,x));draw();});draw();
+  numChk(stage.querySelector('.card'),0.25,()=>{addReveal(`<div class="rh">✓ 1/4 = 0.25</div><p>$\\int_0^1 (x-x^3)\\,dx = \\big[\\tfrac{x^2}{2}-\\tfrac{x^4}{4}\\big]_0^1 = \\tfrac12-\\tfrac14 = \\tfrac14$. The gold strip you dragged is the integrand: at each $x$ its length is the top minus the bottom, and summing those strips across $[0,1]$ is the area. Always integrate top − bottom; if the curves cross, split the interval where they swap.</p>`);},s=>parseFloat(s));
+  setHints([`Integrate the gap: ∫₀¹(x − x³)dx, using the reverse power rule on each term.`,`[x²/2 − x⁴/4] from 0 to 1 = 1/2 − 1/4 = 1/4.`]);
+}
+
+function c5_volume(){
+  stage.innerHTML=`<div class="card"><h2>Volumes of revolution: stack the disks</h2>
+    <p>Spin a region around an axis and it sweeps out a solid. Slice the solid perpendicular to the axis into thin <b>disks</b>: at position $x$, the disk has radius $f(x)$, so face area $\\pi f(x)^2$ and volume $\\pi f(x)^2\\,dx$. Add them up:</p>
+    <div class="eqbox">$$V = \\int_a^b \\pi\\,f(x)^2\\,dx$$</div>
+    <p>Rotate the line $y=x$ on $[0,3]$ about the $x$-axis and you get a cone. Below is its silhouette ($y=\\pm x$); drag $x$ to see the disk sliced there — its radius is $f(x)=x$. Stacking all such disks gives the volume.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">radius f(x)</div><div class="v" id="rv">—</div></div><div class="rdc"><div class="k">disk area πr²</div><div class="v" id="av">—</div></div></div>
+    <div class="task"><b>Find the volume</b>$V=\\displaystyle\\int_0^3 \\pi x^2\\,dx = k\\pi$. Enter $k$.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.3,xmax:3.3,ymin:-3.6,ymax:3.6});
+  const f=x=>x;let xs=1.5;
+  function draw(){pl.grid();const{ctx}=pl;
+    ctx.fillStyle='rgba(122,184,255,0.10)';ctx.beginPath();ctx.moveTo(pl.px(0),pl.py(0));ctx.lineTo(pl.px(3),pl.py(3));ctx.lineTo(pl.px(3),pl.py(-3));ctx.closePath();ctx.fill();
+    pl.curve(f,'#7ab8ff');pl.curve(x=>-x,'#7ab8ff');
+    ctx.strokeStyle='#e8b84b';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(pl.px(xs),pl.py(-f(xs)));ctx.lineTo(pl.px(xs),pl.py(f(xs)));ctx.stroke();
+    pl.point(xs,f(xs),'#e8b84b',4);pl.point(xs,-f(xs),'#e8b84b',4);
+    document.getElementById('xv').textContent=xs.toFixed(2);
+    document.getElementById('rv').textContent=f(xs).toFixed(2);
+    document.getElementById('av').textContent=(Math.PI*f(xs)*f(xs)).toFixed(2);}
+  xdrag(cv,pl,x=>{xs=Math.max(0,Math.min(3,x));draw();});draw();
+  numChk(stage.querySelector('.card'),9,()=>{addReveal(`<div class="rh">✓ k = 9, so V = 9π</div><p>$V=\\int_0^3 \\pi x^2 dx = \\pi\\big[\\tfrac{x^3}{3}\\big]_0^3 = \\pi\\cdot 9 = 9\\pi$. Sanity check against geometry: a cone of radius $r=3$ and height $h=3$ has volume $\\tfrac13\\pi r^2 h = \\tfrac13\\pi(9)(3)=9\\pi$ ✓ — the calculus reproduces the classical formula, and in fact <em>derives</em> it (that $\\tfrac13$ is just $\\int_0^h x^2/h^2\\,dx$ in disguise). The disk method handles any shape whose profile you can integrate, not just cones.</p>`);});
+  setHints([`Pull the π out: V = π∫₀³ x² dx. Evaluate the integral to get the coefficient k.`,`∫₀³ x² dx = 27/3 = 9, so V = 9π and k = 9.`]);
+}
+
+function c5_arclength(){
+  stage.innerHTML=`<div class="card"><h2>Arc length: Pythagoras on a tiny scale</h2>
+    <p>How long is a curve? Zoom in on a tiny piece: it's nearly straight, a little right triangle with horizontal leg $dx$ and vertical leg $dy$. By Pythagoras its length is $ds=\\sqrt{dx^2+dy^2}$. Factor out $dx$ and use $\\tfrac{dy}{dx}=f'(x)$:</p>
+    <div class="eqbox">$$ds = \\sqrt{1+\\big(f'(x)\\big)^2}\\,dx \\qquad\\Rightarrow\\qquad L = \\int_a^b \\sqrt{1+\\big(f'(x)\\big)^2}\\,dx$$</div>
+    <p>Below is $y=\\tfrac23 x^{3/2}$, so $f'(x)=\\sqrt{x}$ and the integrand is $\\sqrt{1+x}$. Drag along the curve to see the little $dx$–$dy$–$ds$ triangle, and read the integrand.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">slope f′(x)=√x</div><div class="v" id="sv">—</div></div><div class="rdc"><div class="k">√(1+f′²)</div><div class="v" id="iv">—</div></div></div>
+    <div class="task"><b>Evaluate the integrand</b>At $x=3$, the arc-length integrand $\\sqrt{1+(f'(x))^2}=\\sqrt{1+x}$ equals?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.3,xmax:3.5,ymin:-0.5,ymax:4});
+  const f=x=>x>=0?(2/3)*Math.pow(x,1.5):NaN, fp=x=>Math.sqrt(Math.max(0,x));let xs=1.2;
+  function draw(){pl.grid();pl.curve(f,'#7ab8ff');
+    const{ctx}=pl;const dx=0.6,x2=Math.min(xs+dx,3.4),y1=f(xs),y2=f(x2);
+    ctx.strokeStyle='#3fb98f';ctx.lineWidth=1.8;ctx.setLineDash([4,3]);
+    ctx.beginPath();ctx.moveTo(pl.px(xs),pl.py(y1));ctx.lineTo(pl.px(x2),pl.py(y1));ctx.stroke();
+    ctx.beginPath();ctx.moveTo(pl.px(x2),pl.py(y1));ctx.lineTo(pl.px(x2),pl.py(y2));ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle='#e8b84b';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(pl.px(xs),pl.py(y1));ctx.lineTo(pl.px(x2),pl.py(y2));ctx.stroke();
+    pl.label((xs+x2)/2-0.05,y1-0.28,'dx','#3fb98f');pl.label(x2+0.04,(y1+y2)/2,'dy','#3fb98f');pl.label(xs-0.02,(y1+y2)/2+0.28,'ds','#e8b84b');
+    pl.point(xs,y1,'#e8b84b',4);
+    document.getElementById('xv').textContent=xs.toFixed(2);
+    document.getElementById('sv').textContent=fp(xs).toFixed(3);
+    document.getElementById('iv').textContent=Math.sqrt(1+xs).toFixed(3);}
+  xdrag(cv,pl,x=>{xs=Math.max(0,Math.min(2.7,x));draw();});draw();
+  numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ 2</div><p>At $x=3$: $\\sqrt{1+3}=\\sqrt4=2$. The full length is $\\int_0^3 \\sqrt{1+x}\\,dx = \\big[\\tfrac23(1+x)^{3/2}\\big]_0^3 = \\tfrac23(8-1)=\\tfrac{14}{3}$. This example was chosen because $\\sqrt{1+x}$ antidifferentiates cleanly — most arc-length integrands (even for something as simple as $y=x^2$, giving $\\sqrt{1+4x^2}$) have no elementary antiderivative and must be integrated numerically. The <em>formula</em> is exact and universal; whether it evaluates in closed form is luck.</p>`);});
+  setHints([`The integrand is √(1+x). Put x = 3.`,`√(1+3) = √4 = 2.`]);
+}
+
+function c5_problems(){
+  stage.innerHTML=`<div class="card"><h2>Problem set</h2>
+    <p>Mixed techniques — decide which tool each integrand calls for. Paper first; solutions fold open.</p>
+
+    <div class="prob"><span class="lvl">substitution</span><div class="ph">Problem 1</div>
+    <p>Evaluate $\\displaystyle\\int 2x\\cos(x^2)\\,dx$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Let $u=x^2$, $du=2x\\,dx$. The integral becomes $\\int \\cos u\\,du = \\sin u + C = \\sin(x^2)+C$. (Check by differentiating: $\\cos(x^2)\\cdot 2x$ ✓.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">substitution</span><div class="ph">Problem 2</div>
+    <p>Evaluate $\\displaystyle\\int_0^1 \\frac{2x}{x^2+1}\\,dx$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$u=x^2+1$, $du=2x\\,dx$; limits $1\\to 2$. $\\int_1^2 \\tfrac{du}{u} = \\big[\\ln u\\big]_1^2 = \\ln 2 - \\ln 1 = \\ln 2 \\approx 0.693$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">by parts</span><div class="ph">Problem 3</div>
+    <p>Evaluate $\\displaystyle\\int x\\sin x\\,dx$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$u=x\\Rightarrow du=dx$; $dv=\\sin x\\,dx\\Rightarrow v=-\\cos x$. Then $\\int x\\sin x\\,dx = -x\\cos x - \\int(-\\cos x)\\,dx = -x\\cos x + \\sin x + C$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">by parts</span><div class="ph">Problem 4</div>
+    <p>Evaluate $\\displaystyle\\int_1^{e} \\ln x\\,dx$. (Hint: $u=\\ln x$, $dv=dx$.)</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$u=\\ln x\\Rightarrow du=\\tfrac1x dx$; $dv=dx\\Rightarrow v=x$. So $\\int \\ln x\\,dx = x\\ln x - \\int x\\cdot\\tfrac1x dx = x\\ln x - x + C$. Evaluate $\\big[x\\ln x - x\\big]_1^{e} = (e\\cdot 1 - e) - (0 - 1) = 0 - (-1) = 1$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">partial fractions</span><div class="ph">Problem 5</div>
+    <p>Evaluate $\\displaystyle\\int \\frac{1}{x(x+1)}\\,dx$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\tfrac{1}{x(x+1)} = \\tfrac{A}{x}+\\tfrac{B}{x+1}$. Cover-up: $A=\\tfrac{1}{x+1}\\big|_{x=0}=1$, $B=\\tfrac{1}{x}\\big|_{x=-1}=-1$. So $\\int\\big(\\tfrac1x - \\tfrac{1}{x+1}\\big)dx = \\ln|x| - \\ln|x+1| + C = \\ln\\big|\\tfrac{x}{x+1}\\big| + C$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">improper</span><div class="ph">Problem 6</div>
+    <p>Does $\\displaystyle\\int_1^{\\infty}\\frac{1}{\\sqrt{x}}\\,dx$ converge or diverge?</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\int_1^b x^{-1/2}dx = \\big[2\\sqrt{x}\\big]_1^b = 2\\sqrt{b}-2 \\to \\infty$ as $b\\to\\infty$. It <b>diverges</b>. ($\\tfrac{1}{\\sqrt x}=x^{-1/2}$ decays too slowly — the exponent $-\\tfrac12$ is above the $-1$ borderline where things start to converge.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">area</span><div class="ph">Problem 7</div>
+    <p>Find the area enclosed between $y=x^2$ and $y=x$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>They meet where $x^2=x$, i.e. $x=0$ and $x=1$. On $(0,1)$, $x\\ge x^2$, so top is $x$. Area $=\\int_0^1(x-x^2)\\,dx = \\big[\\tfrac{x^2}{2}-\\tfrac{x^3}{3}\\big]_0^1 = \\tfrac12-\\tfrac13 = \\tfrac16$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">volume</span><div class="ph">Problem 8</div>
+    <p>The region under $y=\\sqrt{x}$ on $[0,4]$ is rotated about the $x$-axis. Find the volume.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Disks of radius $\\sqrt{x}$: $V=\\int_0^4 \\pi(\\sqrt{x})^2\\,dx = \\pi\\int_0^4 x\\,dx = \\pi\\big[\\tfrac{x^2}{2}\\big]_0^4 = \\pi\\cdot 8 = 8\\pi$.</p></div></details></div>
+  </div>`;
+  setHints([]);unlock();
+}
+
+function c5_recap(){
+  stage.innerHTML=`<div class="card"><h2>What you built</h2>
+    <div class="eqbox" style="line-height:2.2">$$\\int f(g(x))g'(x)\\,dx=\\int f(u)\\,du \\qquad \\int u\\,dv = uv-\\int v\\,du$$
+    <div style="text-align:center;line-height:2;color:#dbe6f4;margin-top:6px">partial fractions: split a rational into $\\tfrac{A}{x-r}$ pieces $\\to$ logs<br>improper: $\\int_1^\\infty f = \\lim_{b\\to\\infty}\\int_1^b f$ (converge vs diverge)<br>area $=\\int(y_{\\text{top}}-y_{\\text{bottom}})\\,dx$ · volume $=\\int \\pi f(x)^2\\,dx$<br>arc length $=\\int \\sqrt{1+(f')^2}\\,dx$</div></div>
+    <p>Every technique was a differentiation rule reversed, and every application was the same reflex: slice the thing into pieces, write one piece as an integrand, integrate. You can now integrate the large class of functions that submit to these tools — and you know, honestly, that some functions don't.</p>
+    <p><b>Next — Module 7:</b> what if you add up <em>infinitely many</em> terms? <b>Sequences and series</b> ask when an infinite sum settles to a finite value — the convergence tests echo the improper-integral knife-edge you just saw — and culminate in <b>Taylor series</b>, which rebuild functions like $e^x$, $\\sin x$, and $\\cos x$ as infinite polynomials.</p></div>`;
   setHints([]);unlock();
 }
 
