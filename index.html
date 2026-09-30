@@ -143,7 +143,9 @@ const MODULES=[
  {id:'c6',title:'Sequences & Series',sub:'Convergence tests, power series, and Taylor/Maclaurin expansions.',ready:true,
   outro:`An infinite sum converges when its partial sums settle to a finite limit. The geometric series is the model; the nth-term, integral, and ratio tests decide the rest — echoing the improper-integral knife-edge. Power series are polynomials of infinite degree, and Taylor series rebuild $e^x$, $\\sin x$, and $\\cos x$ from their derivatives at a single point.`,
   beats:[c6_recall,c6_intro,c6_sequences,c6_geometric,c6_nthterm,c6_integraltest,c6_ratiotest,c6_powerseries,c6_taylor,c6_problems,c6_recap]},
- {id:'c7',title:'Multivariable Calculus',sub:'Partial derivatives, the gradient, directional derivatives, and multiple integrals.',ready:false},
+ {id:'c7',title:'Multivariable Calculus',sub:'Partial derivatives, the gradient, directional derivatives, and multiple integrals.',ready:true,
+  outro:`With several inputs, a partial derivative measures change in one direction at a time; the gradient $\\nabla f$ packs them together and points straight uphill, perpendicular to the level curves; the directional derivative $\\nabla f\\cdot\\mathbf{u}$ gives the rate in any direction. Setting $\\nabla f=\\mathbf 0$ finds the peaks, valleys, and saddles — and stepping along $-\\nabla f$ is gradient descent, the engine of machine learning. Double integrals accumulate over regions, computed as iterated single integrals.`,
+  beats:[c7_recall,c7_intro,c7_partials,c7_gradient,c7_directional,c7_critical,c7_doubleint,c7_iterated,c7_problems,c7_recap]},
  {id:'c8',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:false},
  {id:'c9',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:false},
 ];
@@ -310,6 +312,18 @@ const RECALL={
     a:"Integrate to a finite $b$ and take $\\lim_{b\\to\\infty}$. It <em>converges</em> if that limit is finite ($\\int_1^\\infty\\tfrac{1}{x^2}=1$), <em>diverges</em> if not ($\\int_1^\\infty\\tfrac1x=\\infty$).", b:5},
    {q:"How are area between curves, volume of revolution, and arc length each set up as integrals?",
     a:"Area $=\\int(y_{\\text{top}}-y_{\\text{bottom}})\\,dx$; volume by disks $=\\int\\pi f(x)^2\\,dx$; arc length $=\\int\\sqrt{1+(f')^2}\\,dx$. Each slices the object and integrates one piece.", b:6}
+ ]},
+ c6:{title:'Module 7 — Sequences & Series', cues:[
+   {q:"When does a series $\\sum a_n$ converge, and what is the geometric series sum?",
+    a:"It converges when the partial sums $S_n$ have a finite limit. The geometric series $\\sum_{n=0}^{\\infty} r^n=\\frac{1}{1-r}$ for $|r|&lt;1$, and diverges for $|r|\\ge 1$.", b:3},
+   {q:"State the nth-term test, and why the harmonic series is the key cautionary example.",
+    a:"If $a_n\\not\\to 0$, the series diverges. But $a_n\\to 0$ is <em>not</em> sufficient: the harmonic $\\sum\\frac1n$ has terms $\\to 0$ yet diverges (group terms into blocks each $\\ge\\frac12$).", b:4},
+   {q:"What do the integral test and the p-series say?",
+    a:"For positive decreasing $f$, the sum $\\sum f(n)$ and the integral $\\int f$ converge together. So $\\sum\\frac1{n^p}$ converges iff $p&gt;1$ — the same threshold as $\\int_1^\\infty x^{-p}\\,dx$.", b:5},
+   {q:"State the ratio test and the idea behind it.",
+    a:"With $L=\\lim\\left|\\frac{a_{n+1}}{a_n}\\right|$: $L&lt;1$ converges, $L&gt;1$ diverges, $L=1$ inconclusive. It works by trapping the tail under a convergent geometric series with ratio $r$ chosen between $L$ and $1$.", b:6},
+   {q:"What is a Taylor/Maclaurin series, and the expansions of $e^x$, $\\sin$, $\\cos$?",
+    a:"$f(x)=\\sum\\frac{f^{(n)}(0)}{n!}x^n$. In particular $e^x=\\sum\\frac{x^n}{n!}$, $\\sin x=x-\\frac{x^3}{3!}+\\cdots$, $\\cos x=1-\\frac{x^2}{2!}+\\cdots$ — each valid for every $x$.", b:8}
  ]}
 };
 const RECALL_HINT=`Run it as one unbroken chain — each cue answers the previous one's "so what?". If a link takes you away to review, one tap on Back returns you to this list.`;
@@ -1717,9 +1731,11 @@ function c6_ratiotest(){
     <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
     <p style="margin-top:16px"><b>The test, and why it works.</b> Compute $L=\\lim_{n\\to\\infty}\\left|\\dfrac{a_{n+1}}{a_n}\\right|$. The rule:</p>
     <div class="eqbox">$$L&lt;1\\Rightarrow\\text{converges},\\qquad L&gt;1\\Rightarrow\\text{diverges},\\qquad L=1\\Rightarrow\\text{inconclusive}$$</div>
-    <p><b>Why it works — geometric domination.</b> Suppose $L&lt;1$. Slip a cutoff $L'$ into the gap between $L$ and $1$ — there is room because $L&lt;1$, so take for instance the midpoint $L'=\\tfrac{L+1}{2}$. The ratios close in on $L$, which sits <em>below</em> $L'$, so from some term $N$ onward every ratio stays under $L'$: each term is less than $L'$ times the one before it. Iterate that from $a_N$:</p>
-    <div class="eqbox">$$|a_{N+1}|&lt;L'|a_N|,\\quad |a_{N+2}|&lt;L'|a_{N+1}|&lt;L'^{2}|a_N|,\\quad\\dots,\\quad |a_{N+k}|&lt;L'^{k}|a_N|$$</div>
-    <p>So the tail is smaller, term by term, than the geometric series $|a_N|\\sum_{k}L'^{k}$ — which converges because $L'&lt;1$. By comparison the tail converges, so the whole series does. (The cutoff $L'$ is only a proof device: we need a threshold strictly above $L$, so the ratios are guaranteed to fall below it, yet strictly below $1$, so the comparison series still converges.) If instead $L&gt;1$ the terms eventually grow, so it diverges; $L=1$ gives no information.</p>
+    <p><b>Why it works — it <em>is</em> a comparison to a geometric series.</b> Take positive terms and suppose $L&lt;1$. Choose a number $r$ sitting between $L$ and $1$ (so $L&lt;r&lt;1$ — there is room precisely because $L&lt;1$). Since the ratios $\\tfrac{a_{n+1}}{a_n}$ approach $L$, which lies below $r$, they must eventually fall below $r$ and stay there — say for every $n\\ge N$:</p>
+    <div class="eqbox">$$\\frac{a_{n+1}}{a_n}\\le r\\ \\text{ for all } n\\ge N \\qquad\\Longleftrightarrow\\qquad a_{n+1}\\le r\\,a_n$$</div>
+    <p>Now <b>unroll</b> that from $a_N$ — each step multiplies by one more $r$:</p>
+    <div class="eqbox">$$a_{N+1}\\le a_N r,\\quad a_{N+2}\\le a_{N+1}r\\le a_N r^2,\\quad a_{N+3}\\le a_N r^3,\\quad\\dots,\\quad a_{N+k}\\le a_N r^{k}$$</div>
+    <p>So from term $N$ onward the series is bounded, term by term, by $a_N\\big(1+r+r^2+\\cdots\\big)=a_N\\cdot\\dfrac{1}{1-r}$ — a <em>geometric</em> series with ratio $r&lt;1$, which converges (the formula from the geometric beat). By comparison, our series converges too. That's the whole test: once the term-ratio settles below $1$, the tail is trapped under a convergent geometric series. (If $L&gt;1$ the terms eventually grow, so it diverges; $L=1$ is inconclusive.)</p>
     <p><b>Our example.</b> With $a_n=\\tfrac{n}{2^n}$:</p>
     <div class="eqbox">$$\\left|\\frac{a_{n+1}}{a_n}\\right|=\\frac{(n+1)/2^{n+1}}{n/2^{n}}=\\frac{n+1}{2n}=\\frac12\\Big(1+\\tfrac1n\\Big)\\;\\xrightarrow{\\,n\\to\\infty\\,}\\;\\tfrac12$$</div>
     <p>Since $L=\\tfrac12&lt;1$, $\\sum\\tfrac{n}{2^n}$ converges. The ratio test is the natural test for anything with factorials or $n$th powers, and it's what pins down power series next.</p></div>`;
@@ -1845,6 +1861,293 @@ function c6_recap(){
     <div style="text-align:center;line-height:2;color:#dbe6f4;margin-top:6px">converge $\\iff$ partial sums $S_n$ have a finite limit<br>nth-term test ($a_n\\not\\to0\\Rightarrow$ diverges) · integral test · ratio test $L=\\lim|\\tfrac{a_{n+1}}{a_n}|$<br>power series $\\sum c_n x^n$ on $(-R,R)$, radius $R$ from the ratio test<br>$e^x=\\sum\\frac{x^n}{n!}$ · $\\sin x=x-\\frac{x^3}{3!}+\\cdots$ · $\\cos x=1-\\frac{x^2}{2!}+\\cdots$</div></div>
     <p>Convergence is one question — do the partial sums settle? — answered by tests that all trace back to the geometric series and the improper-integral knife-edge. Taylor series then close the loop: the transcendental functions you built by geometry and integration are infinite polynomials, computable to any precision.</p>
     <p><b>Next — Module 8:</b> calculus in more than one variable. <b>Partial derivatives</b> measure change in one direction at a time, the <b>gradient</b> assembles them into the direction of steepest ascent, and multiple integrals accumulate over regions — the machinery underneath every optimization surface in machine learning.</p></div>`;
+  setHints([]);unlock();
+}
+
+/* ================= MODULE 8 — MULTIVARIABLE CALCULUS ================= */
+function c7_recall(){recallFrom(`Module 8 takes calculus into several variables at once — the terrain of every machine-learning loss surface. Rebuild the single-variable machine first; the gradient and multiple integrals are built directly on it.`,['c0','c1','c2','c3','c4','c5','c6'],RECALL_HINT);}
+
+function c7_intro(){
+  stage.innerHTML=`<div class="card"><h2>From a curve to a surface</h2>
+    <p>Everything so far had one input. Now let functions take two: $f(x,y)$ assigns a height to each point of the plane, tracing out a <b>surface</b> — a landscape of hills and valleys. Since we can't easily draw 3-D on a phone, we read the landscape from above as a <b>contour map</b>: each ring joins points of equal height, exactly like a hiking map. Below is $f(x,y)=x^2+y^2$, a bowl with its low point at the origin.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="task"><b>Read the map</b>On this contour map, what do the concentric rings represent?</div>
+    <div class="choices" id="ch"></div></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=30,cx=W/2,cy=H/2;
+  const px=x=>cx+x*S,py=y=>cy-y*S;
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=-10;g<=10;g++){ctx.beginPath();ctx.moveTo(px(g),0);ctx.lineTo(px(g),H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,py(g));ctx.lineTo(W,py(g));ctx.stroke();}
+    ctx.strokeStyle='#2b3a4f';ctx.beginPath();ctx.moveTo(0,py(0));ctx.lineTo(W,py(0));ctx.moveTo(px(0),0);ctx.lineTo(px(0),H);ctx.stroke();
+    for(const r of [1,2,3,4,5]){ctx.strokeStyle='#3a4c66';ctx.lineWidth=1.3;ctx.beginPath();for(let i=0;i<=64;i++){const t=i/64*2*Math.PI;const X=px(r*Math.cos(t)),Y=py(r*Math.sin(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();
+      ctx.fillStyle='#5d7186';ctx.font='11px sans-serif';ctx.fillText('f='+(r*r),px(r)+3,py(0)-3);}
+    ctx.fillStyle='#3fb98f';ctx.beginPath();ctx.arc(px(0),py(0),4,0,7);ctx.fill();}
+  draw();
+  const opts=[['points of <b>equal height</b> $f(x,y)$ — the level curves of the surface','y'],['the path of steepest descent','n'],['the graph of $f$ itself in 3-D','n'],['places where $f=0$','n']];
+  mcChoices(document.getElementById('ch'),opts,()=>{addReveal(`<div class="rh">✓ Level curves — points of equal height</div><p>Each ring is a <b>level curve</b> $f(x,y)=c$: walk along it and your height never changes (like a contour on a map). Closely spaced rings mean a steep slope; widely spaced, gentle. The whole module is about slope and accumulation on such a surface — starting with how $f$ changes along one axis at a time.</p>`);});
+  setHints([`Think of a topographic hiking map — what does a single contour line connect?`]);
+}
+
+function c7_partials(){
+  stage.innerHTML=`<div class="card"><h2>Partial derivatives: change one input at a time</h2>
+    <p>With two inputs, "the derivative" splits in two. The <b>partial derivative</b> $\\dfrac{\\partial f}{\\partial x}$ measures how $f$ changes as you nudge $x$ while <em>holding $y$ fixed</em> — and vice versa. Geometrically: slice the surface with a plane (fix one variable) and take the ordinary slope of the curve you get. Take $f(x,y)=x^2+xy$; tap to choose which variable to freeze, and drag along the slice to read its slope.</p>
+    <div class="seg" id="seg"></div>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k" id="pk">—</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">slope of this slice</div><div class="v" id="sv">—</div></div></div>
+    <div class="task"><b>Compute a partial</b>For $f(x,y)=x^2+xy$, find $\\dfrac{\\partial f}{\\partial x}$ at the point $(x,y)=(1,2)$.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>How to compute one.</b> A partial derivative is an ordinary derivative with the other variable treated as a <em>constant</em>. Straight from the limit definition, freezing $y$:</p>
+    <div class="eqbox">$$\\frac{\\partial f}{\\partial x}=\\lim_{h\\to0}\\frac{f(x+h,y)-f(x,y)}{h}$$</div>
+    <p>Apply it to $f=x^2+xy$. Holding $y$ constant, $x^2$ differentiates to $2x$ and $xy$ (a constant $y$ times $x$) differentiates to $y$:</p>
+    <div class="eqbox">$$\\frac{\\partial f}{\\partial x}=2x+y,\\qquad \\frac{\\partial f}{\\partial y}=x$$</div>
+    <p>(For $\\partial f/\\partial y$, freeze $x$: $x^2$ is now a constant, gone; $xy$ gives $x$.) At $(1,2)$: $\\frac{\\partial f}{\\partial x}=2(1)+2=4$. Notice it depends on $y$ — the slope in the $x$-direction changes with where you're standing.</p></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-4,xmax:4,ymin:-3,ymax:9});
+  let sel='y', a=1;
+  const slice=x=>sel==='y'? x*x+2*x : 4+2*x;       // hold y=2 -> x²+2x ; hold x=2 -> 4+2y (var plotted on x-axis)
+  const slope=x=>sel==='y'? 2*x+2 : 2;
+  function draw(){pl.grid();pl.curve(slice,'#7ab8ff');
+    const m=slope(a),{ctx}=pl;ctx.strokeStyle='#e8b84b';ctx.lineWidth=2;ctx.beginPath();
+    const y0=slice(a)+m*(pl.xmin-a),y1=slice(a)+m*(pl.xmax-a);ctx.moveTo(pl.px(pl.xmin),pl.py(y0));ctx.lineTo(pl.px(pl.xmax),pl.py(y1));ctx.stroke();
+    pl.point(a,slice(a),'#e8b84b',5);
+    document.getElementById('pk').textContent=sel==='y'?'∂f/∂x (y = 2 fixed)':'∂f/∂y (x = 2 fixed)';
+    document.getElementById('pv').textContent=slope(a).toFixed(2);
+    document.getElementById('sv').textContent=slope(a).toFixed(2);}
+  function build(){const labs={'y':'hold y = 2 (vary x)','x':'hold x = 2 (vary y)'};document.getElementById('seg').innerHTML=Object.keys(labs).map(k=>`<span class="segb ${k===sel?'on':''}" data-k="${k}">${labs[k]}</span>`).join('');
+    document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{sel=b.dataset.k;a=1;build();draw();});}
+  build();draw();
+  xdrag(cv,pl,x=>{a=x;draw();});
+  numChk(stage.querySelector('.card'),4,()=>{addReveal(`<div class="rh">✓ 4</div><p>$\\frac{\\partial f}{\\partial x}=2x+y$, so at $(1,2)$ it is $2+2=4$. The slice with $y$ fixed is an ordinary curve, and its slope <em>is</em> the partial derivative — calculus you already know, applied one axis at a time. Two partials, one per input; the next beat packs them into a single vector.</p>`);});
+  setHints([`∂f/∂x means differentiate x²+xy in x, treating y as a constant. So x²→2x and xy→y.`,`2x+y at (1,2) = 2+2 = 4.`]);
+}
+
+function c7_gradient(){
+  stage.innerHTML=`<div class="card"><h2>The gradient: the direction straight uphill</h2>
+    <p>Stack the two partials into one vector — the <b>gradient</b> $\\nabla f=\\left(\\dfrac{\\partial f}{\\partial x},\\dfrac{\\partial f}{\\partial y}\\right)$. It is not just bookkeeping: the gradient <em>points in the direction of steepest ascent</em>, and its length is that steepest slope. Drag the point over the bowl $f=x^2+y^2$ and watch the gold arrow $\\nabla f=(2x,2y)$ — always aiming directly away from the low point, dead perpendicular to the ring it sits on.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">∇f = (2x, 2y)</div><div class="v" id="gv">—</div></div><div class="rdc"><div class="k">|∇f| (steepest slope)</div><div class="v" id="gm">—</div></div></div>
+    <div class="task"><b>Magnitude of the gradient</b>For $f=x^2+y^2$, compute $|\\nabla f|$ at the point $(3,4)$.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>Two facts, and why.</b> First, $\\nabla f\\perp$ the level curve: moving <em>along</em> a level curve keeps $f$ constant (zero change), and the gradient is the direction of <em>maximum</em> change — the two are at right angles. Second, its length is the steepest slope. For our bowl:</p>
+    <div class="eqbox">$$\\nabla f=(2x,\\,2y)\\qquad\\Rightarrow\\qquad |\\nabla f|=\\sqrt{(2x)^2+(2y)^2}$$</div>
+    <p>At $(3,4)$: $\\nabla f=(6,8)$, so $|\\nabla f|=\\sqrt{6^2+8^2}=\\sqrt{36+64}=\\sqrt{100}=10$. That $10$ is the slope you'd feel climbing straight uphill from $(3,4)$ — steeper than in any other direction, which the next beat makes precise.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=30,cx=W/2,cy=H/2;
+  const px=x=>cx+x*S,py=y=>cy-y*S,mx=X=>(X-cx)/S,my=Y=>(cy-Y)/S;
+  let x0=3,y0=4;
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=-10;g<=10;g++){ctx.beginPath();ctx.moveTo(px(g),0);ctx.lineTo(px(g),H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,py(g));ctx.lineTo(W,py(g));ctx.stroke();}
+    ctx.strokeStyle='#2b3a4f';ctx.beginPath();ctx.moveTo(0,py(0));ctx.lineTo(W,py(0));ctx.moveTo(px(0),0);ctx.lineTo(px(0),H);ctx.stroke();
+    for(const r of [1,2,3,4,5,6]){ctx.strokeStyle='#3a4c66';ctx.lineWidth=1.2;ctx.beginPath();for(let i=0;i<=64;i++){const t=i/64*2*Math.PI;const X=px(r*Math.cos(t)),Y=py(r*Math.sin(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();}
+    const gx=2*x0,gy=2*y0,sc=0.35,X0=px(x0),Y0=py(y0),X1=px(x0+gx*sc),Y1=py(y0+gy*sc);
+    ctx.strokeStyle='#e8b84b';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();
+    const ang=Math.atan2(Y1-Y0,X1-X0);ctx.fillStyle='#e8b84b';ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-11*Math.cos(ang-0.4),Y1-11*Math.sin(ang-0.4));ctx.lineTo(X1-11*Math.cos(ang+0.4),Y1-11*Math.sin(ang+0.4));ctx.closePath();ctx.fill();
+    ctx.fillStyle='#7ab8ff';ctx.beginPath();ctx.arc(X0,Y0,5,0,7);ctx.fill();
+    document.getElementById('gv').textContent='('+gx.toFixed(1)+', '+gy.toFixed(1)+')';
+    document.getElementById('gm').textContent=Math.sqrt(gx*gx+gy*gy).toFixed(2);}
+  let drg=false;cv.style.touchAction='none';
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));x0=Math.max(-8,Math.min(8,mx(X)));y0=Math.max(-5.5,Math.min(5.5,my(Y)));draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),10,()=>{addReveal(`<div class="rh">✓ 10</div><p>$\\nabla f(3,4)=(6,8)$ and $|\\nabla f|=\\sqrt{36+64}=10$. The arrow points radially outward — straight uphill on the bowl — and crosses every ring at a right angle. The gradient is the single most important object in this module: it's what optimization follows, and in machine learning, what training descends.</p>`);});
+  setHints([`∇f = (2x, 2y). At (3,4) that's (6,8). Its length is √(6²+8²).`,`√(36+64) = √100 = 10.`]);
+}
+
+function c7_directional(){
+  stage.innerHTML=`<div class="card"><h2>Directional derivatives: slope in any direction</h2>
+    <p>Partials give the slope along the $x$- and $y$-axes, but you can walk in <em>any</em> direction $\\mathbf u=(\\cos\\theta,\\sin\\theta)$. The <b>directional derivative</b> $D_{\\mathbf u}f$ is the slope you feel heading that way. Fix the point $(3,4)$ on the bowl and drag to aim $\\mathbf u$; watch the slope swing from steepest to zero to downhill.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">direction angle</div><div class="v" id="av">—</div></div><div class="rdc"><div class="k">Dᵤf = ∇f · u</div><div class="v" id="dv">—</div></div></div>
+    <div class="task"><b>Slope along the x-axis</b>At $(3,4)$ with $\\nabla f=(6,8)$, what is $D_{\\mathbf u}f$ in the direction $\\mathbf u=(1,0)$ (straight along $+x$)?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>The formula, and why the gradient wins.</b> Walking from a point in direction $\\mathbf u$, the rate of change is the gradient projected onto $\\mathbf u$ — a dot product (it drops out of the chain rule applied to $f$ along the line):</p>
+    <div class="eqbox">$$D_{\\mathbf u}f=\\nabla f\\cdot\\mathbf u=|\\nabla f|\\,\\cos\\phi$$</div>
+    <p>where $\\phi$ is the angle between $\\mathbf u$ and $\\nabla f$. That $\\cos\\phi$ says it all: the slope is <b>largest</b> when $\\mathbf u$ points along $\\nabla f$ ($\\cos\\phi=1$, giving $|\\nabla f|$), <b>zero</b> when $\\mathbf u\\perp\\nabla f$ (moving along a level curve), and <b>most negative</b> straight opposite. So the gradient really is the steepest-ascent direction. In our case $\\mathbf u=(1,0)$ gives $D_{\\mathbf u}f=(6,8)\\cdot(1,0)=6$ — which is just $\\partial f/\\partial x$, as it must be.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=30,cx=W/2,cy=H/2;
+  const px=x=>cx+x*S,py=y=>cy-y*S,mx=X=>(X-cx)/S,my=Y=>(cy-Y)/S;
+  const x0=3,y0=4,gx=2*x0,gy=2*y0;let th=0.2;
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=-10;g<=10;g++){ctx.beginPath();ctx.moveTo(px(g),0);ctx.lineTo(px(g),H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,py(g));ctx.lineTo(W,py(g));ctx.stroke();}
+    ctx.strokeStyle='#2b3a4f';ctx.beginPath();ctx.moveTo(0,py(0));ctx.lineTo(W,py(0));ctx.moveTo(px(0),0);ctx.lineTo(px(0),H);ctx.stroke();
+    for(const r of [1,2,3,4,5,6]){ctx.strokeStyle='#3a4c66';ctx.lineWidth=1.2;ctx.beginPath();for(let i=0;i<=64;i++){const t=i/64*2*Math.PI;const X=px(r*Math.cos(t)),Y=py(r*Math.sin(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();}
+    const X0=px(x0),Y0=py(y0);
+    // faint gradient arrow
+    const gsc=0.32;ctx.strokeStyle='rgba(232,184,75,0.45)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(px(x0+gx*gsc),py(y0+gy*gsc));ctx.stroke();
+    // direction u arrow (length 2 units)
+    const ux=Math.cos(th),uy=Math.sin(th),L=2.2,X1=px(x0+ux*L),Y1=py(y0+uy*L);
+    ctx.strokeStyle='#3fb98f';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();
+    const ang=Math.atan2(Y1-Y0,X1-X0);ctx.fillStyle='#3fb98f';ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-11*Math.cos(ang-0.4),Y1-11*Math.sin(ang-0.4));ctx.lineTo(X1-11*Math.cos(ang+0.4),Y1-11*Math.sin(ang+0.4));ctx.closePath();ctx.fill();
+    ctx.fillStyle='#7ab8ff';ctx.beginPath();ctx.arc(X0,Y0,5,0,7);ctx.fill();
+    const Du=gx*ux+gy*uy;
+    document.getElementById('av').textContent=(th*180/Math.PI).toFixed(0)+'°';
+    document.getElementById('dv').textContent=Du.toFixed(2);}
+  let drg=false;cv.style.touchAction='none';
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));th=Math.atan2(my(Y)-y0,mx(X)-x0);draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),6,()=>{addReveal(`<div class="rh">✓ 6</div><p>$D_{\\mathbf u}f=(6,8)\\cdot(1,0)=6$ — the same as $\\partial f/\\partial x$, since $\\mathbf u=(1,0)$ is the $x$-direction. Swing $\\mathbf u$ around and the readout peaks at $|\\nabla f|=10$ (pointing along the gradient), passes through $0$ when $\\mathbf u$ runs along a ring, and bottoms at $-10$ pointing downhill. Steepest ascent is the gradient — full stop.</p>`);});
+  setHints([`Dᵤf = ∇f · u = (6,8)·(1,0) = 6·1 + 8·0.`,`= 6.`]);
+}
+
+function c7_critical(){
+  stage.innerHTML=`<div class="card"><h2>Critical points and gradient descent</h2>
+    <p>Where is a surface flat? At a peak or valley, <em>every</em> slice has a horizontal tangent, so both partials vanish — the multivariable version of Fermat's rule: interior extrema occur where $\\nabla f=\\mathbf 0$. Drag around the bowl $f=x^2+y^2$ and watch the <span class="grn">green descent arrow</span> $-\\nabla f$ (the downhill direction) and $|\\nabla f|$; steer toward the bottom and the gradient shrinks to nothing.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">point (x, y)</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">|∇f|</div><div class="v" id="gm">—</div></div></div>
+    <div class="task"><b>Locate the minimum</b>At the lowest point of $f=x^2+y^2$, the gradient is zero. What is $\\dfrac{\\partial f}{\\partial x}$ there?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>Critical points.</b> Setting $\\nabla f=\\mathbf 0$ means solving $\\frac{\\partial f}{\\partial x}=0$ and $\\frac{\\partial f}{\\partial y}=0$ together. For $f=x^2+y^2$: $2x=0$ and $2y=0$, so the only critical point is the origin — the minimum, where $|\\nabla f|=0$. (As in 1-D, a zero gradient is a <em>candidate</em>: it can be a peak, a valley, or a <b>saddle</b> like $x^2-y^2$, which climbs one way and drops the other.)</p>
+    <p><b>Gradient descent — the ML engine.</b> The gradient points uphill, so to <em>minimize</em> a function you repeatedly step in the opposite direction:</p>
+    <div class="eqbox">$$\\mathbf x_{\\text{next}}=\\mathbf x-\\alpha\\,\\nabla f(\\mathbf x)$$</div>
+    <p>with a small step size $\\alpha$. Each step walks downhill; the steps shrink as $\\nabla f\\to\\mathbf 0$ near the bottom. This one line — slide opposite the gradient — is how essentially every neural network is trained, on loss surfaces with millions of variables instead of two.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=30,cx=W/2,cy=H/2;
+  const px=x=>cx+x*S,py=y=>cy-y*S,mx=X=>(X-cx)/S,my=Y=>(cy-Y)/S;
+  let x0=4,y0=3;
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=-10;g<=10;g++){ctx.beginPath();ctx.moveTo(px(g),0);ctx.lineTo(px(g),H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,py(g));ctx.lineTo(W,py(g));ctx.stroke();}
+    ctx.strokeStyle='#2b3a4f';ctx.beginPath();ctx.moveTo(0,py(0));ctx.lineTo(W,py(0));ctx.moveTo(px(0),0);ctx.lineTo(px(0),H);ctx.stroke();
+    for(const r of [1,2,3,4,5,6]){ctx.strokeStyle='#3a4c66';ctx.lineWidth=1.2;ctx.beginPath();for(let i=0;i<=64;i++){const t=i/64*2*Math.PI;const X=px(r*Math.cos(t)),Y=py(r*Math.sin(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();}
+    ctx.fillStyle='#3fb98f';ctx.beginPath();ctx.arc(px(0),py(0),4,0,7);ctx.fill();
+    const gx=2*x0,gy=2*y0,gmag=Math.sqrt(gx*gx+gy*gy);
+    if(gmag>0.05){const sc=0.35,X0=px(x0),Y0=py(y0),X1=px(x0-gx*sc),Y1=py(y0-gy*sc);
+      ctx.strokeStyle='#3fb98f';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();
+      const ang=Math.atan2(Y1-Y0,X1-X0);ctx.fillStyle='#3fb98f';ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-11*Math.cos(ang-0.4),Y1-11*Math.sin(ang-0.4));ctx.lineTo(X1-11*Math.cos(ang+0.4),Y1-11*Math.sin(ang+0.4));ctx.closePath();ctx.fill();}
+    ctx.fillStyle='#7ab8ff';ctx.beginPath();ctx.arc(px(x0),py(y0),5,0,7);ctx.fill();
+    document.getElementById('pv').textContent='('+x0.toFixed(1)+', '+y0.toFixed(1)+')';
+    document.getElementById('gm').textContent=gmag.toFixed(2);}
+  let drg=false;cv.style.touchAction='none';
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));x0=Math.max(-8,Math.min(8,mx(X)));y0=Math.max(-5.5,Math.min(5.5,my(Y)));draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),0,()=>{addReveal(`<div class="rh">✓ 0</div><p>At the minimum $(0,0)$, $\\frac{\\partial f}{\\partial x}=2x=0$ (and $\\frac{\\partial f}{\\partial y}=2y=0$) — the whole gradient vanishes, which is what "flat in every direction" means. Drag the point to the center and $|\\nabla f|$ drops to $0$; the descent arrow shrinks to nothing. Everywhere else it points home, and stepping along it is gradient descent.</p>`);});
+  setHints([`The minimum is at the origin (0,0). ∂f/∂x = 2x — evaluate at x = 0.`,`2·0 = 0.`]);
+}
+
+function c7_doubleint(){
+  stage.innerHTML=`<div class="card"><h2>Double integrals: volume over a region</h2>
+    <p>Integration also lifts to two variables. The <b>double integral</b> $\\iint_R f\\,dA$ is the signed volume between the surface $z=f(x,y)$ and the region $R$ in the plane — the 2-D echo of "area under a curve." Build it the same way: chop $R$ into little cells, multiply each cell's area by the height above it, and sum. Tap to refine the grid over the unit square with $f=x+y$ and watch the sum settle.</p>
+    <div class="seg" id="seg"></div>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">grid</div><div class="v" id="nv">—</div></div><div class="rdc"><div class="k">Riemann sum</div><div class="v" id="sv">—</div></div></div>
+    <div class="task"><b>The volume</b>What does $\\displaystyle\\iint_{[0,1]\\times[0,1]}(x+y)\\,dA$ come out to? (Read it off the refining sum, or compute — it's a round number.)</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>The definition.</b> Grid $R$ into cells of area $\\Delta A=\\Delta x\\,\\Delta y$, sample the height $f(x_i,y_j)$ in each, and take the limit as the cells shrink — a double Riemann sum:</p>
+    <div class="eqbox">$$\\iint_R f\\,dA=\\lim_{\\Delta A\\to0}\\sum_i\\sum_j f(x_i,y_j)\\,\\Delta A$$</div>
+    <p>For a positive $f$ each term is the volume of a thin box (base $\\Delta A$, height $f$), so the sum is the total volume. Exactly as in one variable, we don't want this limit by hand — the next beat turns it into ordinary single integrals.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
+  const X0=180,X1=520,Y0=350,Y1=30;   // unit square region on canvas
+  const px=x=>X0+x*(X1-X0),py=y=>Y0+y*(Y1-Y0);
+  const f=(x,y)=>x+y;const ns=['4','8','16'];let sel='4';
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    const n=parseInt(sel),d=1/n;let S=0;
+    for(let i=0;i<n;i++)for(let j=0;j<n;j++){const xc=(i+0.5)*d,yc=(j+0.5)*d,h=f(xc,yc);S+=h*d*d;
+      const t=h/2;ctx.fillStyle='rgb('+Math.round(50+t*170)+','+Math.round(90+t*90)+','+Math.round(210-t*140)+')';
+      ctx.fillRect(px(i*d),py((j+1)*d),(X1-X0)/n,(Y0-Y1)/n);}
+    ctx.strokeStyle='rgba(13,20,32,0.5)';ctx.lineWidth=1;
+    for(let i=0;i<=n;i++){ctx.beginPath();ctx.moveTo(px(i*d),py(0));ctx.lineTo(px(i*d),py(1));ctx.stroke();ctx.beginPath();ctx.moveTo(px(0),py(i*d));ctx.lineTo(px(1),py(i*d));ctx.stroke();}
+    ctx.strokeStyle='#8095ab';ctx.lineWidth=1.5;ctx.strokeRect(px(0),py(1),X1-X0,Y0-Y1);
+    ctx.fillStyle='#5d7186';ctx.font='12px sans-serif';ctx.fillText('R = [0,1]×[0,1],  height f = x+y (dark→light)',X0,Y0+22);
+    document.getElementById('nv').textContent=n+' × '+n;
+    document.getElementById('sv').textContent=S.toFixed(4);}
+  function build(){document.getElementById('seg').innerHTML=ns.map(k=>`<span class="segb ${k===sel?'on':''}" data-k="${k}">${k}×${k}</span>`).join('');
+    document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{sel=b.dataset.k;build();draw();});}
+  build();draw();
+  numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ 1</div><p>The refining sums close in on $1$. By symmetry it's believable: the average height of $x+y$ over the unit square is $1$ (average of $x$ is $\\tfrac12$, of $y$ is $\\tfrac12$), times area $1$. The next beat computes it exactly with iterated integrals.</p>`);});
+  setHints([`Crank the grid up and read the Riemann-sum box — it settles on a whole number.`,`It approaches 1.`]);
+}
+
+function c7_iterated(){
+  stage.innerHTML=`<div class="card"><h2>Iterated integrals: slice, then stack</h2>
+    <p>A double integral is computed as two ordinary integrals, one variable at a time (<b>Fubini's theorem</b>). The idea is exactly volume-by-slices from Module 6: at a fixed $y$, the slice through the solid has cross-sectional area $A(y)=\\int f(x,y)\\,dx$; sweeping $y$ and stacking those slices gives the volume $\\int A(y)\\,dy$. Drag the sweep line over $f=x+y$ on $[0,3]\\times[0,2]$ and read the slice area $A(y)$.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">y</div><div class="v" id="yv">—</div></div><div class="rdc"><div class="k">slice area A(y)</div><div class="v" id="av">—</div></div></div>
+    <div class="task"><b>Evaluate the whole thing</b>Compute $\\displaystyle\\int_0^2\\!\\!\\int_0^3 (x+y)\\,dx\\,dy$.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>Work it inside-out.</b> The <em>inner</em> integral treats $y$ as a constant and integrates over $x$ — that's the slice area:</p>
+    <div class="eqbox">$$A(y)=\\int_0^3 (x+y)\\,dx=\\Big[\\tfrac{x^2}{2}+xy\\Big]_0^3=\\tfrac{9}{2}+3y$$</div>
+    <p>Then the <em>outer</em> integral stacks the slices over $y$:</p>
+    <div class="eqbox">$$\\int_0^2\\Big(\\tfrac{9}{2}+3y\\Big)dy=\\Big[\\tfrac92 y+\\tfrac{3}{2}y^2\\Big]_0^2=9+6=15$$</div>
+    <p>So the volume is $15$. Fubini also lets you swap the order — integrate over $y$ first, then $x$ — and you get the same number; choose whichever order is easier. That's the whole computational engine of multivariable integration.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
+  const AX0=120,AX1=560,AY0=350,AY1=40;   // region [0,3]x[0,2]
+  const px=x=>AX0+x/3*(AX1-AX0),py=y=>AY0+y/2*(AY1-AY0),my=Y=>(Y-AY0)/(AY1-AY0)*2;
+  let y0=1;
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    const nx=48,ny=32;for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){const x=(i+0.5)/nx*3,y=(j+0.5)/ny*2,h=(x+y)/5;
+      ctx.fillStyle='rgb('+Math.round(50+h*170)+','+Math.round(90+h*90)+','+Math.round(210-h*140)+')';
+      ctx.fillRect(px(i/nx*3),py((j+1)/ny*2),(AX1-AX0)/nx+1,(AY0-AY1)/ny+1);}
+    ctx.strokeStyle='#8095ab';ctx.lineWidth=1.5;ctx.strokeRect(px(0),py(2),AX1-AX0,AY0-AY1);
+    ctx.strokeStyle='#e8b84b';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(px(0),py(y0));ctx.lineTo(px(3),py(y0));ctx.stroke();
+    ctx.fillStyle='#e8b84b';ctx.font='12px sans-serif';ctx.fillText('slice at y = '+y0.toFixed(2),px(3)+6,py(y0)+4);
+    ctx.fillStyle='#5d7186';ctx.fillText('R = [0,3]×[0,2],  f = x+y',AX0,AY0+22);
+    document.getElementById('yv').textContent=y0.toFixed(2);
+    document.getElementById('av').textContent=(4.5+3*y0).toFixed(2);}
+  let drg=false;cv.style.touchAction='none';
+  function setP(e){const r=cv.getBoundingClientRect();const Y=(e.clientY-r.top)*(H/Math.max(1,r.height));y0=Math.max(0,Math.min(2,my(Y)));draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),15,()=>{addReveal(`<div class="rh">✓ 15</div><p>Inner integral (slice area) $A(y)=\\tfrac92+3y$; outer integral stacks them to $9+6=15$. The slice area you dragged runs from $A(0)=4.5$ up to $A(2)=10.5$, and their accumulation is the volume. Two single integrals, nested — nothing new to learn, just applied twice.</p>`);});
+  setHints([`Inner first: ∫₀³(x+y)dx = 9/2 + 3y (treat y as constant). Then ∫₀²(9/2+3y)dy.`,`[9y/2 + 3y²/2] from 0 to 2 = 9 + 6 = 15.`]);
+}
+
+function c7_problems(){
+  stage.innerHTML=`<div class="card"><h2>Problem set</h2>
+    <p>Partials, gradients, and double integrals. Paper first; solutions fold open.</p>
+
+    <div class="prob"><span class="lvl">partial derivatives</span><div class="ph">Problem 1</div>
+    <p>For $f(x,y)=x^3y+y^2$, find $\\dfrac{\\partial f}{\\partial x}$ and $\\dfrac{\\partial f}{\\partial y}$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Holding $y$ fixed: $\\frac{\\partial f}{\\partial x}=3x^2y$. Holding $x$ fixed: $\\frac{\\partial f}{\\partial y}=x^3+2y$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">gradient</span><div class="ph">Problem 2</div>
+    <p>For $f(x,y)=x^2+3y^2$, find $\\nabla f$ at $(1,1)$ and its magnitude.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\nabla f=(2x,6y)$, so at $(1,1)$ it is $(2,6)$. Magnitude $=\\sqrt{2^2+6^2}=\\sqrt{40}=2\\sqrt{10}\\approx6.32$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">directional derivative</span><div class="ph">Problem 3</div>
+    <p>For $f=x^2+y^2$ at $(3,4)$, find the directional derivative in the direction $\\mathbf u=\\left(\\tfrac35,\\tfrac45\\right)$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\nabla f=(6,8)$; $\\mathbf u$ is a unit vector ($\\tfrac{9}{25}+\\tfrac{16}{25}=1$). $D_{\\mathbf u}f=(6,8)\\cdot(\\tfrac35,\\tfrac45)=\\tfrac{18}{5}+\\tfrac{32}{5}=\\tfrac{50}{5}=10$. It equals $|\\nabla f|$ — because $\\mathbf u$ points exactly along the gradient.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">critical point</span><div class="ph">Problem 4</div>
+    <p>Find the critical point of $f(x,y)=x^2-4x+y^2+2y$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\frac{\\partial f}{\\partial x}=2x-4=0\\Rightarrow x=2$; $\\frac{\\partial f}{\\partial y}=2y+2=0\\Rightarrow y=-1$. Critical point $(2,-1)$ — a minimum (an upward bowl shifted off the origin).</p></div></details></div>
+
+    <div class="prob"><span class="lvl">double integral</span><div class="ph">Problem 5</div>
+    <p>Evaluate $\\displaystyle\\int_0^1\\!\\!\\int_0^2 xy\\,dx\\,dy$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Inner: $\\int_0^2 xy\\,dx=y\\big[\\tfrac{x^2}{2}\\big]_0^2=2y$. Outer: $\\int_0^1 2y\\,dy=[y^2]_0^1=1$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">double integral</span><div class="ph">Problem 6</div>
+    <p>Evaluate $\\displaystyle\\int_0^1\\!\\!\\int_0^1 (x^2+y^2)\\,dx\\,dy$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Inner: $\\int_0^1 (x^2+y^2)\\,dx=\\big[\\tfrac{x^3}{3}+xy^2\\big]_0^1=\\tfrac13+y^2$. Outer: $\\int_0^1(\\tfrac13+y^2)\\,dy=\\tfrac13+\\tfrac13=\\tfrac23$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">steepest ascent</span><div class="ph">Problem 7</div>
+    <p>At the point $(1,2)$ on $f(x,y)=x^2+y^2$, in which direction should you move to increase $f$ fastest, and how fast is that?</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Fastest increase is along $\\nabla f=(2,4)$, i.e. direction $\\tfrac{1}{\\sqrt{20}}(2,4)=\\tfrac{1}{\\sqrt5}(1,2)$. The rate is $|\\nabla f|=\\sqrt{2^2+4^2}=\\sqrt{20}=2\\sqrt5\\approx4.47$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">challenge — order swap</span><div class="ph">Problem 8</div>
+    <p>Verify Fubini for $\\displaystyle\\iint_{[0,1]\\times[0,2]} x\\,dA$ by computing it both orders.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$dx$ first: $\\int_0^2\\!\\big(\\int_0^1 x\\,dx\\big)dy=\\int_0^2\\tfrac12\\,dy=1$. $dy$ first: $\\int_0^1\\!\\big(\\int_0^2 x\\,dy\\big)dx=\\int_0^1 2x\\,dx=1$. Same answer, $1$ — the order doesn't matter.</p></div></details></div>
+  </div>`;
+  setHints([]);unlock();
+}
+
+function c7_recap(){
+  stage.innerHTML=`<div class="card"><h2>What you built</h2>
+    <div class="eqbox" style="line-height:2.3">$$\\nabla f=\\Big(\\tfrac{\\partial f}{\\partial x},\\tfrac{\\partial f}{\\partial y}\\Big)\\ \\text{(steepest ascent, }\\perp\\text{ level curves)}\\qquad D_{\\mathbf u}f=\\nabla f\\cdot\\mathbf u$$
+    <div style="text-align:center;line-height:2;color:#dbe6f4;margin-top:6px">partial = ordinary derivative, other variables held constant<br>critical points: $\\nabla f=\\mathbf 0$ · gradient descent: $\\mathbf x-\\alpha\\nabla f$<br>$\\iint_R f\\,dA=\\lim\\sum\\sum f\\,\\Delta A$ (volume)<br>compute by iterated single integrals (Fubini), inside-out</div></div>
+    <p>Multivariable calculus is single-variable calculus applied one direction at a time and then reassembled: partials are slice-slopes, the gradient bundles them into the steepest-ascent vector, and double integrals are areas-under-a-curve stacked into volumes. The gradient — and descending it — is the exact machinery underneath training a model.</p>
+    <p><b>Next — Module 9:</b> package all these partials into <b>matrices</b>. The Jacobian collects the partials of a vector-valued function, the Hessian collects second partials, and the multivariable chain rule becomes matrix multiplication — the language of backpropagation and the formal bridge into machine learning.</p></div>`;
   setHints([]);unlock();
 }
 
