@@ -155,6 +155,9 @@ function renderMath(el){try{if(window.renderMathInElement)renderMathInElement(el
 const SAVE_KEY='calc_fp_v1';
 function saveState(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({view,curM,beat,completed}));}catch(e){}}
 function loadState(){try{return JSON.parse(localStorage.getItem(SAVE_KEY));}catch(e){return null;}}
+/* URL-hash position (survives refresh even when storage is blocked) */
+function setHash(){try{const h=view==='module'?('#m'+curM+'b'+beat):'';if((location.hash||'')!==h)history.replaceState(null,'',h||location.pathname+location.search);}catch(e){}}
+function parseHash(){const m=/^#m(\d+)b(\d+)$/.exec(location.hash||'');return m?{curM:+m[1],beat:+m[2]}:null;}
 
 function renderMenu(){
   view='menu';footer.style.display='none';hintbox.className='hintbox';hintbox.innerHTML='';
@@ -167,7 +170,7 @@ function renderMenu(){
       <div class="mtitle">${m.title}</div><div class="msub">${m.sub}</div></div>`;});
   stage.innerHTML=html;
   stage.querySelectorAll('.mcard').forEach(c=>{const i=parseInt(c.dataset.i);if(MODULES[i].ready)c.onclick=()=>openModule(i);});
-  scrollTop();renderMath();saveState();
+  scrollTop();renderMath();saveState();setHash();
 }
 function openModuleAt(i,b){curM=i;beat=b;view='module';footer.style.display='flex';contBtn.style.display='';hintBtn.style.display='';
   document.getElementById('backBtn').style.display='block';document.getElementById('pbarWrap').style.display='block';
@@ -179,7 +182,7 @@ function renderBeat(){
   document.getElementById('kick').textContent=M.title;
   document.getElementById('stepLbl').textContent=(beat+1)+' / '+M.beats.length;
   document.getElementById('pfill').style.width=Math.round((beat+1)/M.beats.length*100)+'%';
-  contBtn.textContent=beat===M.beats.length-1?'Finish':'Continue';document.getElementById('prevBtn').style.display=(beat>0||recallReturn)?'block':'none';scrollTop();renderMath();saveState();
+  contBtn.textContent=beat===M.beats.length-1?'Finish':'Continue';document.getElementById('prevBtn').style.display=(beat>0||recallReturn)?'block':'none';scrollTop();renderMath();saveState();setHash();
 }
 hintBtn.onclick=()=>{if(hintIdx<hints.length){hintbox.innerHTML=hints[hintIdx];hintbox.className='hintbox show';hintIdx++;if(hintIdx>=hints.length)unlock();}};
 contBtn.onclick=()=>{const M=MODULES[curM];if(beat<M.beats.length-1){beat++;renderBeat();}else finish();};
@@ -1118,22 +1121,11 @@ function c4_intro(){
 
 function c4_riemann(){
   stage.innerHTML=`<div class="card"><h2>Riemann sums: pave the area with rectangles</h2>
-    <p>We can't yet find the area under $f(x)=x^2$ from $0$ to $3$ exactly — but we can trap it. Slice $[0,3]$ into $n$ equal strips, each of width $\\Delta x=\\tfrac{3}{n}$, and cap each strip with a rectangle whose height is the curve's value at the strip's right edge $x_i=i\\,\\Delta x$. The sum of the rectangle areas is the <b>Riemann sum</b>:</p>
-    <div class="eqbox">$$R_n = \\sum_{i=1}^{n} f(x_i)\\,\\Delta x, \\qquad \\Delta x=\\frac{3}{n},\\quad x_i = i\\,\\Delta x=\\frac{3i}{n}$$</div>
-    <p>Each rectangle is crude, but as $n$ grows the staircase hugs the curve. Rather than eyeball the limit, let's compute $R_n$ <em>exactly</em> and take it — a genuine derivation of the area.</p>
-    <p><b>Step 1 — write the height.</b> At the right edge $x_i=\\tfrac{3i}{n}$, the curve's height is</p>
-    <div class="eqbox">$$f(x_i)=\\Big(\\frac{3i}{n}\\Big)^2=\\frac{9i^2}{n^2}.$$</div>
-    <p><b>Step 2 — assemble the sum and pull constants out front.</b> Multiply the height by $\\Delta x=\\tfrac3n$ and sum over $i$. The factors that don't depend on $i$ (here $\\tfrac{9}{n^2}$ and $\\tfrac3n$) come outside the sum:</p>
-    <div class="eqbox">$$R_n=\\sum_{i=1}^{n}\\frac{9i^2}{n^2}\\cdot\\frac{3}{n}=\\frac{27}{n^3}\\sum_{i=1}^{n} i^2$$</div>
-    <p><b>Step 3 — use the sum-of-squares identity.</b> A standard formula (provable by induction) evaluates that sum in closed form: $\\sum_{i=1}^{n} i^2=\\tfrac{n(n+1)(2n+1)}{6}$. Substitute it:</p>
-    <div class="eqbox">$$R_n=\\frac{27}{n^3}\\cdot\\frac{n(n+1)(2n+1)}{6}=\\frac{27(n+1)(2n+1)}{6\\,n^2}$$</div>
-    <p><b>Step 4 — divide through and take the limit.</b> Expand $(n+1)(2n+1)=2n^2+3n+1$, then divide each term by $n^2$:</p>
-    <div class="eqbox">$$R_n=\\frac{27}{6}\\cdot\\frac{2n^2+3n+1}{n^2}=\\frac{9}{2}\\Big(2+\\frac{3}{n}+\\frac{1}{n^2}\\Big)$$</div>
-    <p>As $n\\to\\infty$, the $\\tfrac3n$ and $\\tfrac1{n^2}$ terms die, leaving $R_n\\to\\tfrac92\\cdot 2=9$. The exact area is $9$. Now confirm it: tap to add rectangles and watch $R_n$ settle onto that number.</p>
+    <p>We can't yet find the area under $f(x)=x^2$ from $0$ to $3$ exactly — so let's trap it. Slice $[0,3]$ into $n$ equal strips of width $\\Delta x=\\tfrac3n$, cap each with a rectangle at its right edge $x_i=\\tfrac{3i}{n}$, and add the areas — the <b>Riemann sum</b> $R_n=\\sum_{i=1}^n f(x_i)\\,\\Delta x$. Tap to add rectangles and watch where the sum heads.</p>
     <div class="seg" id="seg"></div>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">n rectangles</div><div class="v" id="nv">—</div></div><div class="rdc"><div class="k">Rₙ (sum)</div><div class="v" id="rv">—</div></div></div>
-    <div class="task"><b>Confirm the limit</b>The sums approach the exact area you just derived. Enter it.</div>
+    <div class="task"><b>Find the limit</b>As $n$ grows the staircase hugs the curve and $R_n$ closes in on one number — the exact area. Read it off the trend and enter it.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
   const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.3,xmax:3.3,ymin:-0.6,ymax:9.8});
   const f=x=>x*x,A=0,B=3;let n=6;
@@ -1148,8 +1140,17 @@ function c4_riemann(){
   function build(){const ns=[3,6,12,24,48,96];document.getElementById('seg').innerHTML=ns.map(k=>`<span class="segb ${k===n?'on':''}" data-k="${k}">${k}</span>`).join('');
     document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{n=+b.dataset.k;build();draw();});}
   build();draw();
-  numChk(stage.querySelector('.card'),9,()=>{addReveal(`<div class="rh">✓ The area is exactly 9</div><p>Notice the approach is from <em>above</em>: right-endpoint rectangles overshoot an increasing curve, so $R_3=14$, $R_6=11.4$, $R_{24}=9.6$, $R_{96}\\approx 9.1$ — the overshoot dies like $\\tfrac{3}{n}$, exactly the term you watched vanish in Step 4. We name this limit the <b>definite integral</b>: $\\int_0^3 x^2\\,dx=\\lim_{n\\to\\infty}R_n=9$. Formalizing that limit — and what it means when the curve dips negative — is the next beat.</p>`);});
-  setHints([`You already derived it in Step 4: Rₙ = (9/2)(2 + 3/n + 1/n²). Let n → ∞.`,`The 3/n and 1/n² vanish, leaving (9/2)(2) = 9.`]);
+  numChk(stage.querySelector('.card'),9,()=>{addReveal(`<div class="rh">✓ The area is exactly 9 — now here's why</div>
+    <p>You watched $R_n$ fall from $R_3=14$ toward $9$. Let's <em>prove</em> the limit is exactly $9$ by computing $R_n$ in closed form.</p>
+    <p><b>1. The height</b> at the right edge $x_i=\\tfrac{3i}{n}$ is $f(x_i)=\\big(\\tfrac{3i}{n}\\big)^2=\\tfrac{9i^2}{n^2}$.</p>
+    <p><b>2. Assemble the sum,</b> pulling the $i$-independent factors out front:</p>
+    <div class="eqbox">$$R_n=\\sum_{i=1}^{n}\\frac{9i^2}{n^2}\\cdot\\frac{3}{n}=\\frac{27}{n^3}\\sum_{i=1}^{n}i^2$$</div>
+    <p><b>3. Use the sum-of-squares identity</b> $\\sum_{i=1}^n i^2=\\tfrac{n(n+1)(2n+1)}{6}$ (provable by induction):</p>
+    <div class="eqbox">$$R_n=\\frac{27}{n^3}\\cdot\\frac{n(n+1)(2n+1)}{6}=\\frac{27(n+1)(2n+1)}{6n^2}$$</div>
+    <p><b>4. Divide through and take the limit,</b> using $(n+1)(2n+1)=2n^2+3n+1$:</p>
+    <div class="eqbox">$$R_n=\\frac{9}{2}\\Big(2+\\frac{3}{n}+\\frac{1}{n^2}\\Big)\\;\\xrightarrow{\\,n\\to\\infty\\,}\\;\\frac{9}{2}\\cdot 2=9$$</div>
+    <p>The $\\tfrac3n$ overshoot you watched shrink is exactly the term that vanishes. We name this limit the <b>definite integral</b>: $\\int_0^3 x^2\\,dx=\\lim_{n\\to\\infty}R_n=9$.</p>`);});
+  setHints([`Read the Rₙ box as you raise n: 14, 11.4, 10.2, 9.6, 9.3, 9.1… what whole number is it converging to?`,`It approaches 9.`]);
 }
 
 function c4_defint(){
@@ -1180,26 +1181,10 @@ function c4_defint(){
 
 function c4_ftc1(){
   stage.innerHTML=`<div class="card"><h2>Fundamental Theorem, Part 1: the area function's slope is the height</h2>
-    <p>Fix the left endpoint at $a$ and let the right endpoint $x$ move. The area swept out becomes a function of $x$ — the <b>area-so-far function</b>:</p>
-    <div class="eqbox">$$A(x)=\\int_a^x f(t)\\,dt$$</div>
-    <p>We're going to compute its derivative $A'(x)$, and the punchline is remarkable: it comes out to be $f(x)$, the height of the original curve at $x$. Let's earn it straight from the definition of the derivative — the same difference quotient from Module 3, nothing smuggled in.</p>
-    <p><b>Start from the definition.</b> The derivative is, by definition, the limit of a difference quotient:</p>
-    <div class="eqbox">$$A'(x)=\\lim_{h\\to 0}\\frac{A(x+h)-A(x)}{h}$$</div>
-    <p>The whole task is to work out what that fraction becomes as $h$ shrinks. Three moves: identify the top, reinterpret the fraction, then trap it.</p>
-    <p><b>Step 1 — the top is one thin sliver of area.</b> $A(x+h)$ is the area from $a$ out to $x+h$; $A(x)$ is the area from $a$ to $x$. Subtracting cancels the shared part and leaves only the strip from $x$ to $x+h$. This is the <em>additivity</em> of the integral (area over $[a,x+h]$ = area over $[a,x]$ + area over $[x,x+h]$):</p>
-    <div class="eqbox">$$A(x+h)-A(x)=\\int_a^{x+h} f\\;-\\;\\int_a^{x} f=\\int_x^{x+h} f(t)\\,dt$$</div>
-    <p><b>Step 2 — so the fraction is an average height.</b> Divide that sliver of area by its width $h$. Area $\\div$ width is a height — the <em>average height</em> of $f$ across $[x,x+h]$ (a rectangle of that height and width $h$ would have the same area as the sliver):</p>
-    <div class="eqbox">$$\\frac{A(x+h)-A(x)}{h}=\\frac{1}{h}\\int_x^{x+h} f(t)\\,dt=\\big(\\text{average of } f \\text{ on } [x,x+h]\\big)$$</div>
-    <p><b>Step 3 — trap that average between two rectangles.</b> On the closed interval $[x,x+h]$ a continuous $f$ has a lowest value $m$ and a highest value $M$. Every value of $f$ on the strip lies between them, so the strip's area lies between the short rectangle (height $m$) and the tall one (height $M$), both of width $h$:</p>
-    <div class="eqbox">$$m\\cdot h\\;\\le\\;\\int_x^{x+h} f(t)\\,dt\\;\\le\\;M\\cdot h$$</div>
-    <p>Divide through by $h$ (positive, so the inequalities keep their direction). The middle is exactly our difference quotient:</p>
-    <div class="eqbox">$$m\\;\\le\\;\\frac{1}{h}\\int_x^{x+h} f(t)\\,dt\\;\\le\\;M$$</div>
-    <p><b>Step 4 — shrink the width and squeeze.</b> Let $h\\to 0$. The interval $[x,x+h]$ collapses onto the single point $x$, so the lowest and highest values of $f$ on it, $m$ and $M$, are both forced to $f(x)$ — that is exactly what it means for $f$ to be continuous at $x$. The difference quotient is sandwiched between $m$ and $M$, and both ends head to the same number $f(x)$, so by the <b>squeeze theorem</b> (Module 2) the middle has nowhere else to go:</p>
-    <div class="eqbox">$$A'(x)=\\lim_{h\\to 0}\\frac{1}{h}\\int_x^{x+h} f(t)\\,dt=\\color{#e8b84b}{f(x)}$$</div>
-    <p>That's the theorem: <b>the rate at which area accumulates equals the current height of the curve.</b> Read the other way, it says $A$ is an <em>antiderivative</em> of $f$ — differentiating "area so far" hands back $f$. Below, take $f(x)=x$ (blue); its area function is $A(x)=\\int_0^x t\\,dt=\\tfrac{x^2}{2}$ (green). Drag $x$ and watch the green curve's <em>slope</em> match the blue curve's <em>height</em> at every point.</p>
+    <p>Fix the left edge at $a$ and let the right edge $x$ slide; the area swept out becomes a function of $x$ — the <b>area-so-far function</b> $A(x)=\\int_a^x f(t)\\,dt$. What is its derivative? Explore before we prove it. Below, $f(x)=x$ is blue and its area function $A(x)=\\int_0^x t\\,dt=\\tfrac{x^2}{2}$ is green. Drag $x$ and compare the green curve's <em>slope</em> to the blue curve's <em>height</em>.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">height f(x)</div><div class="v" id="hv">—</div></div><div class="rdc"><div class="k">area A(x)</div><div class="v" id="av">—</div></div></div>
-    <div class="task"><b>Read the link</b>As the right edge moves, the rate at which accumulated area grows equals which quantity?</div>
+    <div class="task"><b>What did you find?</b>As the right edge moves, the rate at which accumulated area grows equals which quantity?</div>
     <div class="choices" id="ch"></div></div>`;
   const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.3,xmax:3.2,ymin:-0.4,ymax:5});
   const f=x=>x,A=x=>x*x/2;let x0=1.5;
@@ -1213,8 +1198,17 @@ function c4_ftc1(){
     document.getElementById('av').textContent=A(x0).toFixed(2);}
   xdrag(cv,pl,x=>{x0=Math.max(0,Math.min(3,x));draw();});draw();
   const opts=[['the <b>height</b> of the curve there, $f(x)$','y'],['the area itself, $A(x)$','n'],['zero — area accumulates at a constant rate','n'],['the width $dx$','n']];
-  mcChoices(document.getElementById('ch'),opts,()=>{addReveal(`<div class="rh">✓ The rate equals the height, f(x)</div><p>On screen: at $x=2$ the blue height is $2$, and the green area curve climbs with slope $2$. The strip of area added at each step has the current height, so the rate of accumulation is that height — $A'(x)=f(x)$. Its consequence is enormous: the area function is an <em>antiderivative</em> of $f$, so differentiation and area-accumulation are inverse operations. The next two beats cash that in.</p>`);});
-  setHints([`Per step, the area added divided by the step width is the average height of f over that sliver — and as the sliver shrinks, that average is squeezed to f(x) itself.`]);
+  mcChoices(document.getElementById('ch'),opts,()=>{addReveal(`<div class="rh">✓ The rate equals the height, f(x) — now the proof</div>
+    <p>You saw it on screen: at $x=2$ the height is $2$, and the green area-curve climbs with slope $2$. Here it is straight from the limit definition, $A'(x)=\\lim_{h\\to0}\\frac{A(x+h)-A(x)}{h}$.</p>
+    <p><b>1. The top is a thin sliver of area.</b> By additivity, $A(x+h)-A(x)=\\int_x^{x+h} f(t)\\,dt$.</p>
+    <p><b>2. So the fraction is an average height</b> of $f$ across $[x,x+h]$:</p>
+    <div class="eqbox">$$\\frac{A(x+h)-A(x)}{h}=\\frac{1}{h}\\int_x^{x+h} f(t)\\,dt$$</div>
+    <p><b>3. Trap it</b> between the lowest ($m$) and highest ($M$) values of $f$ on the sliver:</p>
+    <div class="eqbox">$$m\\;\\le\\;\\frac{1}{h}\\int_x^{x+h} f(t)\\,dt\\;\\le\\;M$$</div>
+    <p><b>4. Squeeze.</b> As $h\\to 0$ the interval collapses onto $x$, so $m\\to f(x)$ and $M\\to f(x)$ by continuity; the squeeze theorem (Module 2) forces the middle to the same limit:</p>
+    <div class="eqbox">$$A'(x)=\\lim_{h\\to 0}\\frac{1}{h}\\int_x^{x+h} f(t)\\,dt=\\color{#e8b84b}{f(x)}$$</div>
+    <p>So $A$ is an <em>antiderivative</em> of $f$: differentiation and area-accumulation are inverse operations. The next two beats cash that in.</p>`);});
+  setHints([`Compare the two readouts as you drag: at x=2 the height reads 2 — is the green area-curve's slope also 2 there?`]);
 }
 
 function c4_antideriv(){
@@ -1241,22 +1235,9 @@ function c4_antideriv(){
 
 function c4_ftc2(){
   stage.innerHTML=`<div class="card"><h2>Fundamental Theorem, Part 2: evaluate by antiderivative</h2>
-    <p>Part 1 told us antiderivatives <em>exist</em> (the area function is one). Part 2 is the harvest: to compute a definite integral, evaluate <em>any</em> antiderivative at the two endpoints and subtract — no Riemann sums at all. And it follows directly from the discrete sum plus the Mean Value Theorem, welding the two halves of the course together.</p>
-    <p><b>The claim.</b> If $F'=f$ on $[a,b]$, then $\\displaystyle\\int_a^b f(x)\\,dx=F(b)-F(a)$.</p>
-    <p><b>Setup.</b> Cut $[a,b]$ into $n$ slices at $a=x_0&lt;x_1&lt;\\dots&lt;x_n=b$, with widths $\\Delta x_i=x_i-x_{i-1}$.</p>
-    <p><b>Step 1 — telescope the total change in $F$.</b> Build $F(b)-F(a)$ up one slice at a time. Adding the change across each slice, every interior value $F(x_i)$ (for $0&lt;i&lt;n$) shows up once with a $+$ and once with a $-$, so they all cancel:</p>
-    <div class="eqbox">$$F(b)-F(a)=\\big(F(x_1)-F(x_0)\\big)+\\big(F(x_2)-F(x_1)\\big)+\\cdots+\\big(F(x_n)-F(x_{n-1})\\big)$$</div>
-    <p>which collapses to the sum of the per-slice changes, $\\displaystyle F(b)-F(a)=\\sum_{i=1}^{n}\\big(F(x_i)-F(x_{i-1})\\big)$.</p>
-    <p><b>Step 2 — rewrite each slice's change with the MVT.</b> On one slice $[x_{i-1},x_i]$, the Mean Value Theorem (Module 4) hands you a point $c_i$ inside where the instantaneous slope equals the slice's average slope. Multiplying that slope by the slice width recovers the change across the slice exactly — and $F'=f$:</p>
-    <div class="eqbox">$$F(x_i)-F(x_{i-1})=F'(c_i)\\,\\Delta x_i=f(c_i)\\,\\Delta x_i$$</div>
-    <p><b>Step 3 — the total is a Riemann sum.</b> Substitute step 2 into step 1:</p>
-    <div class="eqbox">$$F(b)-F(a)=\\sum_{i=1}^{n} f(c_i)\\,\\Delta x_i$$</div>
-    <p>The right-hand side is precisely a Riemann sum for $f$ — heights $f(c_i)$ at sample points $c_i$, times widths $\\Delta x_i$. And this equation is <em>exact</em> for any slicing, coarse or fine; the number of slices never mattered.</p>
-    <p><b>Step 4 — refine and take the limit.</b> Let the slices shrink, $\\Delta x_i\\to 0$. Being Riemann sums of the (continuous, hence integrable) $f$, the right side converges to the definite integral by definition. The left side, $F(b)-F(a)$, involves no slicing at all — it is a fixed number that never moves. A fixed number equal to something converging must equal the limit:</p>
-    <div class="eqbox">$$\\int_a^b f(x)\\,dx = F(b)-F(a)\\qquad\\color{#5d7186}{\\text{written }\\big[F(x)\\big]_a^b}$$</div>
-    <p><b>Watch it work.</b> The shaded area below is $\\int_0^3 x^2\\,dx$ — the number you ground out of Riemann sums earlier. An antiderivative of $x^2$ is $F(x)=\\tfrac{x^3}{3}$, so it should be $F(3)-F(0)=\\tfrac{27}{3}-0$, in a single line. Compute it:</p>
+    <p>Part 1 showed antiderivatives exist. Part 2 is the payoff: to get a definite integral, evaluate <em>any</em> antiderivative at the endpoints and subtract — $\\int_a^b f=F(b)-F(a)$. Try it on the shaded area below, $\\int_0^3 x^2\\,dx$ — the very number you ground out of Riemann sums. An antiderivative of $x^2$ is $F(x)=\\tfrac{x^3}{3}$.</p>
     <canvas id="cv" width="640" height="360"></canvas>
-    <div class="task"><b>Evaluate</b>Using $F(x)=\\tfrac{x^3}{3}$ (an antiderivative of $x^2$), compute $\\displaystyle\\int_0^3 x^2\\,dx$.</div>
+    <div class="task"><b>Evaluate</b>Compute $F(3)-F(0)=\\tfrac{27}{3}-0$. Does it match the Riemann answer?</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
   const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.3,xmax:3.3,ymin:-0.6,ymax:9.8});
   const f=x=>x*x;
@@ -1264,31 +1245,26 @@ function c4_ftc2(){
     for(let t=0;t<3;t+=step){const X0=pl.px(t),X1=pl.px(t+step),Y0=pl.py(0),Y1=pl.py(f(t));ctx.fillStyle='rgba(122,184,255,0.18)';ctx.fillRect(X0,Y1,X1-X0,Y0-Y1);}
     pl.curve(f,'#7ab8ff');pl.label(1.05,7.4,'∫₀³ x² dx','#9fb0c4');}
   draw();
-  numChk(stage.querySelector('.card'),9,()=>{addReveal(`<div class="rh">✓ 9, in one line</div><p>$\\int_0^3 x^2\\,dx=\\big[\\tfrac{x^3}{3}\\big]_0^3=\\tfrac{27}{3}-0=9$ — the same $9$ the Riemann sums crawled toward, now a single subtraction. <b>This is the theorem the whole subject is named for:</b> integration (area) and differentiation (slope) are inverse operations, so every derivative rule from Modules 3–4, read backwards, becomes an integration formula. Any curve whose antiderivative you can name is suddenly trivial to integrate.</p>`);});
-  setHints([`FTC Part 2: evaluate the antiderivative x³/3 at 3 and at 0, then subtract.`,`27/3 − 0 = 9.`]);
+  numChk(stage.querySelector('.card'),9,()=>{addReveal(`<div class="rh">✓ 9 — the same number, in one subtraction. Here's why it always works.</div>
+    <p>Let $F$ be any antiderivative ($F'=f$) and cut $[a,b]$ into slices $a=x_0&lt;x_1&lt;\\dots&lt;x_n=b$.</p>
+    <p><b>1. Telescope.</b> The total change in $F$ is the sum of the per-slice changes; interior values cancel in pairs:</p>
+    <div class="eqbox">$$F(b)-F(a)=\\sum_{i=1}^{n}\\big(F(x_i)-F(x_{i-1})\\big)$$</div>
+    <p><b>2. MVT on each slice</b> gives a point $c_i$ with $F(x_i)-F(x_{i-1})=F'(c_i)\\,\\Delta x_i=f(c_i)\\,\\Delta x_i$.</p>
+    <p><b>3. That's a Riemann sum:</b> $\\;F(b)-F(a)=\\sum_{i=1}^{n}f(c_i)\\,\\Delta x_i$, exact for every slicing.</p>
+    <p><b>4. Refine.</b> As the slices shrink, the right side $\\to\\int_a^b f$ (the definition), while the left side never moves — so they're equal:</p>
+    <div class="eqbox">$$\\int_a^b f(x)\\,dx=F(b)-F(a)\\qquad\\color{#5d7186}{\\text{written }\\big[F(x)\\big]_a^b}$$</div>
+    <p>Integration and differentiation are inverse operations — every derivative rule, read backwards, is now an integration formula.</p>`);});
+  setHints([`Evaluate the antiderivative x³/3 at 3 and at 0, then subtract.`,`27/3 − 0 = 9 — matching the Riemann limit.`]);
 }
 
 function c4_ln(){
   stage.innerHTML=`<div class="card"><h2>Defining the natural logarithm from area</h2>
-    <p>The reverse power rule left exactly one hole: $n=-1$, the integral $\\int\\frac{dx}{x}$. It's tempting to say "that's just $\\ln x$, the log base $e$" and move on — but that would be circular. To lean on $\\log_e$ we'd first need $e^x$ defined for <em>every</em> real $x$ (irrational exponents need a limit we haven't built) and the fact $(e^x)'=e^x$ (which needs $e$ pinned down so precisely that the argument eats its own tail). We already own a tool that needs nothing new — the integral — so we turn the gap into a <em>definition</em>.</p>
-    <div class="defn"><span class="dt">Definition — natural logarithm</span>$\\displaystyle \\ln x := \\int_1^x \\frac{dt}{t} \\quad (x>0)$ — the signed area under $\\tfrac1t$ from $1$ out to $x$.</div>
-    <p>This is not a modern trick; it retraces history. Logarithms (Napier, <b>1614</b>) were in daily use long before $e$ was a named number, and in <b>1649</b> de Sarasa recognized that the area under the hyperbola $y=\\tfrac1t$ <em>behaves</em> like a logarithm — decades before Euler identified $e$ in the 1700s. Two things make this definition inevitable rather than arbitrary.</p>
-    <p><b>Why start at 1?</b> A logarithm must send $1\\mapsto 0$. Starting the area at $1$ delivers exactly that, because an interval of zero width encloses no area:</p>
-    <div class="eqbox">$$\\ln 1 = \\int_1^1 \\frac{dt}{t} = 0$$</div>
-    <p>Start anywhere else and every value shifts by a constant, breaking $\\ln 1 = 0$.</p>
-    <p><b>The derivative, for free.</b> This is just FTC Part 1 with lower limit $a=1$ and integrand $f(t)=\\tfrac1t$. The derivative of an area function is its integrand's height, so:</p>
-    <div class="eqbox">$$(\\ln x)' = \\frac{d}{dx}\\int_1^x \\frac{dt}{t} = \\color{#e8b84b}{\\frac{1}{x}}$$</div>
-    <p>That is the missing antiderivative of $\\tfrac1x$ — the $n=-1$ hole, now filled rigorously.</p>
-    <p><b>Why it really is a logarithm.</b> Calling it a log takes more than $\\ln 1=0$: the defining property of a logarithm is that it turns products into sums, $\\ln(ab)=\\ln a+\\ln b$. We can <em>prove</em> our area function does this, using only the chain rule and the MVT. Fix a constant $a&gt;0$ and define $g(x)=\\ln(ax)-\\ln x$. Differentiate the first term with the chain rule — inner function $ax$, whose derivative is $a$:</p>
-    <div class="eqbox">$$\\frac{d}{dx}\\ln(ax)=\\frac{1}{ax}\\cdot a=\\frac{1}{x}$$</div>
-    <p>So the two pieces of $g'$ cancel:</p>
-    <div class="eqbox">$$g'(x)=\\frac{1}{x}-\\frac{1}{x}=0$$</div>
-    <p>A function with zero derivative on an interval is constant (the MVT corollary, Module 4), so $g$ has the same value everywhere — evaluate it at the easy point $x=1$: $\\;g(1)=\\ln(a)-\\ln(1)=\\ln a$. Therefore $g(x)=\\ln a$ for all $x$, i.e. $\\ln(ax)-\\ln x=\\ln a$. Rearranged, and then setting $x=b$:</p>
-    <div class="eqbox">$$\\ln(ax)=\\ln x+\\ln a \\quad\\xrightarrow{\\,x=b\\,}\\quad \\color{#e8b84b}{\\ln(ab)=\\ln a+\\ln b}$$</div>
-    <p>Proven, not asserted. (The same trick on $h(x)=\\ln(x^p)-p\\ln x$ gives $h'=0$, hence $\\ln(x^p)=p\\ln x$.) So this integral genuinely <em>is</em> a logarithm. Drag $x$ and read $\\ln x$ off the shaded area — positive right of $1$, negative left of it (the area is swept backwards).</p>
+    <p>The reverse power rule left one hole: $n=-1$, the integral $\\int\\frac{dx}{x}$. Saying "that's just $\\ln x$" would be circular — to use $\\log_e$ we'd first need $e^x$ for every real $x$ and $(e^x)'=e^x$. The integral needs nothing new, so we turn the gap into a definition:</p>
+    <div class="defn"><span class="dt">Definition — natural logarithm</span>$\\displaystyle \\ln x := \\int_1^x \\frac{dt}{t} \\quad (x>0)$ — the signed area under $\\tfrac1t$ from $1$ to $x$. (This retraces history: de Sarasa saw the area under $\\tfrac1t$ act like a logarithm in 1649, before $e$ was named.)</div>
+    <p>Drag $x$ and read $\\ln x$ off the shaded area — watch it hit $0$ at $x=1$, go positive to the right, negative to the left, and always climb.</p>
     <canvas id="cv" width="640" height="360"></canvas>
     <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">ln x = shaded area</div><div class="v" id="lv">—</div></div></div>
-    <div class="task"><b>Apply FTC to ln</b>Since $(\\ln x)' = \\tfrac1x$, what is $(\\ln x)'$ at $x = 2$? (Enter a decimal.)</div>
+    <div class="task"><b>Apply FTC to ln</b>By FTC Part 1, differentiating an area function returns its integrand. So what is $(\\ln x)'$ at $x=2$? (Enter a decimal.)</div>
     <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
   const cv=document.getElementById('cv');const pl=plot(cv,{xmin:0,xmax:5,ymin:-0.4,ymax:3.6});
   const f=t=>t>0.06?1/t:NaN;let x0=2;
@@ -1299,25 +1275,22 @@ function c4_ln(){
     document.getElementById('xv').textContent=x0.toFixed(3);
     document.getElementById('lv').textContent=lnA(x0).toFixed(3);}
   xdrag(cv,pl,x=>{x0=Math.max(0.3,Math.min(5,x));draw();});draw();
-  numChk(stage.querySelector('.card'),0.5,()=>{addReveal(`<div class="rh">✓ (ln 2)′ = ½ = 0.5</div><p>$(\\ln x)'=\\tfrac1x$, so at $x=2$ it is $\\tfrac12$. The picture confirms the shape: $\\ln 1 = 0$, $\\ln x > 0$ for $x > 1$, $\\ln x &lt; 0$ for $0 &lt; x &lt; 1$, and because the integrand $\\tfrac1t$ is always positive, $\\ln$ is <b>strictly increasing</b> everywhere. That single fact — strictly increasing, running over all real values — is what guarantees it has an inverse, the doorway to $e$ and $e^x$, next.</p>`);},s=>parseFloat(s));
-  setHints([`The derivative of ln x is 1/x. Put x = 2.`,`1/2 = 0.5.`]);
+  numChk(stage.querySelector('.card'),0.5,()=>{addReveal(`<div class="rh">✓ (ln 2)′ = ½ = 0.5 — the derivative, and why it's a log</div>
+    <p><b>The derivative, for free.</b> This is FTC Part 1 with $a=1$ and $f(t)=\\tfrac1t$: the area function's derivative is its integrand's height, so $(\\ln x)'=\\tfrac1x$ — the missing antiderivative of $\\tfrac1x$, now rigorous. At $x=2$ it is $\\tfrac12$.</p>
+    <p><b>Why it really is a logarithm.</b> A logarithm turns products into sums, $\\ln(ab)=\\ln a+\\ln b$. We can prove our area does this. Fix $a&gt;0$ and let $g(x)=\\ln(ax)-\\ln x$. Differentiate the first term by the chain rule (inner $ax$, derivative $a$):</p>
+    <div class="eqbox">$$\\frac{d}{dx}\\ln(ax)=\\frac{1}{ax}\\cdot a=\\frac{1}{x}\\;\\Rightarrow\\; g'(x)=\\frac1x-\\frac1x=0$$</div>
+    <p>Zero derivative means constant (MVT, Module 4), so $g(x)=g(1)=\\ln a-\\ln 1=\\ln a$ for all $x$. Thus $\\ln(ax)=\\ln x+\\ln a$; setting $x=b$:</p>
+    <div class="eqbox">$$\\color{#e8b84b}{\\ln(ab)=\\ln a+\\ln b}$$</div>
+    <p>Proven, not asserted. And since the integrand $\\tfrac1t>0$, $\\ln$ is strictly increasing — which gives it an inverse, the doorway to $e$ and $e^x$, next.</p>`);},s=>parseFloat(s));
+  setHints([`FTC Part 1: the derivative of ∫₁ˣ (1/t)dt is just the integrand 1/x. Put x = 2.`,`1/2 = 0.5.`]);
 }
+
 function c4_e(){
   stage.innerHTML=`<div class="card"><h2>The number e and the function eˣ</h2>
-    <p>The last beat established that $\\ln$ is <b>continuous</b> (it's differentiable, with $(\\ln x)'=\\tfrac1x$) and <b>strictly increasing</b>. It also runs over every real value — its area grows without bound as $x\\to\\infty$ and plunges to $-\\infty$ as $x\\to 0^+$. A continuous function that climbs from $-\\infty$ to $+\\infty$ hits every height exactly once (Intermediate Value Theorem, Module 2, plus strict increase for uniqueness). In particular there is a <em>single</em> input where the value is $1$ — and that number is how we define $e$.</p>
-    <div class="defn"><span class="dt">Definition — the number e</span>$e$ is the unique number with $\\ln e = 1$: the point where the area under $\\tfrac1t$ (starting at $1$) first reaches $1$. Numerically $e \\approx 2.71828$.</div>
-    <p>Because $\\ln$ is one-to-one, it has an inverse function — and that inverse is precisely what the symbol $e^x$ will <em>mean</em>:</p>
-    <div class="defn"><span class="dt">Definition — the exponential function</span>$e^x$ is the inverse of $\\ln$: the two relations $\\ln(e^x)=x$ and $e^{\\ln x}=x$ hold. This at last defines $e^x$ for <em>every</em> real $x$ — irrational exponents included — with no appeal to "repeated multiplication."</div>
-    <p><b>Its derivative, step by step.</b> The self-replicating property teased back in Module 1 now falls out by differentiating the inverse relationship. Set $y=e^x$. By the definition just above, applying $\\ln$ to both sides gives</p>
-    <div class="eqbox">$$\\ln y = x.$$</div>
-    <p>Differentiate both sides with respect to $x$. On the right, $\\frac{d}{dx}x=1$. On the left, $y$ is a function of $x$, so the chain rule applies — the outer derivative of $\\ln$ is $\\tfrac1y$, times the inner derivative $\\tfrac{dy}{dx}$:</p>
-    <div class="eqbox">$$\\frac{1}{y}\\cdot\\frac{dy}{dx}=1.$$</div>
-    <p>Solve for $\\tfrac{dy}{dx}$ by multiplying both sides by $y$, then recall $y=e^x$:</p>
-    <div class="eqbox">$$\\frac{dy}{dx}=y \\quad\\Longrightarrow\\quad \\color{#e8b84b}{(e^x)'=e^x}.$$</div>
-    <p>$e^x$ is its own derivative — the one function (up to scaling) whose growth rate equals its own height, which is why every growth or decay law is written $e^{kt}$. Every other exponential reduces to it: $a^x=e^{x\\ln a}$, so by the chain rule $(a^x)'=a^x\\ln a$. Drag $x$ until the shaded area hits exactly $1$ — the spot where it does is $e$.</p>
+    <p>$\\ln$ climbs continuously from $-\\infty$ (as $x\\to 0^+$) up to $+\\infty$, hitting every height exactly once. In particular there is a single input where the area equals exactly $1$ — a special number worth finding. Drag $x$ until the shaded area reaches $1$, and notice where you land.</p>
     <canvas id="cv" width="640" height="360"></canvas>
     <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">area = ln x</div><div class="v" id="lv">—</div></div></div>
-    <div class="task"><b>Use the derivative</b>Since $(e^x)' = e^x$ and $e^0 = 1$, what is the slope of $e^x$ at $x = 0$?</div>
+    <div class="task"><b>Use the derivative</b>That spot (call it $e$) makes $e^x$ the inverse of $\\ln$, and it turns out $(e^x)'=e^x$. Given that and $e^0=1$, what is the slope of $e^x$ at $x=0$?</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
   const cv=document.getElementById('cv');const pl=plot(cv,{xmin:0,xmax:5,ymin:-0.4,ymax:3.6});
   const f=t=>t>0.06?1/t:NaN;let x0=1.5;
@@ -1330,7 +1303,12 @@ function c4_e(){
     document.getElementById('lv').textContent=ln.toFixed(3);
     if(!draw.hitE&&ln>=1){draw.hitE=true;flash('✓ area = 1 → x = e ≈ 2.718');}}
   xdrag(cv,pl,x=>{x0=Math.max(0.3,Math.min(5,x));draw();});draw();
-  numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ slope = 1 at x = 0</div><p>$(e^x)'=e^x$, so the slope at $0$ is $e^0=1$ — the curve crosses the $y$-axis climbing at exactly $45°$. With $\\ln e = 1$ from the area and $(e^x)'=e^x$ from the inverse, the entire $e$–$\\ln$ pair is now built from the integral alone: no unproven limit, no circular appeal to "log base $e$." The transcendentals promised since Module 3 are finally rigorous — assembled, like everything in this course, from pieces you already had.</p>`);});
+  numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ slope = 1 — and here's the whole e / eˣ story</div>
+    <div class="defn"><span class="dt">Definition — the number e</span>$e$ is the unique number with $\\ln e=1$ — the spot you dragged to, $\\approx 2.71828$.</div>
+    <div class="defn"><span class="dt">Definition — the exponential function</span>$e^x$ is the inverse of $\\ln$: $\\ln(e^x)=x$ and $e^{\\ln x}=x$. This defines $e^x$ for <em>every</em> real $x$, irrational exponents included.</div>
+    <p><b>Its derivative, step by step.</b> Set $y=e^x$, so $\\ln y=x$. Differentiate both sides in $x$; the left needs the chain rule (outer $\\ln$ gives $\\tfrac1y$, times inner $\\tfrac{dy}{dx}$):</p>
+    <div class="eqbox">$$\\frac{1}{y}\\cdot\\frac{dy}{dx}=1\\;\\Longrightarrow\\;\\frac{dy}{dx}=y\\;\\Longrightarrow\\;\\color{#e8b84b}{(e^x)'=e^x}$$</div>
+    <p>So the slope at $0$ is $e^0=1$. $e^x$ is its own derivative — the growth property teased in Module 1, now earned. The whole $e$–$\\ln$ pair is built from the integral alone: no unproven limit, no circular appeal to "log base $e$."</p>`);});
   setHints([`(eˣ)′ = eˣ, and e⁰ = 1, so the slope at 0 is just e⁰.`,`e⁰ = 1.`]);
 }
 
@@ -1599,9 +1577,12 @@ function c5_recap(){
 window.onerror=function(m,s,l){console.error(m,l);};
 function bootRestore(){const s=loadState();
   if(s&&s.completed)Object.assign(completed,s.completed);
-  if(s&&s.view==='module'&&typeof s.curM==='number'&&MODULES[s.curM]&&MODULES[s.curM].ready){
-    const b=Math.max(0,Math.min(s.beat|0,MODULES[s.curM].beats.length-1));openModuleAt(s.curM,b);
-  }else renderMenu();}
+  const hp=parseHash();
+  let t=null;
+  if(hp&&MODULES[hp.curM]&&MODULES[hp.curM].ready)t={curM:hp.curM,beat:hp.beat};
+  else if(s&&s.view==='module'&&typeof s.curM==='number'&&MODULES[s.curM]&&MODULES[s.curM].ready)t={curM:s.curM,beat:s.beat};
+  if(t){const b=Math.max(0,Math.min(t.beat|0,MODULES[t.curM].beats.length-1));openModuleAt(t.curM,b);}
+  else renderMenu();}
 bootRestore();
 window.addEventListener('load',()=>renderMath());
 window.addEventListener('DOMContentLoaded',()=>renderMath());
