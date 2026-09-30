@@ -1655,7 +1655,8 @@ function c6_geometric(){
 
 function c6_nthterm(){
   stage.innerHTML=`<div class="card"><h2>The nth-term test — and the harmonic trap</h2>
-    <p>Here's a fast way to catch divergence, and the surprise that makes series subtle. Compare two series whose terms both shrink to $0$: the <b>harmonic</b> $\\sum\\tfrac1n$ and $\\sum\\tfrac1{n^2}$. Watch their partial sums.</p>
+    <p>The geometric series was a lucky special case — we found its <em>exact</em> sum. Most series have no such closed form, so from here the goal shifts: stop trying to compute the total and just ask <em>whether it converges at all</em>. That job falls to a handful of <b>convergence tests</b> that work on any series, and the rest of the module is those tests. Here's the first — plus the surprise that makes the sharper ones necessary.</p>
+    <p>Compare two series whose terms both shrink to $0$: the <b>harmonic</b> $\\sum\\tfrac1n$ and $\\sum\\tfrac1{n^2}$. Watch their partial sums.</p>
     <div class="seg" id="seg"></div>
     <canvas id="cv" width="640" height="380"></canvas>
     <p class="small" id="obs" style="margin-top:8px"></p>
@@ -1716,7 +1717,9 @@ function c6_ratiotest(){
     <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
     <p style="margin-top:16px"><b>The test, and why it works.</b> Compute $L=\\lim_{n\\to\\infty}\\left|\\dfrac{a_{n+1}}{a_n}\\right|$. The rule:</p>
     <div class="eqbox">$$L&lt;1\\Rightarrow\\text{converges},\\qquad L&gt;1\\Rightarrow\\text{diverges},\\qquad L=1\\Rightarrow\\text{inconclusive}$$</div>
-    <p>Why: if the ratio approaches $L&lt;1$, then past some point every term is less than $L'$ times the previous one (for any $L'$ with $L&lt;L'&lt;1$). From there the tail is dominated by a geometric series with ratio $L'&lt;1$, which converges — so by comparison, so does ours.</p>
+    <p><b>Why it works — geometric domination.</b> Suppose $L&lt;1$. Slip a cutoff $L'$ into the gap between $L$ and $1$ — there is room because $L&lt;1$, so take for instance the midpoint $L'=\\tfrac{L+1}{2}$. The ratios close in on $L$, which sits <em>below</em> $L'$, so from some term $N$ onward every ratio stays under $L'$: each term is less than $L'$ times the one before it. Iterate that from $a_N$:</p>
+    <div class="eqbox">$$|a_{N+1}|&lt;L'|a_N|,\\quad |a_{N+2}|&lt;L'|a_{N+1}|&lt;L'^{2}|a_N|,\\quad\\dots,\\quad |a_{N+k}|&lt;L'^{k}|a_N|$$</div>
+    <p>So the tail is smaller, term by term, than the geometric series $|a_N|\\sum_{k}L'^{k}$ — which converges because $L'&lt;1$. By comparison the tail converges, so the whole series does. (The cutoff $L'$ is only a proof device: we need a threshold strictly above $L$, so the ratios are guaranteed to fall below it, yet strictly below $1$, so the comparison series still converges.) If instead $L&gt;1$ the terms eventually grow, so it diverges; $L=1$ gives no information.</p>
     <p><b>Our example.</b> With $a_n=\\tfrac{n}{2^n}$:</p>
     <div class="eqbox">$$\\left|\\frac{a_{n+1}}{a_n}\\right|=\\frac{(n+1)/2^{n+1}}{n/2^{n}}=\\frac{n+1}{2n}=\\frac12\\Big(1+\\tfrac1n\\Big)\\;\\xrightarrow{\\,n\\to\\infty\\,}\\;\\tfrac12$$</div>
     <p>Since $L=\\tfrac12&lt;1$, $\\sum\\tfrac{n}{2^n}$ converges. The ratio test is the natural test for anything with factorials or $n$th powers, and it's what pins down power series next.</p></div>`;
@@ -1757,17 +1760,25 @@ function c6_powerseries(){
 
 function c6_taylor(){
   stage.innerHTML=`<div class="card"><h2>Taylor series: rebuild a function from its derivatives</h2>
-    <p>Here's the payoff. A power series can <em>be</em> a familiar function. Force a polynomial to match $\\sin x$ in value and in every derivative at $x=0$, and it hugs the curve — tap up the degree and watch the gold polynomial swallow more of the blue sine.</p>
+    <p>Here's the payoff of power series: a familiar function can <em>be</em> one. The idea is to build a polynomial that matches a function's value and every derivative at a point, then let its degree run to infinity. Watch it on $\\sin x$ — tap up the degree and see the gold polynomial swallow more of the blue sine curve.</p>
     <div class="seg" id="seg"></div>
     <canvas id="cv" width="640" height="380"></canvas>
     <p class="small" id="obs" style="margin-top:8px"></p>
-    <div class="task"><b>The coefficient pattern</b>The series has $n!$ in the denominators. In the $x^3$ term of $e^x$, namely $\\tfrac{x^3}{3!}$, what number is $3!$? (Enter it.)</div>
+    <p>Continue that matching forever and $\\sin$ becomes an infinite polynomial — a power series — whose denominators are factorials:</p>
+    <div class="eqbox">$$\\sin x = x-\\frac{x^3}{3!}+\\frac{x^5}{5!}-\\frac{x^7}{7!}+\\cdots$$</div>
+    <p>The gold curve you dragged is just the first few terms of this sum.</p>
+    <div class="task"><b>The factorial denominators</b>Those $n!$ are what make it work. In the $x^3$ term $\\tfrac{x^3}{3!}$, what number is $3!$? (Enter it.)</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
-    <p style="margin-top:16px"><b>Where the coefficients come from.</b> Suppose $f(x)=\\sum_{n=0}^{\\infty} c_n x^n$. Differentiate $k$ times: each differentiation drops the powers, and at $x=0$ every term dies except the constant one, leaving $f^{(k)}(0)=k!\\,c_k$. Solve for the coefficient:</p>
-    <div class="eqbox">$$c_k=\\frac{f^{(k)}(0)}{k!}\\qquad\\Longrightarrow\\qquad f(x)=\\sum_{n=0}^{\\infty}\\frac{f^{(n)}(0)}{n!}\\,x^n\\ \\text{(Maclaurin series)}$$</div>
-    <p><b>Build the classics.</b> For $e^x$, every derivative is $e^x$, which is $1$ at $0$, so all $c_n=\\tfrac1{n!}$. For $\\sin$ and $\\cos$ the derivatives cycle and pick out alternating signs:</p>
+    <p style="margin-top:16px"><b>Where the coefficients come from.</b> Suppose a function equals a power series, $f(x)=c_0+c_1x+c_2x^2+c_3x^3+c_4x^4+\\cdots$. We can pull each coefficient out by differentiating and then setting $x=0$ — because at $x=0$ every term that still contains an $x$ dies:</p>
+    <p>&bull; <b>As is:</b> $f(0)=c_0$ (all the other terms carry an $x$).</p>
+    <p>&bull; <b>Differentiate once:</b> $f'(x)=c_1+2c_2x+3c_3x^2+4c_4x^3+\\cdots$, so $f'(0)=c_1$.</p>
+    <p>&bull; <b>Again:</b> $f''(x)=2c_2+(3\\cdot2)c_3x+(4\\cdot3)c_4x^2+\\cdots$, so $f''(0)=2c_2$, i.e. $c_2=\\tfrac{f''(0)}{2}$.</p>
+    <p>&bull; <b>Again:</b> $f'''(x)=(3\\cdot2)c_3+(4\\cdot3\\cdot2)c_4x+\\cdots$, so $f'''(0)=3!\\,c_3$, i.e. $c_3=\\tfrac{f'''(0)}{3!}$.</p>
+    <p>Each differentiation brings one more power down as a factor, so after $k$ passes $f^{(k)}(0)=k!\\,c_k$. Solving for the coefficient gives the <b>Maclaurin series</b>:</p>
+    <div class="eqbox">$$c_k=\\frac{f^{(k)}(0)}{k!}\\qquad\\Longrightarrow\\qquad f(x)=\\sum_{n=0}^{\\infty}\\frac{f^{(n)}(0)}{n!}\\,x^n$$</div>
+    <p><b>Build the classics.</b> For $e^x$, every derivative is $e^x$, which equals $1$ at $0$, so every $c_n=\\tfrac1{n!}$. For $\\sin$ and $\\cos$ the derivatives cycle through $0,1,0,-1,\\dots$ at $0$, picking out alternating signs on the odd (respectively even) powers:</p>
     <div class="eqbox">$$e^x=\\sum_{n=0}^{\\infty}\\frac{x^n}{n!},\\quad \\sin x=x-\\frac{x^3}{3!}+\\frac{x^5}{5!}-\\cdots,\\quad \\cos x=1-\\frac{x^2}{2!}+\\frac{x^4}{4!}-\\cdots$$</div>
-    <p>Each converges for all $x$ (the ratio test gave $R=\\infty$). Setting $x=1$ in the first even recovers $e=1+1+\\tfrac12+\\tfrac16+\\cdots$. Functions you defined geometrically or by integration are now infinite polynomials — the bridge from calculus into everything numerical.</p></div>`;
+    <p>Each converges for every $x$ (the ratio test gave $R=\\infty$). Setting $x=1$ in the first recovers $e=1+1+\\tfrac12+\\tfrac16+\\cdots$. Functions you built by geometry or integration are now infinite polynomials — computable to any precision, the bridge from calculus into everything numerical.</p></div>`;
   const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-7,xmax:7,ymin:-2.2,ymax:2.2});
   const fact=n=>{let f=1;for(let i=2;i<=n;i++)f*=i;return f;};
   const ts=(x,d)=>{let s=0,sign=1;for(let k=1;k<=d;k+=2){s+=sign*Math.pow(x,k)/fact(k);sign*=-1;}return s;};
@@ -1777,7 +1788,7 @@ function c6_taylor(){
   function build(){document.getElementById('seg').innerHTML=ds.map(k=>`<span class="segb ${k===sel?'on':''}" data-k="${k}">deg ${k}</span>`).join('');
     document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{sel=b.dataset.k;build();draw();});}
   build();draw();
-  numChk(stage.querySelector('.card'),6,()=>{addReveal(`<div class="rh">✓ 3! = 6</div><p>$3!=3\\cdot2\\cdot1=6$. The factorial denominators are what make these series converge everywhere — they crush the growing powers. Crank the degree above and the gold polynomial matches $\\sin x$ over a wider and wider stretch; the infinite series matches it exactly. That's the whole idea of a Taylor series.</p>`);});
+  numChk(stage.querySelector('.card'),6,()=>{addReveal(`<div class="rh">✓ 3! = 6</div><p>$3!=3\\cdot2\\cdot1=6$. Those factorial denominators grow so fast they crush the rising powers, which is why these series converge everywhere. Crank the degree above and the gold polynomial matches $\\sin x$ over a wider and wider stretch — the infinite series matches it exactly.</p>`);});
   setHints([`3! means 3 factorial = 3 × 2 × 1.`,`3 × 2 × 1 = 6.`]);
 }
 
