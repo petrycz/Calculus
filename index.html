@@ -1118,13 +1118,22 @@ function c4_intro(){
 
 function c4_riemann(){
   stage.innerHTML=`<div class="card"><h2>Riemann sums: pave the area with rectangles</h2>
-    <p>To approximate the area under $f(x)=x^2$ from $0$ to $3$, slice the interval into $n$ equal strips of width $\\Delta x = \\frac{3}{n}$, cap each strip with a rectangle whose height is the curve's value at the strip's right edge, and add them up:</p>
-    <div class="eqbox">$$R_n = \\sum_{i=1}^{n} f(x_i)\\,\\Delta x, \\qquad x_i = i\\,\\Delta x$$</div>
-    <p>Each rectangle is crude, but crank $n$ up and the staircase hugs the curve. Tap to add rectangles and watch the sum settle.</p>
+    <p>We can't yet find the area under $f(x)=x^2$ from $0$ to $3$ exactly — but we can trap it. Slice $[0,3]$ into $n$ equal strips, each of width $\\Delta x=\\tfrac{3}{n}$, and cap each strip with a rectangle whose height is the curve's value at the strip's right edge $x_i=i\\,\\Delta x$. The sum of the rectangle areas is the <b>Riemann sum</b>:</p>
+    <div class="eqbox">$$R_n = \\sum_{i=1}^{n} f(x_i)\\,\\Delta x, \\qquad \\Delta x=\\frac{3}{n},\\quad x_i = i\\,\\Delta x=\\frac{3i}{n}$$</div>
+    <p>Each rectangle is crude, but as $n$ grows the staircase hugs the curve. Rather than eyeball the limit, let's compute $R_n$ <em>exactly</em> and take it — a genuine derivation of the area.</p>
+    <p><b>Step 1 — write the height.</b> At the right edge $x_i=\\tfrac{3i}{n}$, the curve's height is</p>
+    <div class="eqbox">$$f(x_i)=\\Big(\\frac{3i}{n}\\Big)^2=\\frac{9i^2}{n^2}.$$</div>
+    <p><b>Step 2 — assemble the sum and pull constants out front.</b> Multiply the height by $\\Delta x=\\tfrac3n$ and sum over $i$. The factors that don't depend on $i$ (here $\\tfrac{9}{n^2}$ and $\\tfrac3n$) come outside the sum:</p>
+    <div class="eqbox">$$R_n=\\sum_{i=1}^{n}\\frac{9i^2}{n^2}\\cdot\\frac{3}{n}=\\frac{27}{n^3}\\sum_{i=1}^{n} i^2$$</div>
+    <p><b>Step 3 — use the sum-of-squares identity.</b> A standard formula (provable by induction) evaluates that sum in closed form: $\\sum_{i=1}^{n} i^2=\\tfrac{n(n+1)(2n+1)}{6}$. Substitute it:</p>
+    <div class="eqbox">$$R_n=\\frac{27}{n^3}\\cdot\\frac{n(n+1)(2n+1)}{6}=\\frac{27(n+1)(2n+1)}{6\\,n^2}$$</div>
+    <p><b>Step 4 — divide through and take the limit.</b> Expand $(n+1)(2n+1)=2n^2+3n+1$, then divide each term by $n^2$:</p>
+    <div class="eqbox">$$R_n=\\frac{27}{6}\\cdot\\frac{2n^2+3n+1}{n^2}=\\frac{9}{2}\\Big(2+\\frac{3}{n}+\\frac{1}{n^2}\\Big)$$</div>
+    <p>As $n\\to\\infty$, the $\\tfrac3n$ and $\\tfrac1{n^2}$ terms die, leaving $R_n\\to\\tfrac92\\cdot 2=9$. The exact area is $9$. Now confirm it: tap to add rectangles and watch $R_n$ settle onto that number.</p>
     <div class="seg" id="seg"></div>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">n rectangles</div><div class="v" id="nv">—</div></div><div class="rdc"><div class="k">Rₙ (sum)</div><div class="v" id="rv">—</div></div></div>
-    <div class="task"><b>Find the limit</b>As $n$ grows, the sums close in on one number — the exact area. Enter it.</div>
+    <div class="task"><b>Confirm the limit</b>The sums approach the exact area you just derived. Enter it.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
   const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.3,xmax:3.3,ymin:-0.6,ymax:9.8});
   const f=x=>x*x,A=0,B=3;let n=6;
@@ -1139,18 +1148,21 @@ function c4_riemann(){
   function build(){const ns=[3,6,12,24,48,96];document.getElementById('seg').innerHTML=ns.map(k=>`<span class="segb ${k===n?'on':''}" data-k="${k}">${k}</span>`).join('');
     document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{n=+b.dataset.k;build();draw();});}
   build();draw();
-  numChk(stage.querySelector('.card'),9,()=>{addReveal(`<div class="rh">✓ The area is exactly 9</div><p>Right-endpoint rectangles <em>overshoot</em> here (an increasing curve pokes above each strip's left part), so $R_3=14$, but the overshoot shrinks like $\\frac1n$: $R_6=11.4$, $R_{24}=9.6$, $R_{96}\\approx 9.1\\ldots$, homing in on $9$. That limit <em>is</em> the area, and we name it the <b>definite integral</b>: $\\int_0^3 x^2\\,dx = \\lim_{n\\to\\infty} R_n = 9$. (Algebraically $R_n=\\frac{27}{n^3}\\cdot\\frac{n(n+1)(2n+1)}{6}\\to 9$.)</p>`);});
-  setHints([`Read the Rₙ box as you raise n: 14, 11.4, 10.2, 9.6, 9.3, 9.1… what whole number is it converging to?`,`It approaches 9.`]);
+  numChk(stage.querySelector('.card'),9,()=>{addReveal(`<div class="rh">✓ The area is exactly 9</div><p>Notice the approach is from <em>above</em>: right-endpoint rectangles overshoot an increasing curve, so $R_3=14$, $R_6=11.4$, $R_{24}=9.6$, $R_{96}\\approx 9.1$ — the overshoot dies like $\\tfrac{3}{n}$, exactly the term you watched vanish in Step 4. We name this limit the <b>definite integral</b>: $\\int_0^3 x^2\\,dx=\\lim_{n\\to\\infty}R_n=9$. Formalizing that limit — and what it means when the curve dips negative — is the next beat.</p>`);});
+  setHints([`You already derived it in Step 4: Rₙ = (9/2)(2 + 3/n + 1/n²). Let n → ∞.`,`The 3/n and 1/n² vanish, leaving (9/2)(2) = 9.`]);
 }
 
 function c4_defint(){
   stage.innerHTML=`<div class="card"><h2>The definite integral: signed area as a limit</h2>
-    <p>That limit of Riemann sums, which exists for any continuous $f$ no matter how you slice, is the <b>definite integral</b>:</p>
-    <div class="eqbox">$$\\int_a^b f(x)\\,dx = \\lim_{n\\to\\infty}\\sum_{i=1}^{n} f(x_i)\\,\\Delta x$$</div>
-    <p>The elongated S is a "sum"; $a,b$ are the limits, $f(x)$ the integrand, $dx$ the vanishing width. One crucial wrinkle: where $f$ dips <em>below</em> the axis, its heights are negative, so those strips subtract. The integral is <b>signed area</b> — area above the axis minus area below. Drag the right edge across $f(x)=x$ and watch the running total; the <span class="rd">red</span> region (below the axis) counts against the <span class="grn">green</span>.</p>
+    <p>The limit you just computed isn't special to $x^2$. For any continuous $f$, the Riemann sums converge to the same number however you slice (equal widths or not) and wherever inside each strip you sample the height. That common limit is the <b>definite integral</b>:</p>
+    <div class="eqbox">$$\\int_a^b f(x)\\,dx = \\lim_{n\\to\\infty}\\sum_{i=1}^{n} f(x_i)\\,\\Delta x \\qquad \\color{#5d7186}{(\\text{strips shrinking as } n\\to\\infty)}$$</div>
+    <p>The elongated S is a stretched "sum"; $a$ and $b$ are the limits of integration, $f(x)$ is the integrand, and $dx$ is the width shrinking to zero.</p>
+    <p><b>Signed area.</b> The heights $f(x_i)$ carry a sign. Where the curve dips below the axis, $f(x_i)&lt;0$, so that strip contributes $f(x_i)\\,\\Delta x&lt;0$ — it <em>subtracts</em>. So the integral is not raw area but area above the axis <em>minus</em> area below. Drag the right edge across $f(x)=x$; the <span class="rd">red</span> region below the axis counts against the <span class="grn">green</span> one above.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">right edge b</div><div class="v" id="bv">—</div></div><div class="rdc"><div class="k">signed area ∫₋₂ᵇ</div><div class="v" id="av">—</div></div></div>
+    <p><b>Four properties, all inherited from the sums.</b> Each is obvious for a finite sum and simply survives the limit:</p>
     <div class="eqbox">$$\\begin{gathered}\\textstyle\\int_a^a f=0 \\qquad \\int_b^a f=-\\int_a^b f \\\\[2pt] \\textstyle\\int_a^b(cf+g)=c\\!\\int_a^b f+\\int_a^b g \\qquad \\int_a^c f+\\int_c^b f=\\int_a^b f\\end{gathered}$$</div>
+    <p>Reading them off, left to right: a zero-width interval encloses no strips, so the sum is $0$; running the interval backwards flips the sign of every $\\Delta x$, flipping the whole sum; a sum of scaled heights splits apart, $\\sum(cf+g)\\Delta x=c\\sum f\\Delta x+\\sum g\\Delta x$, which is <em>linearity</em>; and slicing $[a,c]$ and then $[c,b]$ is just one slicing of $[a,b]$, so the two integrals add (<em>additivity</em>).</p>
     <div class="task"><b>Signed area</b>What is $\\displaystyle\\int_{-2}^{2} x\\,dx$ — the net signed area of $f(x)=x$ from $-2$ to $2$?</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
   const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-2.6,xmax:2.6,ymin:-2.6,ymax:2.6});
@@ -1162,7 +1174,7 @@ function c4_defint(){
     document.getElementById('bv').textContent=b.toFixed(2);
     document.getElementById('av').textContent=sarea(b).toFixed(3);}
   xdrag(cv,pl,x=>{b=Math.max(-1.9,Math.min(2.5,x));draw();});draw();
-  numChk(stage.querySelector('.card'),0,()=>{addReveal(`<div class="rh">✓ 0 — the halves cancel</div><p>From $-2$ to $0$ the curve is below the axis (a triangle of area $2$, counted <em>negative</em>); from $0$ to $2$ it's an equal triangle above (area $+2$). Net: $-2+2=0$. Signed area is why an integral can be zero over a nonempty region, and why $\\int$ of an odd function over a symmetric interval always vanishes. The four properties boxed above — all inherited from the sums — are the algebra you'll compute with.</p>`);});
+  numChk(stage.querySelector('.card'),0,()=>{addReveal(`<div class="rh">✓ 0 — the halves cancel</div><p>From $-2$ to $0$ the curve is below the axis (a triangle of area $2$, counted <em>negative</em>); from $0$ to $2$ it's an equal triangle above (area $+2$). Net: $-2+2=0$. Signed area is why an integral can be zero over a nonempty region, and why $\\int$ of an odd function over a symmetric interval always vanishes. Those four properties are the algebra you'll compute with from here on.</p>`);});
   setHints([`Below the axis counts negative. The triangle on the left ($-2$ to $0$) and the one on the right ($0$ to $2$) are mirror images.`,`Equal negative and positive triangles cancel: 0.`]);
 }
 
