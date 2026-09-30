@@ -140,7 +140,9 @@ const MODULES=[
  {id:'c5',title:'Techniques & Applications of Integration',sub:'Substitution, parts, partial fractions, improper integrals; area, volume, arc length.',ready:true,
   outro:`Integration is a craft, and now you have the toolbox: substitution reverses the chain rule, parts reverses the product rule, partial fractions breaks a hard rational into easy pieces, and improper integrals extend the idea to infinite regions via limits. Then the payoff — area between curves, volumes of revolution, and arc length — is all one move: slice, express the piece as an integrand, and integrate.`,
   beats:[c5_recall,c5_intro,c5_usub,c5_parts,c5_partialfrac,c5_improper,c5_area,c5_volume,c5_arclength,c5_problems,c5_recap]},
- {id:'c6',title:'Sequences & Series',sub:'Convergence tests, power series, and Taylor/Maclaurin expansions.',ready:false},
+ {id:'c6',title:'Sequences & Series',sub:'Convergence tests, power series, and Taylor/Maclaurin expansions.',ready:true,
+  outro:`An infinite sum converges when its partial sums settle to a finite limit. The geometric series is the model; the nth-term, integral, and ratio tests decide the rest — echoing the improper-integral knife-edge. Power series are polynomials of infinite degree, and Taylor series rebuild $e^x$, $\\sin x$, and $\\cos x$ from their derivatives at a single point.`,
+  beats:[c6_recall,c6_intro,c6_sequences,c6_geometric,c6_nthterm,c6_integraltest,c6_ratiotest,c6_powerseries,c6_taylor,c6_problems,c6_recap]},
  {id:'c7',title:'Multivariable Calculus',sub:'Partial derivatives, the gradient, directional derivatives, and multiple integrals.',ready:false},
  {id:'c8',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:false},
  {id:'c9',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:false},
@@ -296,6 +298,18 @@ const RECALL={
     a:"$F$ with $F'=f$; the family is $\\int f\\,dx=F+C$. Reverse power rule: $\\int x^n dx=\\frac{x^{n+1}}{n+1}+C$ ($n\\ne-1$). The $+C$ is there because constants vanish under $d/dx$, so an initial condition is needed to pin it.", b:5},
    {q:"How are $\\ln$, $e$, and $e^x$ defined from the integral, and what are $(\\ln x)'$ and $(e^x)'$?",
     a:"$\\ln x:=\\int_1^x \\frac{dt}{t}$, so $(\\ln x)'=\\frac1x$ (FTC Part 1); $e$ is defined by $\\ln e=1$; $e^x$ is the inverse of $\\ln$, and $(e^x)'=e^x$.", b:7}
+ ]},
+ c5:{title:'Module 6 — Techniques & Applications of Integration', cues:[
+   {q:"How does substitution work, and which differentiation rule does it reverse?",
+    a:"It reverses the chain rule: $\\int f(g(x))\\,g'(x)\\,dx=\\int f(u)\\,du$ with $u=g(x)$. Spot an inner function whose derivative is also present, rename it, and the integral collapses.", b:2},
+   {q:"State integration by parts and the rule it reverses.",
+    a:"It reverses the product rule: $\\int u\\,dv=uv-\\int v\\,du$. Choose $u$ to be the part that gets simpler when differentiated, so the leftover integral is easier.", b:3},
+   {q:"What does partial-fraction decomposition do, and what do the pieces integrate to?",
+    a:"It splits a rational function into simple fractions like $\\tfrac{A}{x-r}$ (via matching, or the cover-up method); each piece integrates to a logarithm.", b:4},
+   {q:"How do you handle an improper integral over an infinite interval, and what is convergence?",
+    a:"Integrate to a finite $b$ and take $\\lim_{b\\to\\infty}$. It <em>converges</em> if that limit is finite ($\\int_1^\\infty\\tfrac{1}{x^2}=1$), <em>diverges</em> if not ($\\int_1^\\infty\\tfrac1x=\\infty$).", b:5},
+   {q:"How are area between curves, volume of revolution, and arc length each set up as integrals?",
+    a:"Area $=\\int(y_{\\text{top}}-y_{\\text{bottom}})\\,dx$; volume by disks $=\\int\\pi f(x)^2\\,dx$; arc length $=\\int\\sqrt{1+(f')^2}\\,dx$. Each slices the object and integrates one piece.", b:6}
  ]}
 };
 const RECALL_HINT=`Run it as one unbroken chain — each cue answers the previous one's "so what?". If a link takes you away to review, one tap on Back returns you to this list.`;
@@ -1570,6 +1584,256 @@ function c5_recap(){
     <div style="text-align:center;line-height:2;color:#dbe6f4;margin-top:6px">partial fractions: split a rational into $\\tfrac{A}{x-r}$ pieces $\\to$ logs<br>improper: $\\int_1^\\infty f = \\lim_{b\\to\\infty}\\int_1^b f$ (converge vs diverge)<br>area $=\\int(y_{\\text{top}}-y_{\\text{bottom}})\\,dx$ · volume $=\\int \\pi f(x)^2\\,dx$<br>arc length $=\\int \\sqrt{1+(f')^2}\\,dx$</div></div>
     <p>Every technique was a differentiation rule reversed, and every application was the same reflex: slice the thing into pieces, write one piece as an integrand, integrate. You can now integrate the large class of functions that submit to these tools — and you know, honestly, that some functions don't.</p>
     <p><b>Next — Module 7:</b> what if you add up <em>infinitely many</em> terms? <b>Sequences and series</b> ask when an infinite sum settles to a finite value — the convergence tests echo the improper-integral knife-edge you just saw — and culminate in <b>Taylor series</b>, which rebuild functions like $e^x$, $\\sin x$, and $\\cos x$ as infinite polynomials.</p></div>`;
+  setHints([]);unlock();
+}
+
+/* ================= MODULE 7 — SEQUENCES & SERIES ================= */
+function c6_recall(){recallFrom(`Module 7 asks what happens when you add up <em>infinitely many</em> terms — so rebuild the whole machine first, especially the improper integrals whose convergence knife-edge these series will echo.`,['c0','c1','c2','c3','c4','c5'],RECALL_HINT);}
+
+function c6_intro(){
+  stage.innerHTML=`<div class="card"><h2>Can an infinite sum be finite?</h2>
+    <p>You've added finitely many numbers all your life. Now the new question: add <em>infinitely</em> many and ask whether the running total settles down. Some do — $\\tfrac12+\\tfrac14+\\tfrac18+\\cdots$ creeps up on exactly $1$, never passing it. Some don't — $1+2+3+\\cdots$ runs away, and even $1+\\tfrac12+\\tfrac13+\\cdots$ (whose terms shrink to $0$) turns out to grow without bound.</p>
+    <p>That single distinction — <b>convergence</b> vs <b>divergence</b> — is the whole module, and it will rhyme with the improper integrals of Module 6, where $\\int_1^\\infty\\tfrac1{x^2}$ was finite but $\\int_1^\\infty\\tfrac1x$ was not.</p>
+    <div class="task"><b>First instinct</b>Is it possible for a sum of <em>infinitely many positive</em> numbers to be finite?</div>
+    <div class="choices" id="ch"></div></div>`;
+  const opts=[['Yes — e.g. $\\tfrac12+\\tfrac14+\\tfrac18+\\cdots=1$, if the terms shrink fast enough','y'],['No — infinitely many positives always add to infinity','n'],['Only if all but finitely many terms are zero','n'],['Only for negative terms','n']];
+  mcChoices(document.getElementById('ch'),opts,()=>{addReveal(`<div class="rh">✓ Yes — if the terms shrink fast enough</div><p>Halving each time, the leftover gap to $1$ also halves, so the total is squeezed to $1$. The entire subject is figuring out <em>which</em> series shrink fast enough to converge and which don't — and the surprise ahead is that "terms shrink to $0$" is necessary but <b>not</b> sufficient.</p>`);});
+  setHints([`Think about 1/2 + 1/4 + 1/8 + … — each step covers half the remaining distance to 1.`]);
+}
+
+function c6_sequences(){
+  stage.innerHTML=`<div class="card"><h2>Sequences and their limits</h2>
+    <p>A <b>sequence</b> is an ordered list $a_1,a_2,a_3,\\dots$ — a function whose inputs are the whole numbers. It <b>converges</b> to $L$ if the terms get and stay arbitrarily close to $L$ (the same closeness idea as a limit in Module 2, now marching through $n=1,2,3,\\dots$). Tap between three sequences and watch which ones settle.</p>
+    <div class="seg" id="seg"></div>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <p class="small" id="obs" style="margin-top:8px"></p>
+    <div class="task"><b>Read off a limit</b>For $a_n=\\dfrac{n}{n+1}$ (the first sequence), what value do the terms approach? (Enter a number.)</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>Now compute it.</b> To find $\\lim_{n\\to\\infty}\\dfrac{n}{n+1}$, divide top and bottom by the highest power of $n$ (here $n$) — the same move as limits at infinity in Module 2:</p>
+    <div class="eqbox">$$\\frac{n}{n+1}=\\frac{1}{1+\\tfrac1n}\\;\\xrightarrow{\\,n\\to\\infty\\,}\\;\\frac{1}{1+0}=1$$</div>
+    <p>The $\\tfrac1n$ dies, leaving $1$. Not every sequence has a limit: $a_n=(-1)^n$ bounces between $-1$ and $1$ forever (no single value), and $a_n=\\sqrt{n}$ grows past every bound — both <em>diverge</em>. Convergence is special.</p></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:0,xmax:13,ymin:-1.4,ymax:3.8});
+  const seqs={'n/(n+1)':{f:n=>n/(n+1),L:1,note:'Terms climb toward 1 and stay there — converges to 1.'},'(−1)ⁿ':{f:n=>Math.pow(-1,n),L:null,note:'Bounces between −1 and 1 forever — diverges (no single limit).'},'√n':{f:n=>Math.sqrt(n),L:null,note:'Grows without bound — diverges to ∞.'}};
+  let sel='n/(n+1)';
+  function draw(){pl.grid();const g=seqs[sel];if(g.L!==null)pl.hline(g.L,'#3fb98f',true);
+    for(let n=1;n<=12;n++){const y=g.f(n);if(y<=pl.ymax+1&&y>=pl.ymin-1)pl.point(n,y,'#7ab8ff',4);}
+    document.getElementById('obs').textContent=g.note;}
+  function build(){document.getElementById('seg').innerHTML=Object.keys(seqs).map(k=>`<span class="segb ${k===sel?'on':''}" data-k="${k}">${k}</span>`).join('');
+    document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{sel=b.dataset.k;build();draw();});}
+  build();draw();
+  numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ Approaches 1</div><p>The dots pile up on the dashed line $y=1$, and dividing through by $n$ confirms it exactly. A sequence's limit is the launching pad for a series — which is just a sequence of running totals.</p>`);});
+  setHints([`The dots climb toward a dashed line. Or compute: n/(n+1) = 1/(1+1/n).`,`As n→∞, 1/n→0, so it approaches 1.`]);
+}
+
+function c6_geometric(){
+  stage.innerHTML=`<div class="card"><h2>Series and the geometric model</h2>
+    <p>A <b>series</b> is the sum of a sequence, $\\sum a_n=a_1+a_2+\\cdots$. To make sense of infinitely many additions, watch the <b>partial sums</b> $S_n=a_1+\\cdots+a_n$: the series <em>converges</em> to $S$ exactly when the sequence $S_n$ converges to $S$. The model case is the <b>geometric series</b> $1+r+r^2+\\cdots$. Tap through values of $r$ and watch the partial sums.</p>
+    <div class="seg" id="seg"></div>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">r</div><div class="v" id="rv">—</div></div><div class="rdc"><div class="k">sum S</div><div class="v" id="sv">—</div></div></div>
+    <div class="task"><b>Find the sum</b>For $r=\\tfrac12$ (so $1+\\tfrac12+\\tfrac14+\\cdots$), what does the series add up to?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>Now derive the sum.</b> Write the $n$-term partial sum and use a subtraction trick. Multiply $S_n$ by $r$ and line the two up:</p>
+    <div class="eqbox">$$S_n=1+r+r^2+\\cdots+r^{n-1},\\qquad rS_n=r+r^2+\\cdots+r^{n}$$</div>
+    <p>Subtract — everything in the middle cancels — and solve for $S_n$:</p>
+    <div class="eqbox">$$S_n-rS_n=1-r^{n}\\;\\Rightarrow\\;S_n=\\frac{1-r^{n}}{1-r}$$</div>
+    <p>Now let $n\\to\\infty$. If $|r|&lt;1$ then $r^{n}\\to 0$, so the partial sums settle:</p>
+    <div class="eqbox">$$\\sum_{n=0}^{\\infty} r^{n}=\\color{#e8b84b}{\\frac{1}{1-r}}\\quad(|r|&lt;1);\\qquad \\text{if } |r|\\ge 1,\\ r^{n}\\not\\to 0\\ \\Rightarrow\\ \\text{diverges}$$</div>
+    <p>(With a leading coefficient $a$, the sum is $\\dfrac{a}{1-r}$.) This one formula underlies almost every test that follows.</p></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:0,xmax:13,ymin:-0.5,ymax:6});
+  const rs=['0.3','0.5','0.8','1.2'];let sel='0.5';
+  function draw(){pl.grid();const r=parseFloat(sel);const conv=Math.abs(r)<1;if(conv)pl.hline(1/(1-r),'#3fb98f',true);
+    let S=0;for(let n=0;n<=12;n++){S+=Math.pow(r,n);if(S<=pl.ymax+2&&S>=pl.ymin-1)pl.point(n+1,S,'#7ab8ff',4);}
+    document.getElementById('rv').textContent=r.toFixed(1);
+    document.getElementById('sv').textContent=conv?(1/(1-r)).toFixed(3):'diverges';}
+  function build(){document.getElementById('seg').innerHTML=rs.map(k=>`<span class="segb ${k===sel?'on':''}" data-k="${k}">r = ${k}</span>`).join('');
+    document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{sel=b.dataset.k;build();draw();});}
+  build();draw();
+  numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ 2</div><p>$\\frac{1}{1-1/2}=\\frac{1}{1/2}=2$ — the partial sums climb $1,1.5,1.75,1.875,\\dots$ toward exactly $2$. Push $r$ toward $1$ and the sum blows up; at $|r|\\ge 1$ the terms don't even shrink to $0$, so it diverges. Keep $\\frac{1}{1-r}$ close — it's the workhorse of the whole module.</p>`);});
+  setHints([`Sum of a geometric series with |r|<1 is 1/(1−r).`,`1/(1−0.5) = 1/0.5 = 2.`]);
+}
+
+function c6_nthterm(){
+  stage.innerHTML=`<div class="card"><h2>The nth-term test — and the harmonic trap</h2>
+    <p>Here's a fast way to catch divergence, and the surprise that makes series subtle. Compare two series whose terms both shrink to $0$: the <b>harmonic</b> $\\sum\\tfrac1n$ and $\\sum\\tfrac1{n^2}$. Watch their partial sums.</p>
+    <div class="seg" id="seg"></div>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <p class="small" id="obs" style="margin-top:8px"></p>
+    <div class="task"><b>Why the harmonic diverges</b>Group its terms: $\\tfrac15+\\tfrac16+\\tfrac17+\\tfrac18$. Each is at least $\\tfrac18$, so their sum is at least $4\\cdot\\tfrac18=$ ? (Enter a decimal.)</div>
+    <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>The nth-term test.</b> If $\\sum a_n$ converges to $S$, then $a_n=S_n-S_{n-1}\\to S-S=0$. Contrapositive: <em>if $a_n\\not\\to 0$, the series diverges.</em> It's a quick disqualifier — but it only detects divergence.</p>
+    <p><b>The trap: $a_n\\to 0$ is not enough.</b> The harmonic series has $\\tfrac1n\\to 0$ yet diverges, shown by grouping (Oresme, ~1350):</p>
+    <div class="eqbox">$$1+\\underbrace{\\tfrac12}_{\\ge\\frac12}+\\underbrace{\\tfrac13+\\tfrac14}_{\\ge\\frac12}+\\underbrace{\\tfrac15+\\cdots+\\tfrac18}_{\\ge\\frac12}+\\underbrace{\\tfrac19+\\cdots+\\tfrac1{16}}_{\\ge\\frac12}+\\cdots$$</div>
+    <p>Each bracket sums to at least $\\tfrac12$ (replace every term by the smallest one in the group), and there are infinitely many brackets, so the total exceeds $\\tfrac12+\\tfrac12+\\cdots=\\infty$. Terms shrinking to $0$ was necessary, never sufficient — which is exactly why we need the sharper tests next.</p></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:0,xmax:52,ymin:-0.3,ymax:3.2});
+  const series={'∑ 1/n (harmonic)':{f:k=>1/k,note:'Partial sums keep climbing past every level — diverges.'},'∑ 1/n²':{f:k=>1/(k*k),note:'Partial sums level off near 1.64 — converges.'}};
+  let sel='∑ 1/n (harmonic)';
+  function draw(){pl.grid();const g=series[sel];let S=0;for(let k=1;k<=50;k++){S+=g.f(k);if(S<=pl.ymax+0.5)pl.point(k,S,'#7ab8ff',3);}
+    document.getElementById('obs').textContent=g.note;}
+  function build(){document.getElementById('seg').innerHTML=Object.keys(series).map(k=>`<span class="segb ${k===sel?'on':''}" data-k="${k}">${k}</span>`).join('');
+    document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{sel=b.dataset.k;build();draw();});}
+  build();draw();
+  numChk(stage.querySelector('.card'),0.5,()=>{addReveal(`<div class="rh">✓ ½ = 0.5</div><p>Four terms each $\\ge\\tfrac18$ sum to $\\ge\\tfrac12$. The next group ($\\tfrac19$ to $\\tfrac1{16}$) is eight terms each $\\ge\\tfrac1{16}$, again $\\ge\\tfrac12$ — endlessly. So the harmonic sum outgrows every bound even though its terms vanish. On the graph, $\\sum\\tfrac1n$ keeps rising while $\\sum\\tfrac1{n^2}$ flattens.</p>`);},s=>parseFloat(s));
+  setHints([`Four terms, each at least 1/8. Add them: 4 × 1/8.`,`4/8 = 1/2 = 0.5.`]);
+}
+
+function c6_integraltest(){
+  stage.innerHTML=`<div class="card"><h2>The integral test and p-series</h2>
+    <p>To settle whether $\\sum\\tfrac1{n^p}$ converges, compare the sum to an area. Each term $\\tfrac1{n^p}$ is the area of a width-$1$ rectangle of height $\\tfrac1{n^p}$; line those rectangles up against the curve $y=\\tfrac1{x^p}$. Tap between $p$ values and watch whether the partial sum levels off.</p>
+    <div class="seg" id="seg"></div>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">p</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">partial sum (50 terms)</div><div class="v" id="sv">—</div></div></div>
+    <div class="task"><b>The verdict</b>The p-series $\\sum\\tfrac1{n^p}$ converges for which $p$?</div>
+    <div class="choices" id="ch"></div>
+    <p style="margin-top:16px"><b>Why — the integral test.</b> For a positive, decreasing $f$, the rectangles are trapped against the curve. Right-edge rectangles sit <em>below</em> the curve, left-edge ones sit <em>above</em>, so the tail of the sum is squeezed between two copies of the integral:</p>
+    <div class="eqbox">$$\\int_1^{\\infty} f(x)\\,dx\\;\\le\\;\\sum_{n=1}^{\\infty} f(n)\\;\\le\\;f(1)+\\int_1^{\\infty} f(x)\\,dx$$</div>
+    <p>So the sum is finite exactly when the integral is — they share one fate. Apply it to $f(x)=\\tfrac1{x^p}$, using the improper integral from Module 6:</p>
+    <div class="eqbox">$$\\int_1^{\\infty}\\frac{dx}{x^p}\\ \\text{converges}\\iff p&gt;1\\quad\\Longrightarrow\\quad \\sum_{n=1}^{\\infty}\\frac1{n^p}\\ \\text{converges}\\iff \\color{#e8b84b}{p&gt;1}$$</div>
+    <p>So $\\sum\\tfrac1{n^2}$ converges ($p=2$) but the harmonic $\\sum\\tfrac1n$ diverges ($p=1$) — the same knife-edge you saw for improper integrals, now for sums.</p></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:0,xmax:8,ymin:-0.15,ymax:1.35});
+  const ps=['0.5','1','2'];let sel='2';
+  function draw(){pl.grid();const p=parseFloat(sel);const{ctx}=pl;
+    for(let n=1;n<=7;n++){const h=1/Math.pow(n,p);const X0=pl.px(n),X1=pl.px(n+1),Y0=pl.py(0),Y1=pl.py(h);
+      ctx.fillStyle='rgba(122,184,255,0.16)';ctx.fillRect(X0,Y1,X1-X0,Y0-Y1);ctx.strokeStyle='rgba(122,184,255,0.55)';ctx.lineWidth=1;ctx.strokeRect(X0,Y1,X1-X0,Y0-Y1);}
+    pl.curve(x=>x>=1?1/Math.pow(x,p):NaN,'#e8b84b');
+    let S=0;for(let n=1;n<=50;n++)S+=1/Math.pow(n,p);
+    document.getElementById('pv').textContent=p;
+    document.getElementById('sv').textContent=p>1?S.toFixed(3):S.toFixed(2)+' ↑ (climbing)';}
+  function build(){document.getElementById('seg').innerHTML=ps.map(k=>`<span class="segb ${k===sel?'on':''}" data-k="${k}">p = ${k}</span>`).join('');
+    document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{sel=b.dataset.k;build();draw();});}
+  build();draw();
+  const opts=[['when $p&gt;1$ — e.g. $\\sum 1/n^2$ converges, $\\sum 1/n$ diverges','y'],['for every $p$','n'],['when $p&lt;1$','n'],['when $p\\ge 1$','n']];
+  mcChoices(document.getElementById('ch'),opts,()=>{addReveal(`<div class="rh">✓ Converges iff p &gt; 1</div><p>The rectangles ride the curve, so the sum and the improper integral $\\int_1^\\infty x^{-p}\\,dx$ converge together — and that integral is finite only for $p&gt;1$. At $p=2$ the partial sum flattens (toward $\\pi^2/6\\approx1.645$); at $p=1$ and $p=0.5$ it climbs forever.</p>`);});
+  setHints([`Recall the improper integral: ∫₁^∞ x^(−p) dx was finite only when p > 1. The sum shares that fate.`]);
+}
+
+function c6_ratiotest(){
+  stage.innerHTML=`<div class="card"><h2>The ratio test: compare to a geometric series</h2>
+    <p>The sharpest everyday test looks at how fast the terms shrink — the ratio of consecutive terms. If that ratio settles below $1$, the tail behaves like a convergent geometric series. Below are the ratios $\\left|\\tfrac{a_{n+1}}{a_n}\\right|$ for $\\sum \\tfrac{n}{2^n}$; watch where they head.</p>
+    <canvas id="cv" width="640" height="360"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">n</div><div class="v" id="nv">—</div></div><div class="rdc"><div class="k">ratio aₙ₊₁/aₙ</div><div class="v" id="rv">—</div></div></div>
+    <div class="task"><b>The limiting ratio</b>Drag along the dots: what value $L$ do the ratios $\\tfrac{n+1}{2n}$ approach? (Enter a decimal.)</div>
+    <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>The test, and why it works.</b> Compute $L=\\lim_{n\\to\\infty}\\left|\\dfrac{a_{n+1}}{a_n}\\right|$. The rule:</p>
+    <div class="eqbox">$$L&lt;1\\Rightarrow\\text{converges},\\qquad L&gt;1\\Rightarrow\\text{diverges},\\qquad L=1\\Rightarrow\\text{inconclusive}$$</div>
+    <p>Why: if the ratio approaches $L&lt;1$, then past some point every term is less than $L'$ times the previous one (for any $L'$ with $L&lt;L'&lt;1$). From there the tail is dominated by a geometric series with ratio $L'&lt;1$, which converges — so by comparison, so does ours.</p>
+    <p><b>Our example.</b> With $a_n=\\tfrac{n}{2^n}$:</p>
+    <div class="eqbox">$$\\left|\\frac{a_{n+1}}{a_n}\\right|=\\frac{(n+1)/2^{n+1}}{n/2^{n}}=\\frac{n+1}{2n}=\\frac12\\Big(1+\\tfrac1n\\Big)\\;\\xrightarrow{\\,n\\to\\infty\\,}\\;\\tfrac12$$</div>
+    <p>Since $L=\\tfrac12&lt;1$, $\\sum\\tfrac{n}{2^n}$ converges. The ratio test is the natural test for anything with factorials or $n$th powers, and it's what pins down power series next.</p></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:0,xmax:13,ymin:-0.1,ymax:1.3});
+  const ratio=n=>(n+1)/(2*n);let selN=1;
+  function draw(){pl.grid();pl.hline(0.5,'#3fb98f',true);
+    for(let n=1;n<=12;n++)pl.point(n,ratio(n),n===selN?'#e8b84b':'#7ab8ff',n===selN?5:3);
+    document.getElementById('nv').textContent=selN;
+    document.getElementById('rv').textContent=ratio(selN).toFixed(3);}
+  xdrag(cv,pl,x=>{selN=Math.max(1,Math.min(12,Math.round(x)));draw();});draw();
+  numChk(stage.querySelector('.card'),0.5,()=>{addReveal(`<div class="rh">✓ L = ½ = 0.5</div><p>$\\frac{n+1}{2n}=\\frac12+\\frac1{2n}\\to\\frac12$. Since $\\tfrac12&lt;1$, the tail shrinks geometrically and $\\sum\\tfrac{n}{2^n}$ converges. (A ratio $\\to 0$, as for $\\sum\\tfrac{x^n}{n!}$, means convergence for <em>every</em> $x$ — the fact behind $e^x$'s series ahead.)</p>`);},s=>parseFloat(s));
+  setHints([`The ratio is (n+1)/(2n) = ½ + 1/(2n). As n grows, the 1/(2n) part vanishes.`,`It approaches ½ = 0.5.`]);
+}
+
+function c6_powerseries(){
+  stage.innerHTML=`<div class="card"><h2>Power series and the radius of convergence</h2>
+    <p>A <b>power series</b> $\\sum_{n=0}^{\\infty} c_n x^n$ is a "polynomial of infinite degree." For each $x$ you plug in, it's just a series of numbers — which may converge or diverge. The set of $x$ that converge is always an interval centered at $0$, whose half-width is the <b>radius of convergence</b> $R$. Explore it on $\\sum (x/2)^n$: drag $x$ and see where the sum survives.</p>
+    <canvas id="cv" width="640" height="300"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">verdict</div><div class="v" id="vv">—</div></div></div>
+    <div class="task"><b>Find the radius</b>For which half-width $R$ does $\\sum(x/2)^n$ converge on $(-R,R)$? (Enter a number.)</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>Why, via the ratio test.</b> $\\sum(x/2)^n$ is geometric with ratio $\\tfrac{x}{2}$, so it converges exactly when $\\left|\\tfrac{x}{2}\\right|&lt;1$, i.e. $|x|&lt;2$ — radius $R=2$. In general the ratio test does this for any power series:</p>
+    <div class="eqbox">$$\\left|\\frac{c_{n+1}x^{n+1}}{c_n x^{n}}\\right|=|x|\\left|\\frac{c_{n+1}}{c_n}\\right|\\to \\frac{|x|}{R}\\;&lt;\\;1\\iff |x|&lt;R$$</div>
+    <p>So the radius is set by how the coefficients grow. Two extremes worth remembering: $\\sum x^n$ (geometric) has $R=1$; $\\sum\\tfrac{x^n}{n!}$ has ratio $\\tfrac{|x|}{n+1}\\to 0&lt;1$ for <em>every</em> $x$, so $R=\\infty$ — it converges everywhere. That last one is about to become $e^x$.</p></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-3.6,xmax:3.6,ymin:-1,ymax:1});
+  let x0=1;
+  function draw(){pl.grid();const{ctx}=pl;
+    pl.bandX(-2,2,'rgba(63,185,143,0.12)');pl.bandX(pl.xmin,-2,'rgba(226,102,79,0.10)');pl.bandX(2,pl.xmax,'rgba(226,102,79,0.10)');
+    pl.vline(-2,'#3fb98f',true);pl.vline(2,'#3fb98f',true);
+    const inside=Math.abs(x0)<2;pl.point(x0,0,inside?'#3fb98f':'#e2664f',7);
+    pl.label(-2.1,0.42,'−R','#3fb98f');pl.label(1.86,0.42,'R','#3fb98f');
+    document.getElementById('xv').textContent=x0.toFixed(2);
+    document.getElementById('vv').textContent=inside?('converges → '+(1/(1-x0/2)).toFixed(2)):'diverges';}
+  xdrag(cv,pl,x=>{x0=Math.max(-3.5,Math.min(3.5,x));draw();});draw();
+  numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ R = 2</div><p>$\\sum(x/2)^n$ is geometric with ratio $x/2$, convergent iff $|x/2|&lt;1$, i.e. $|x|&lt;2$. Inside the green band the sum is $\\frac{1}{1-x/2}$; cross $\\pm2$ and the terms stop shrinking, so it diverges. The radius is dictated entirely by the coefficients through the ratio test.</p>`);});
+  setHints([`It's geometric with ratio x/2. Geometric converges when |ratio| < 1, i.e. |x/2| < 1.`,`|x| < 2, so R = 2.`]);
+}
+
+function c6_taylor(){
+  stage.innerHTML=`<div class="card"><h2>Taylor series: rebuild a function from its derivatives</h2>
+    <p>Here's the payoff. A power series can <em>be</em> a familiar function. Force a polynomial to match $\\sin x$ in value and in every derivative at $x=0$, and it hugs the curve — tap up the degree and watch the gold polynomial swallow more of the blue sine.</p>
+    <div class="seg" id="seg"></div>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <p class="small" id="obs" style="margin-top:8px"></p>
+    <div class="task"><b>The coefficient pattern</b>The series has $n!$ in the denominators. In the $x^3$ term of $e^x$, namely $\\tfrac{x^3}{3!}$, what number is $3!$? (Enter it.)</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>Where the coefficients come from.</b> Suppose $f(x)=\\sum_{n=0}^{\\infty} c_n x^n$. Differentiate $k$ times: each differentiation drops the powers, and at $x=0$ every term dies except the constant one, leaving $f^{(k)}(0)=k!\\,c_k$. Solve for the coefficient:</p>
+    <div class="eqbox">$$c_k=\\frac{f^{(k)}(0)}{k!}\\qquad\\Longrightarrow\\qquad f(x)=\\sum_{n=0}^{\\infty}\\frac{f^{(n)}(0)}{n!}\\,x^n\\ \\text{(Maclaurin series)}$$</div>
+    <p><b>Build the classics.</b> For $e^x$, every derivative is $e^x$, which is $1$ at $0$, so all $c_n=\\tfrac1{n!}$. For $\\sin$ and $\\cos$ the derivatives cycle and pick out alternating signs:</p>
+    <div class="eqbox">$$e^x=\\sum_{n=0}^{\\infty}\\frac{x^n}{n!},\\quad \\sin x=x-\\frac{x^3}{3!}+\\frac{x^5}{5!}-\\cdots,\\quad \\cos x=1-\\frac{x^2}{2!}+\\frac{x^4}{4!}-\\cdots$$</div>
+    <p>Each converges for all $x$ (the ratio test gave $R=\\infty$). Setting $x=1$ in the first even recovers $e=1+1+\\tfrac12+\\tfrac16+\\cdots$. Functions you defined geometrically or by integration are now infinite polynomials — the bridge from calculus into everything numerical.</p></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-7,xmax:7,ymin:-2.2,ymax:2.2});
+  const fact=n=>{let f=1;for(let i=2;i<=n;i++)f*=i;return f;};
+  const ts=(x,d)=>{let s=0,sign=1;for(let k=1;k<=d;k+=2){s+=sign*Math.pow(x,k)/fact(k);sign*=-1;}return s;};
+  const ds=['1','3','5','7','9'];let sel='3';
+  function draw(){pl.grid();const d=parseInt(sel);pl.curve(Math.sin,'#7ab8ff');pl.curve(x=>ts(x,d),'#e8b84b');
+    document.getElementById('obs').textContent='Degree '+d+' Taylor polynomial (gold) vs sin x (blue) — it hugs the curve farther out as the degree rises.';}
+  function build(){document.getElementById('seg').innerHTML=ds.map(k=>`<span class="segb ${k===sel?'on':''}" data-k="${k}">deg ${k}</span>`).join('');
+    document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{sel=b.dataset.k;build();draw();});}
+  build();draw();
+  numChk(stage.querySelector('.card'),6,()=>{addReveal(`<div class="rh">✓ 3! = 6</div><p>$3!=3\\cdot2\\cdot1=6$. The factorial denominators are what make these series converge everywhere — they crush the growing powers. Crank the degree above and the gold polynomial matches $\\sin x$ over a wider and wider stretch; the infinite series matches it exactly. That's the whole idea of a Taylor series.</p>`);});
+  setHints([`3! means 3 factorial = 3 × 2 × 1.`,`3 × 2 × 1 = 6.`]);
+}
+
+function c6_problems(){
+  stage.innerHTML=`<div class="card"><h2>Problem set</h2>
+    <p>Decide convergence, and name the test. Paper first; solutions fold open.</p>
+
+    <div class="prob"><span class="lvl">geometric</span><div class="ph">Problem 1</div>
+    <p>Evaluate $\\displaystyle\\sum_{n=0}^{\\infty}\\frac{2}{3^n}$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Geometric with first term $a=2$ and ratio $r=\\tfrac13$ ($|r|&lt;1$): sum $=\\dfrac{a}{1-r}=\\dfrac{2}{1-1/3}=\\dfrac{2}{2/3}=3$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">nth-term test</span><div class="ph">Problem 2</div>
+    <p>Does $\\displaystyle\\sum_{n=1}^{\\infty}\\frac{n}{2n+1}$ converge?</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>The terms $\\frac{n}{2n+1}\\to\\frac12\\ne 0$. Since $a_n\\not\\to 0$, the series <b>diverges</b> by the nth-term test.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">p-series</span><div class="ph">Problem 3</div>
+    <p>Does $\\displaystyle\\sum_{n=1}^{\\infty}\\frac{1}{n^{3/2}}$ converge?</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>It's a p-series with $p=\\tfrac32&gt;1$, so it <b>converges</b> (the integral test: $\\int_1^\\infty x^{-3/2}dx=2$ is finite).</p></div></details></div>
+
+    <div class="prob"><span class="lvl">ratio test</span><div class="ph">Problem 4</div>
+    <p>Does $\\displaystyle\\sum_{n=1}^{\\infty}\\frac{2^n}{n!}$ converge?</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Ratio: $\\left|\\frac{a_{n+1}}{a_n}\\right|=\\frac{2^{n+1}/(n+1)!}{2^n/n!}=\\frac{2}{n+1}\\to 0&lt;1$. Converges by the ratio test. (In fact the sum is $e^2-1$.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">integral test</span><div class="ph">Problem 5</div>
+    <p>Does $\\displaystyle\\sum_{n=2}^{\\infty}\\frac{1}{n\\ln n}$ converge?</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Integral test with $f(x)=\\frac{1}{x\\ln x}$: substitute $u=\\ln x$, $du=\\frac{dx}{x}$, giving $\\int\\frac{du}{u}=\\ln|u|=\\ln(\\ln x)\\to\\infty$. The integral diverges, so the series <b>diverges</b> — just barely.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">power series</span><div class="ph">Problem 6</div>
+    <p>Find the radius of convergence of $\\displaystyle\\sum_{n=1}^{\\infty}\\frac{x^n}{n}$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Ratio: $\\left|\\frac{x^{n+1}/(n+1)}{x^n/n}\\right|=|x|\\cdot\\frac{n}{n+1}\\to|x|$. Converges when $|x|&lt;1$, so $R=1$. (At the endpoints it's the harmonic-type series — diverges at $x=1$, converges at $x=-1$.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">Taylor</span><div class="ph">Problem 7</div>
+    <p>Write the Maclaurin series of $\\cos x$, and use it to approximate $\\cos(0.2)$ with two terms.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\cos x=1-\\frac{x^2}{2!}+\\frac{x^4}{4!}-\\cdots$. Two terms at $x=0.2$: $1-\\frac{0.04}{2}=1-0.02=0.98$. (True value $0.980067\\dots$ — the next term $\\frac{x^4}{24}\\approx6.7\\times10^{-5}$ is tiny.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">challenge — telescoping</span><div class="ph">Problem 8</div>
+    <p>Evaluate $\\displaystyle\\sum_{n=1}^{\\infty}\\frac{1}{n(n+1)}$. (Hint: partial fractions.)</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\frac{1}{n(n+1)}=\\frac1n-\\frac1{n+1}$. The partial sum telescopes: $S_N=\\big(1-\\tfrac12\\big)+\\big(\\tfrac12-\\tfrac13\\big)+\\cdots+\\big(\\tfrac1N-\\tfrac1{N+1}\\big)=1-\\frac{1}{N+1}\\to 1$. The sum is $1$.</p></div></details></div>
+  </div>`;
+  setHints([]);unlock();
+}
+
+function c6_recap(){
+  stage.innerHTML=`<div class="card"><h2>What you built</h2>
+    <div class="eqbox" style="line-height:2.3">$$\\sum_{n=0}^{\\infty} r^n=\\frac{1}{1-r}\\ (|r|&lt;1)\\qquad \\sum\\frac1{n^p}\\text{ converges}\\iff p&gt;1$$
+    <div style="text-align:center;line-height:2;color:#dbe6f4;margin-top:6px">converge $\\iff$ partial sums $S_n$ have a finite limit<br>nth-term test ($a_n\\not\\to0\\Rightarrow$ diverges) · integral test · ratio test $L=\\lim|\\tfrac{a_{n+1}}{a_n}|$<br>power series $\\sum c_n x^n$ on $(-R,R)$, radius $R$ from the ratio test<br>$e^x=\\sum\\frac{x^n}{n!}$ · $\\sin x=x-\\frac{x^3}{3!}+\\cdots$ · $\\cos x=1-\\frac{x^2}{2!}+\\cdots$</div></div>
+    <p>Convergence is one question — do the partial sums settle? — answered by tests that all trace back to the geometric series and the improper-integral knife-edge. Taylor series then close the loop: the transcendental functions you built by geometry and integration are infinite polynomials, computable to any precision.</p>
+    <p><b>Next — Module 8:</b> calculus in more than one variable. <b>Partial derivatives</b> measure change in one direction at a time, the <b>gradient</b> assembles them into the direction of steepest ascent, and multiple integrals accumulate over regions — the machinery underneath every optimization surface in machine learning.</p></div>`;
   setHints([]);unlock();
 }
 
