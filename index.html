@@ -145,7 +145,7 @@ const MODULES=[
   beats:[c6_recall,c6_intro,c6_sequences,c6_geometric,c6_nthterm,c6_integraltest,c6_ratiotest,c6_powerseries,c6_taylor,c6_problems,c6_recap]},
  {id:'c7',title:'Multivariable Calculus',sub:'Partial derivatives, the gradient, directional derivatives, and multiple integrals.',ready:true,
   outro:`With several inputs, a partial derivative measures change in one direction at a time; the gradient $\\nabla f$ packs them together and points straight uphill, perpendicular to the level curves; the directional derivative $\\nabla f\\cdot\\mathbf{u}$ gives the rate in any direction. Setting $\\nabla f=\\mathbf 0$ finds the peaks, valleys, and saddles — and stepping along $-\\nabla f$ is gradient descent, the engine of machine learning. Double integrals accumulate over regions, computed as iterated single integrals.`,
-  beats:[c7_recall,c7_intro,c7_partials,c7_gradient,c7_directional,c7_critical,c7_doubleint,c7_iterated,c7_problems,c7_recap]},
+  beats:[c7_recall,c7_intro,c7_partials,c7_gradient,c7_directional,c7_critical,c7_secondderiv,c7_lagrange,c7_doubleint,c7_iterated,c7_changevars,c7_problems,c7_recap]},
  {id:'c8',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:false},
  {id:'c9',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:false},
 ];
@@ -1959,9 +1959,13 @@ function c7_directional(){
     <div class="readout"><div class="rdc"><div class="k">direction angle</div><div class="v" id="av">—</div></div><div class="rdc"><div class="k">Dᵤf = ∇f · u</div><div class="v" id="dv">—</div></div></div>
     <div class="task"><b>Slope along the x-axis</b>At $(3,4)$ with $\\nabla f=(6,8)$, what is $D_{\\mathbf u}f$ in the direction $\\mathbf u=(1,0)$ (straight along $+x$)?</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
-    <p style="margin-top:16px"><b>The formula, and why the gradient wins.</b> Walking from a point in direction $\\mathbf u$, the rate of change is the gradient projected onto $\\mathbf u$ — a dot product (it drops out of the chain rule applied to $f$ along the line):</p>
-    <div class="eqbox">$$D_{\\mathbf u}f=\\nabla f\\cdot\\mathbf u=|\\nabla f|\\,\\cos\\phi$$</div>
-    <p>where $\\phi$ is the angle between $\\mathbf u$ and $\\nabla f$. That $\\cos\\phi$ says it all: the slope is <b>largest</b> when $\\mathbf u$ points along $\\nabla f$ ($\\cos\\phi=1$, giving $|\\nabla f|$), <b>zero</b> when $\\mathbf u\\perp\\nabla f$ (moving along a level curve), and <b>most negative</b> straight opposite. So the gradient really is the steepest-ascent direction. In our case $\\mathbf u=(1,0)$ gives $D_{\\mathbf u}f=(6,8)\\cdot(1,0)=6$ — which is just $\\partial f/\\partial x$, as it must be.</p></div>`;
+    <p style="margin-top:16px"><b>Deriving the formula.</b> Moving in direction $\\mathbf u=(u_1,u_2)$ from the point $P=(x_0,y_0)$ means walking along the line $P+t\\mathbf u$ and watching $f$. So the directional derivative is just the ordinary derivative of the single-variable function $g(t)=f(x_0+tu_1,\\,y_0+tu_2)$ at $t=0$:</p>
+    <div class="eqbox">$$D_{\\mathbf u}f=g'(0),\\qquad g(t)=f(x_0+tu_1,\\;y_0+tu_2)$$</div>
+    <p>Over a tiny step $dt$, the inputs move by $dx=u_1\\,dt$ and $dy=u_2\\,dt$. Each partial is exactly the rate of change of $f$ per unit step in its own variable, so the two contributions to the change in $f$ add:</p>
+    <div class="eqbox">$$df=\\frac{\\partial f}{\\partial x}\\,dx+\\frac{\\partial f}{\\partial y}\\,dy=\\big(f_x\\,u_1+f_y\\,u_2\\big)\\,dt$$</div>
+    <p>(This is the multivariable chain rule, and it holds because near $P$ the surface is well-approximated by its tangent plane $f\\approx f(P)+f_x\\,dx+f_y\\,dy$ — the linear contributions from each direction simply sum.) Divide by $dt$ and recognize a dot product:</p>
+    <div class="eqbox">$$D_{\\mathbf u}f=f_x u_1+f_y u_2=\\nabla f\\cdot\\mathbf u=|\\nabla f|\\,|\\mathbf u|\\cos\\phi=|\\nabla f|\\cos\\phi$$</div>
+    <p>using $|\\mathbf u|=1$, where $\\phi$ is the angle between $\\mathbf u$ and $\\nabla f$. That $\\cos\\phi$ says it all: the slope is <b>largest</b> when $\\mathbf u$ points along $\\nabla f$ ($\\cos\\phi=1$, giving $|\\nabla f|$), <b>zero</b> when $\\mathbf u\\perp\\nabla f$ (along a level curve), and <b>most negative</b> straight opposite. So the gradient really is the steepest-ascent direction. For $\\mathbf u=(1,0)$: $D_{\\mathbf u}f=(6,8)\\cdot(1,0)=6$ — just $\\partial f/\\partial x$, as it must be.</p></div>`;
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=30,cx=W/2,cy=H/2;
   const px=x=>cx+x*S,py=y=>cy-y*S,mx=X=>(X-cx)/S,my=Y=>(cy-Y)/S;
   const x0=3,y0=4,gx=2*x0,gy=2*y0;let th=0.2;
@@ -2026,6 +2030,142 @@ function c7_critical(){
   setHints([`The minimum is at the origin (0,0). ∂f/∂x = 2x — evaluate at x = 0.`,`2·0 = 0.`]);
 }
 
+function c7_secondderiv(){
+  stage.innerHTML=`<div class="card"><h2>Classifying a critical point: the second-derivative test</h2>
+    <p>A zero gradient only says the surface is flat — it could be a valley, a peak, or a <b>saddle</b>. To tell them apart we look at the <em>curvature</em>, which lives in the second partials $f_{xx},f_{yy},f_{xy}$. Watch it happen on $f=x^2+c\\,xy+y^2$: the origin is always a critical point, but as you crank the cross-term $c$ the round bowl gets stretched, tips over, and finally splits into a saddle. Drag to change $c$.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">c (the xy term)</div><div class="v" id="cv0">—</div></div><div class="rdc"><div class="k">D = f&#8339;&#8339;f&#8339;&#8339;&#8722;f&#8339;&#8339;&#178;</div><div class="v" id="dv">—</div></div><div class="rdc"><div class="k">verdict</div><div class="v" id="vd">—</div></div></div>
+    <div class="task"><b>Compute the discriminant</b>For $f=x^2+xy+y^2$ (that's $c=1$) the second partials are $f_{xx}=2$, $f_{yy}=2$, $f_{xy}=1$. Evaluate $D=f_{xx}\\,f_{yy}-f_{xy}^{\\,2}$.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>Why one number decides it.</b> Shift the critical point to the origin with $f=0$ there. Since $\\nabla f=\\mathbf 0$, the first-order terms vanish and the Taylor expansion starts at second order — near the point the surface <em>is</em> a quadratic:</p>
+    <div class="eqbox">$f(x,y)\\approx\\tfrac12\\big(f_{xx}\\,x^2+2f_{xy}\\,xy+f_{yy}\\,y^2\\big)=\\tfrac12\\,Q(x,y).$</div>
+    <p>So the point is a minimum exactly when $Q&gt;0$ in every direction, a maximum when $Q&lt;0$ everywhere, and a saddle when $Q$ takes both signs. Write $A=f_{xx}$, $B=f_{xy}$, $C=f_{yy}$ and <b>complete the square</b> (assume $A\\neq0$):</p>
+    <div class="eqbox">$Q=Ax^2+2Bxy+Cy^2=A\\Big(x+\\tfrac{B}{A}y\\Big)^{2}+\\Big(C-\\tfrac{B^2}{A}\\Big)y^{2}=A\\Big(x+\\tfrac{B}{A}y\\Big)^{2}+\\frac{AC-B^{2}}{A}\\,y^{2}.$</div>
+    <p>Now $Q$ is a sum of two squares, with coefficients $A$ and $\\dfrac{AC-B^2}{A}$. Let $D=AC-B^{2}=f_{xx}f_{yy}-f_{xy}^{\\,2}$. Reading off the signs:</p>
+    <p>&bull; <b>$D&gt;0$:</b> then $\\frac{AC-B^2}{A}$ has the same sign as $A$, so <em>both</em> squared terms carry that sign — $Q$ is one-signed. If $A=f_{xx}&gt;0$ it's a <b>minimum</b>; if $f_{xx}&lt;0$, a <b>maximum</b>.</p>
+    <p>&bull; <b>$D&lt;0$:</b> the two coefficients have opposite signs, so $Q$ is positive along one axis and negative along another — a <b>saddle</b>.</p>
+    <p>&bull; <b>$D=0$:</b> one square drops out; the quadratic is flat in a direction and the test is <b>inconclusive</b> (higher terms decide).</p>
+    <p>That is the whole test. For $f=x^2+cxy+y^2$: $A=C=2$, $B=c$, so $D=4-c^2$. It is positive (a bowl) until $|c|=2$, then negative (a saddle) — exactly the flip you dragged through above.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=40,cx=W/2,cy=H/2;
+  let c=0;
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    const step=3,wp=step/S,lvl=2.2;
+    for(let X=0;X<W;X+=step)for(let Y=0;Y<H;Y+=step){
+      const x=(X-cx)/S,y=(cy-Y)/S;const v=x*x+c*x*y+y*y;
+      const gx=2*x+c*y,gy=c*x+2*y,g=Math.sqrt(gx*gx+gy*gy)+1e-6;
+      const d=v-Math.round(v/lvl)*lvl;
+      if(Math.abs(d)<0.7*g*wp){const near0=Math.abs(Math.round(v/lvl))<0.5;ctx.fillStyle=near0?'#e8b84b':'#4f7bb0';ctx.fillRect(X,Y,step,step);}}
+    ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(W,cy);ctx.moveTo(cx,0);ctx.lineTo(cx,H);ctx.stroke();
+    ctx.fillStyle='#3fb98f';ctx.beginPath();ctx.arc(cx,cy,4,0,7);ctx.fill();
+    const D=4-c*c;
+    document.getElementById('cv0').textContent=c.toFixed(2);
+    document.getElementById('dv').textContent=D.toFixed(2);
+    document.getElementById('vd').textContent=D>0.06?'bowl → minimum':(D<-0.06?'saddle':'borderline');}
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));c=Math.max(0,Math.min(3,X/W*3));draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),3,()=>{addReveal(`<div class="rh">✓ D = 3</div><p>$D=(2)(2)-1^2=4-1=3&gt;0$, and $f_{xx}=2&gt;0$, so the origin is a <b>minimum</b> — the gently tilted bowl you see at $c=1$. Push $c$ past $2$ on the canvas and $D=4-c^2$ turns negative: the closed loops open into the crossing curves of a saddle, and the gold curve is the zero-level $Q=0$ where the two directions of curvature cancel.</p>`);});
+  setHints([`D = f_xx·f_yy − f_xy². Here f_xx=2, f_yy=2, f_xy=1.`,`2·2 − 1·1 = 4 − 1 = 3. Positive with f_xx>0 ⇒ minimum.`]);
+}
+
+function c7_lagrange(){
+  stage.innerHTML=`<div class="card"><h2>Lagrange multipliers: optimizing on a constraint</h2>
+    <p>Often you don't want the free minimum of $f$ — you want the best value <em>along a curve</em> $g=c$. Concretely: split $10$ into two pieces $x+y=10$ so the product $f=xy$ is as large as possible (the largest rectangle of a fixed perimeter). Drag the split below; the rectangle's area $xy$ is the readout, and the faint hyperbolas are the level curves $xy=\\text{const}$.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">y = 10 &#8722; x</div><div class="v" id="yv">—</div></div><div class="rdc"><div class="k">area f = xy</div><div class="v" id="av">—</div></div></div>
+    <div class="task"><b>Maximize the product</b>Slide to the largest area, or solve it: what is the maximum of $f=xy$ subject to $x+y=10$?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>The tangency idea.</b> Walk along the constraint curve $g=c$. The rate of change of $f$ as you move in the tangent direction $\\mathbf T$ is the directional derivative $\\nabla f\\cdot\\mathbf T$ (from the directional-derivative beat). At a constrained max or min there's no first-order change along the curve, so</p>
+    <div class="eqbox">$\\nabla f\\cdot\\mathbf T=0\\quad\\Longrightarrow\\quad \\nabla f\\perp\\mathbf T.$</div>
+    <p>But the constraint curve <em>is</em> a level curve of $g$, and the gradient is always perpendicular to its own level curves (the gradient beat), so $\\nabla g\\perp\\mathbf T$ too. Two vectors perpendicular to the same tangent line must be parallel:</p>
+    <div class="eqbox">$\\boxed{\\;\\nabla f=\\lambda\\,\\nabla g\\;}$</div>
+    <p>That single scalar $\\lambda$ (the <b>Lagrange multiplier</b>) plus the constraint $g=c$ give enough equations to solve. Geometrically it says: at the optimum the level curve of $f$ is <em>tangent</em> to the constraint — which is exactly the gold hyperbola kissing the line in the picture when you hit the best split.</p>
+    <p><b>Solve our problem.</b> Here $f=xy$ and $g=x+y$, so $\\nabla f=(y,x)$ and $\\nabla g=(1,1)$:</p>
+    <div class="eqbox">$(y,x)=\\lambda(1,1)\\;\\Rightarrow\\; y=\\lambda,\\ x=\\lambda\\;\\Rightarrow\\; x=y.$</div>
+    <p>Combined with $x+y=10$ this gives $x=y=5$, so the maximum product is $f=5\\cdot5=25$. The best rectangle of fixed perimeter is the <b>square</b> — Lagrange recovers the classic result, and the same $\\nabla f=\\lambda\\nabla g$ scales up to constrained optimization in any number of variables.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=30,ox=60,oy=340;
+  const px=x=>ox+x*S,py=y=>oy-y*S;
+  let x0=2;
+  function arrow(X0,Y0,X1,Y1,col){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();const a=Math.atan2(Y1-Y0,X1-X0);ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-10*Math.cos(a-0.4),Y1-10*Math.sin(a-0.4));ctx.lineTo(X1-10*Math.cos(a+0.4),Y1-10*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);const y0=10-x0;
+    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=0;g<=11;g++){ctx.beginPath();ctx.moveTo(px(g),py(0));ctx.lineTo(px(g),py(11));ctx.stroke();ctx.beginPath();ctx.moveTo(px(0),py(g));ctx.lineTo(px(11),py(g));ctx.stroke();}
+    ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(px(0),py(0));ctx.lineTo(px(11),py(0));ctx.moveTo(px(0),py(0));ctx.lineTo(px(0),py(11));ctx.stroke();
+    // faint level curves xy=k
+    for(const k of [9,16,25]){ctx.strokeStyle=k===25?'#5a4a24':'#233042';ctx.lineWidth=k===25?1.6:1.2;ctx.beginPath();let st=false;for(let xx=k/11;xx<=11;xx+=0.05){const yy=k/xx;if(yy>11)continue;const X=px(xx),Y=py(yy);st?ctx.lineTo(X,Y):ctx.moveTo(X,Y);st=true;}ctx.stroke();}
+    // current level curve xy=x0*y0 gold
+    const k0=x0*y0;ctx.strokeStyle='#e8b84b';ctx.lineWidth=2;ctx.beginPath();let s2=false;for(let xx=Math.max(0.05,k0/11);xx<=11;xx+=0.03){const yy=k0/xx;if(yy>11)continue;const X=px(xx),Y=py(yy);s2?ctx.lineTo(X,Y):ctx.moveTo(X,Y);s2=true;}ctx.stroke();
+    // rectangle
+    ctx.fillStyle='rgba(122,184,255,0.10)';ctx.fillRect(px(0),py(y0),x0*S,y0*S);
+    ctx.strokeStyle='#3a4c66';ctx.lineWidth=1;ctx.strokeRect(px(0),py(y0),x0*S,y0*S);
+    // constraint line x+y=10
+    ctx.strokeStyle='#7ab8ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(px(0),py(10));ctx.lineTo(px(10),py(0));ctx.stroke();
+    // gradients at point
+    arrow(px(x0),py(y0),px(x0)+y0*6,py(y0)-x0*6,'#e8b84b'); // grad f = (y,x)
+    arrow(px(x0),py(y0),px(x0)+1*22,py(y0)-1*22,'#3fb98f'); // grad g = (1,1)
+    ctx.fillStyle='#dbe6f4';ctx.beginPath();ctx.arc(px(x0),py(y0),5,0,7);ctx.fill();
+    ctx.fillStyle='#5d7186';ctx.font='12px sans-serif';ctx.fillText('x + y = 10',px(6.4),py(4.2));
+    document.getElementById('xv').textContent=x0.toFixed(2);
+    document.getElementById('yv').textContent=y0.toFixed(2);
+    document.getElementById('av').textContent=(x0*y0).toFixed(2);}
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));x0=Math.max(0.5,Math.min(9.5,(X-ox)/S));draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),25,()=>{addReveal(`<div class="rh">✓ 25</div><p>At $x=y=5$ the product is $25$. Notice on the canvas that this is exactly where the gold hyperbola $xy=25$ just touches the line $x+y=10$ — tangent — and where the two arrows $\\nabla f=(y,x)$ and $\\nabla g=(1,1)$ point the same way, i.e. $\\nabla f=\\lambda\\nabla g$. Move off the square and the hyperbola cuts the line instead of kissing it, and the area drops.</p>`);});
+  setHints([`∇f=(y,x)=λ(1,1)=λ∇g forces x=y. Put that into x+y=10.`,`x=y=5, so f=xy=25.`]);
+}
+
+function c7_changevars(){
+  stage.innerHTML=`<div class="card"><h2>Change of variables: where the extra r comes from</h2>
+    <p>Some regions — disks, rings, anything round — are painful in $x,y$ but easy in <b>polar</b> coordinates $x=r\\cos\\theta,\\ y=r\\sin\\theta$. But you can't just swap $dx\\,dy$ for $dr\\,d\\theta$: a little polar cell isn't the same size as a little rectangle. Below is the polar grid; drag to move the gold cell outward and watch its area grow even though $dr$ and $d\\theta$ never change.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">radius r</div><div class="v" id="rv">—</div></div><div class="rdc"><div class="k">arc = r·dθ</div><div class="v" id="arcv">—</div></div><div class="rdc"><div class="k">cell area ≈ r·dr·dθ</div><div class="v" id="cav">—</div></div></div>
+    <div class="task"><b>The payoff integral</b>With $dA=r\\,dr\\,d\\theta$, the unit disk's area is $\\int_0^{2\\pi}\\!\\!\\int_0^1 r\\,dr\\,d\\theta$. First do the inner piece: evaluate $\\int_0^1 r\\,dr$.</div>
+    <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:16px"><b>Why the cell area is $r\\,dr\\,d\\theta$.</b> Look at one polar cell, between radii $r$ and $r+dr$ and angles $\\theta$ and $\\theta+d\\theta$. Two of its sides are straight radial segments of length $dr$. The other two are little arcs; an arc of angle $d\\theta$ at radius $r$ has length $r\\,d\\theta$ (arc $=$ radius $\\times$ angle). For a thin cell it's nearly a rectangle:</p>
+    <div class="eqbox">$dA\\approx(\\text{radial side})\\times(\\text{arc side})=dr\\cdot(r\\,d\\theta)=r\\,dr\\,d\\theta.$</div>
+    <p>Same $dr$, same $d\\theta$, but a cell out at large $r$ has a longer arc — so it's bigger. That growing factor is the $r$.</p>
+    <p><b>The general rule.</b> Under any change $(u,v)\\mapsto(x,y)$, a $du\\times dv$ cell maps to a parallelogram. Its edges are the vectors $\\big(\\tfrac{\\partial x}{\\partial u},\\tfrac{\\partial y}{\\partial u}\\big)du$ and $\\big(\\tfrac{\\partial x}{\\partial v},\\tfrac{\\partial y}{\\partial v}\\big)dv$, and the area of a parallelogram spanned by $(a,b)$ and $(c,d)$ is $|ad-bc|$ — a $2\\times2$ determinant, the <b>Jacobian</b>:</p>
+    <div class="eqbox">$dx\\,dy=|J|\\,du\\,dv,\\qquad J=\\frac{\\partial x}{\\partial u}\\frac{\\partial y}{\\partial v}-\\frac{\\partial x}{\\partial v}\\frac{\\partial y}{\\partial u}.$</div>
+    <p>For polar, $\\tfrac{\\partial x}{\\partial r}=\\cos\\theta,\\ \\tfrac{\\partial y}{\\partial r}=\\sin\\theta,\\ \\tfrac{\\partial x}{\\partial\\theta}=-r\\sin\\theta,\\ \\tfrac{\\partial y}{\\partial\\theta}=r\\cos\\theta$, so</p>
+    <div class="eqbox">$J=\\cos\\theta\\,(r\\cos\\theta)-(-r\\sin\\theta)\\,\\sin\\theta=r\\cos^2\\theta+r\\sin^2\\theta=r.$</div>
+    <p>The determinant confirms the picture: $|J|=r$. And the payoff — the disk area $\\int_0^{2\\pi}\\!\\int_0^1 r\\,dr\\,d\\theta=2\\pi\\cdot\\tfrac12=\\pi$, i.e. $\\pi r^2$ with $r=1$ — falls out in two easy single integrals, where Cartesian would have fought $\\sqrt{1-x^2}$ limits.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=40,cx=W/2,cy=H/2;
+  const dth=Math.PI/6,dr=0.6,th0=Math.PI/6;
+  const P=(r,t)=>[cx+r*Math.cos(t)*S,cy-r*Math.sin(t)*S];
+  let r0=1;
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#1c2838';ctx.lineWidth=1;
+    for(let r=1;r<=4;r++){ctx.beginPath();for(let i=0;i<=80;i++){const t=i/80*2*Math.PI;const p=P(r,t);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}ctx.stroke();}
+    for(let k=0;k<12;k++){const t=k*Math.PI/6;ctx.beginPath();const a=P(0,t),b=P(4.3,t);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();}
+    // highlighted cell
+    ctx.fillStyle='rgba(232,184,75,0.28)';ctx.strokeStyle='#e8b84b';ctx.lineWidth=2;ctx.beginPath();
+    for(let i=0;i<=20;i++){const t=th0+dth*i/20;const p=P(r0,t);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}
+    for(let i=20;i>=0;i--){const t=th0+dth*i/20;const p=P(r0+dr,t);ctx.lineTo(p[0],p[1]);}
+    ctx.closePath();ctx.fill();ctx.stroke();
+    // labels dr and arc
+    const mid=th0+dth/2;const pr=P(r0+dr/2,th0);ctx.fillStyle='#dbe6f4';ctx.font='12px sans-serif';
+    const pa=P(r0+dr+0.15,mid);ctx.fillText('r·dθ',pa[0]-6,pa[1]);
+    const pdr=P(r0+dr/2,th0-0.12);ctx.fillText('dr',pdr[0]+2,pdr[1]+4);
+    ctx.fillStyle='#5d7186';ctx.fillText('x',P(4.4,0)[0],P(4.4,0)[1]+4);ctx.fillText('y',P(4.4,Math.PI/2)[0]-4,P(4.4,Math.PI/2)[1]-4);
+    document.getElementById('rv').textContent=r0.toFixed(2);
+    document.getElementById('arcv').textContent=(r0*dth).toFixed(2);
+    document.getElementById('cav').textContent=(r0*dr*dth).toFixed(2);}
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));r0=Math.max(0.3,Math.min(3.2,X/W*3.5));draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),0.5,()=>{addReveal(`<div class="rh">✓ 1/2</div><p>$\\int_0^1 r\\,dr=\\big[\\tfrac{r^2}{2}\\big]_0^1=\\tfrac12$. The outer integral just sweeps the angle: $\\int_0^{2\\pi}d\\theta=2\\pi$, so the disk area is $2\\pi\\cdot\\tfrac12=\\pi$ — the familiar $\\pi r^2$. The whole trick was replacing $dx\\,dy$ with $r\\,dr\\,d\\theta$; that extra $r$ is the Jacobian, and it's exactly the arc-growth you dragged through.</p>`);});
+  setHints([`∫₀¹ r dr = [r²/2] from 0 to 1.`,`(1²/2) − 0 = 1/2 = 0.5.`]);
+}
+
 function c7_doubleint(){
   stage.innerHTML=`<div class="card"><h2>Double integrals: volume over a region</h2>
     <p>Integration also lifts to two variables. The <b>double integral</b> $\\iint_R f\\,dA$ is the signed volume between the surface $z=f(x,y)$ and the region $R$ in the plane — the 2-D echo of "area under a curve." Build it the same way: chop $R$ into little cells, multiply each cell's area by the height above it, and sum. Tap to refine the grid over the unit square with $f=x+y$ and watch the sum settle.</p>
@@ -2061,43 +2201,60 @@ function c7_doubleint(){
 
 function c7_iterated(){
   stage.innerHTML=`<div class="card"><h2>Iterated integrals: slice, then stack</h2>
-    <p>A double integral is computed as two ordinary integrals, one variable at a time (<b>Fubini's theorem</b>). The idea is exactly volume-by-slices from Module 6: at a fixed $y$, the slice through the solid has cross-sectional area $A(y)=\\int f(x,y)\\,dx$; sweeping $y$ and stacking those slices gives the volume $\\int A(y)\\,dy$. Drag the sweep line over $f=x+y$ on $[0,3]\\times[0,2]$ and read the slice area $A(y)$.</p>
+    <p>A double integral is computed as two ordinary integrals, one variable at a time (<b>Fubini's theorem</b>). The idea is exactly volume-by-slices from Module 6: at a fixed $y$, the slice through the solid has cross-sectional area $A(y)=\\int f(x,y)\\,dx$; sweeping $y$ and stacking those slices fills the volume $\\int A(y)\\,dy$. Below is the solid under $z=f(x,y)=x+y$ over $[0,3]\\times[0,2]$ in 3-D — drag left-to-right to sweep the gold slice and watch the solid build up.</p>
     <canvas id="cv" width="640" height="380"></canvas>
-    <div class="readout"><div class="rdc"><div class="k">y</div><div class="v" id="yv">—</div></div><div class="rdc"><div class="k">slice area A(y)</div><div class="v" id="av">—</div></div></div>
-    <div class="task"><b>Evaluate the whole thing</b>Compute $\\displaystyle\\int_0^2\\!\\!\\int_0^3 (x+y)\\,dx\\,dy$.</div>
+    <div class="readout"><div class="rdc"><div class="k">slice y</div><div class="v" id="yv">—</div></div><div class="rdc"><div class="k">slice area A(y)</div><div class="v" id="av">—</div></div><div class="rdc"><div class="k">volume so far</div><div class="v" id="vv">—</div></div></div>
+    <div class="task"><b>Evaluate the whole thing</b>Sweep all the way, or compute: $\\displaystyle\\int_0^2\\!\\!\\int_0^3 (x+y)\\,dx\\,dy$.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
-    <p style="margin-top:16px"><b>Work it inside-out.</b> The <em>inner</em> integral treats $y$ as a constant and integrates over $x$ — that's the slice area:</p>
+    <p style="margin-top:16px"><b>Work it inside-out.</b> The <em>inner</em> integral treats $y$ as a constant and integrates over $x$ — that is the slice area:</p>
     <div class="eqbox">$$A(y)=\\int_0^3 (x+y)\\,dx=\\Big[\\tfrac{x^2}{2}+xy\\Big]_0^3=\\tfrac{9}{2}+3y$$</div>
     <p>Then the <em>outer</em> integral stacks the slices over $y$:</p>
     <div class="eqbox">$$\\int_0^2\\Big(\\tfrac{9}{2}+3y\\Big)dy=\\Big[\\tfrac92 y+\\tfrac{3}{2}y^2\\Big]_0^2=9+6=15$$</div>
-    <p>So the volume is $15$. Fubini also lets you swap the order — integrate over $y$ first, then $x$ — and you get the same number; choose whichever order is easier. That's the whole computational engine of multivariable integration.</p></div>`;
+    <p>So the volume is $15$. Fubini also lets you swap the order — integrate over $y$ first, then $x$ — and you get the same number; choose whichever is easier. That's the whole computational engine of multivariable integration.</p></div>`;
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
-  const AX0=120,AX1=560,AY0=350,AY1=40;   // region [0,3]x[0,2]
-  const px=x=>AX0+x/3*(AX1-AX0),py=y=>AY0+y/2*(AY1-AY0),my=Y=>(Y-AY0)/(AY1-AY0)*2;
-  let y0=1;
+  const OX=150,OY=260,exX=50,exY=17,eyX=48,eyY=-31,ezZ=24;
+  const P=(x,y,z)=>[OX+x*exX+y*eyX, OY+x*exY+y*eyY-z*ezZ];
+  const f=(x,y)=>x+y;let y0=1;
+  function poly(pts,fill,stroke,w){if(!ctx)return;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=w||1;ctx.stroke();}}
+  function seg(a,b,color,w){if(!ctx)return;ctx.strokeStyle=color;ctx.lineWidth=w||1;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();}
   function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
-    const nx=48,ny=32;for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){const x=(i+0.5)/nx*3,y=(j+0.5)/ny*2,h=(x+y)/5;
-      ctx.fillStyle='rgb('+Math.round(50+h*170)+','+Math.round(90+h*90)+','+Math.round(210-h*140)+')';
-      ctx.fillRect(px(i/nx*3),py((j+1)/ny*2),(AX1-AX0)/nx+1,(AY0-AY1)/ny+1);}
-    ctx.strokeStyle='#8095ab';ctx.lineWidth=1.5;ctx.strokeRect(px(0),py(2),AX1-AX0,AY0-AY1);
-    ctx.strokeStyle='#e8b84b';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(px(0),py(y0));ctx.lineTo(px(3),py(y0));ctx.stroke();
-    ctx.fillStyle='#e8b84b';ctx.font='12px sans-serif';ctx.fillText('slice at y = '+y0.toFixed(2),px(3)+6,py(y0)+4);
-    ctx.fillStyle='#5d7186';ctx.fillText('R = [0,3]×[0,2],  f = x+y',AX0,AY0+22);
+    // base region (z=0)
+    poly([P(0,0,0),P(3,0,0),P(3,2,0),P(0,2,0)],'rgba(20,30,45,0.65)',null);
+    for(let gx=0;gx<=3;gx++)seg(P(gx,0,0),P(gx,2,0),'#243347',1);
+    for(let gy=0;gy<=2;gy++)seg(P(0,gy,0),P(3,gy,0),'#243347',1);
+    // fill the solid from y=0 up to y0, back(y0) to front(0) so nearer slices overlay
+    const step=0.045;
+    for(let y=y0;y>=-1e-9;y-=step){
+      poly([P(0,y,0),P(3,y,0),P(3,y,f(3,y)),P(0,y,f(0,y))],'rgba(122,184,255,0.11)',null);}
+    // current slice, gold
+    poly([P(0,y0,0),P(3,y0,0),P(3,y0,f(3,y0)),P(0,y0,f(0,y0))],'rgba(232,184,75,0.30)','#e8b84b',2);
+    // roof wireframe (surface boundary)
+    seg(P(0,0,f(0,0)),P(3,0,f(3,0)),'#7ab8ff',1.5);
+    seg(P(3,0,f(3,0)),P(3,2,f(3,2)),'#7ab8ff',1.5);
+    seg(P(3,2,f(3,2)),P(0,2,f(0,2)),'#7ab8ff',1.5);
+    seg(P(0,2,f(0,2)),P(0,0,f(0,0)),'#7ab8ff',1.5);
+    // vertical edges
+    seg(P(0,0,0),P(0,0,f(0,0)),'#3a4c66',1);seg(P(3,0,0),P(3,0,f(3,0)),'#3a4c66',1);
+    seg(P(3,2,0),P(3,2,f(3,2)),'#3a4c66',1);seg(P(0,2,0),P(0,2,f(0,2)),'#3a4c66',1);
+    ctx.fillStyle='#5d7186';ctx.font='12px sans-serif';
+    ctx.fillText('z = x + y',P(0,2,f(0,2))[0]-4,P(0,2,f(0,2))[1]-8);
+    ctx.fillText('x',P(3,0,0)[0]+6,P(3,0,0)[1]+4);ctx.fillText('y',P(0,2,0)[0]-14,P(0,2,0)[1]-2);
     document.getElementById('yv').textContent=y0.toFixed(2);
-    document.getElementById('av').textContent=(4.5+3*y0).toFixed(2);}
+    document.getElementById('av').textContent=(4.5+3*y0).toFixed(2);
+    document.getElementById('vv').textContent=(4.5*y0+1.5*y0*y0).toFixed(2);}
   let drg=false;cv.style.touchAction='none';
-  function setP(e){const r=cv.getBoundingClientRect();const Y=(e.clientY-r.top)*(H/Math.max(1,r.height));y0=Math.max(0,Math.min(2,my(Y)));draw();}
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));y0=Math.max(0,Math.min(2,(X-40)/(W-80)*2));draw();}
   cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),15,()=>{addReveal(`<div class="rh">✓ 15</div><p>Inner integral (slice area) $A(y)=\\tfrac92+3y$; outer integral stacks them to $9+6=15$. The slice area you dragged runs from $A(0)=4.5$ up to $A(2)=10.5$, and their accumulation is the volume. Two single integrals, nested — nothing new to learn, just applied twice.</p>`);});
+  numChk(stage.querySelector('.card'),15,()=>{addReveal(`<div class="rh">✓ 15</div><p>Inner integral (slice area) $A(y)=\\tfrac92+3y$; outer integral stacks the slices to $9+6=15$. Sweep the gold slice from $y=0$ to $2$ and the "volume so far" readout climbs to exactly $15$ — the slice areas run from $A(0)=4.5$ up to $A(2)=10.5$, and their accumulation is the solid's volume. Two single integrals, nested.</p>`);});
   setHints([`Inner first: ∫₀³(x+y)dx = 9/2 + 3y (treat y as constant). Then ∫₀²(9/2+3y)dy.`,`[9y/2 + 3y²/2] from 0 to 2 = 9 + 6 = 15.`]);
 }
 
 function c7_problems(){
   stage.innerHTML=`<div class="card"><h2>Problem set</h2>
-    <p>Partials, gradients, and double integrals. Paper first; solutions fold open.</p>
+    <p>Partials, gradients, optimization, and double integrals. Paper first; solutions fold open.</p>
 
     <div class="prob"><span class="lvl">partial derivatives</span><div class="ph">Problem 1</div>
     <p>For $f(x,y)=x^3y+y^2$, find $\\dfrac{\\partial f}{\\partial x}$ and $\\dfrac{\\partial f}{\\partial y}$.</p>
@@ -2138,6 +2295,21 @@ function c7_problems(){
     <p>Verify Fubini for $\\displaystyle\\iint_{[0,1]\\times[0,2]} x\\,dA$ by computing it both orders.</p>
     <details><summary>Show solution</summary><div class="sol">
     <p>$dx$ first: $\\int_0^2\\!\\big(\\int_0^1 x\\,dx\\big)dy=\\int_0^2\\tfrac12\\,dy=1$. $dy$ first: $\\int_0^1\\!\\big(\\int_0^2 x\\,dy\\big)dx=\\int_0^1 2x\\,dx=1$. Same answer, $1$ — the order doesn't matter.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">second-derivative test</span><div class="ph">Problem 9</div>
+    <p>The function $f(x,y)=x^2-y^2$ has a critical point at the origin. Classify it with $D=f_{xx}f_{yy}-f_{xy}^2$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$f_{xx}=2$, $f_{yy}=-2$, $f_{xy}=0$, so $D=(2)(-2)-0^2=-4&lt;0$. A negative discriminant means a <b>saddle</b> — it climbs along $x$ and falls along $y$, the textbook saddle surface.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">Lagrange multipliers</span><div class="ph">Problem 10</div>
+    <p>Maximize $f(x,y)=x+y$ subject to $x^2+y^2=2$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\nabla f=(1,1)$, $\\nabla g=(2x,2y)$. Setting $(1,1)=\\lambda(2x,2y)$ gives $x=y$. The constraint $x^2+y^2=2$ then yields $2x^2=2$, so $x=y=1$ (taking the $+$ root for the max). Maximum $f=1+1=2$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">change of variables</span><div class="ph">Problem 11</div>
+    <p>Using $dA=r\\,dr\\,d\\theta$, find the area of the disk of radius $R$ by evaluating $\\displaystyle\\int_0^{2\\pi}\\!\\!\\int_0^{R} r\\,dr\\,d\\theta$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Inner: $\\int_0^{R} r\\,dr=\\tfrac{R^2}{2}$. Outer: $\\int_0^{2\\pi}\\tfrac{R^2}{2}\\,d\\theta=\\tfrac{R^2}{2}\\cdot2\\pi=\\pi R^2$ — the classic disk area, recovered in two one-line integrals thanks to the Jacobian factor $r$.</p></div></details></div>
   </div>`;
   setHints([]);unlock();
 }
@@ -2145,9 +2317,9 @@ function c7_problems(){
 function c7_recap(){
   stage.innerHTML=`<div class="card"><h2>What you built</h2>
     <div class="eqbox" style="line-height:2.3">$$\\nabla f=\\Big(\\tfrac{\\partial f}{\\partial x},\\tfrac{\\partial f}{\\partial y}\\Big)\\ \\text{(steepest ascent, }\\perp\\text{ level curves)}\\qquad D_{\\mathbf u}f=\\nabla f\\cdot\\mathbf u$$
-    <div style="text-align:center;line-height:2;color:#dbe6f4;margin-top:6px">partial = ordinary derivative, other variables held constant<br>critical points: $\\nabla f=\\mathbf 0$ · gradient descent: $\\mathbf x-\\alpha\\nabla f$<br>$\\iint_R f\\,dA=\\lim\\sum\\sum f\\,\\Delta A$ (volume)<br>compute by iterated single integrals (Fubini), inside-out</div></div>
-    <p>Multivariable calculus is single-variable calculus applied one direction at a time and then reassembled: partials are slice-slopes, the gradient bundles them into the steepest-ascent vector, and double integrals are areas-under-a-curve stacked into volumes. The gradient — and descending it — is the exact machinery underneath training a model.</p>
-    <p><b>Next — Module 9:</b> package all these partials into <b>matrices</b>. The Jacobian collects the partials of a vector-valued function, the Hessian collects second partials, and the multivariable chain rule becomes matrix multiplication — the language of backpropagation and the formal bridge into machine learning.</p></div>`;
+    <div style="text-align:center;line-height:2;color:#dbe6f4;margin-top:6px">partial = ordinary derivative, other variables held constant<br>critical points: $\\nabla f=\\mathbf 0$ · classify by $D=f_{xx}f_{yy}-f_{xy}^2$ · gradient descent: $\\mathbf x-\\alpha\\nabla f$<br>constrained optima: $\\nabla f=\\lambda\\nabla g$ · $\\iint_R f\\,dA=\\lim\\sum\\sum f\\,\\Delta A$ (volume)<br>iterated single integrals (Fubini), inside-out · change of variables: $dx\\,dy=|J|\\,du\\,dv$ (polar: $r\\,dr\\,d\\theta$)</div></div>
+    <p>Multivariable calculus is single-variable calculus applied one direction at a time and then reassembled: partials are slice-slopes, the gradient bundles them into the steepest-ascent vector, second partials curve it into a min/max/saddle, and double integrals are areas-under-a-curve stacked into volumes. The gradient — and descending it — is the exact machinery underneath training a model.</p>
+    <p><b>Next — Module 9:</b> <b>vector calculus</b>. Attach a vector to every point of the plane (a <em>vector field</em> — think flow or force), then integrate along curves and over surfaces; the Green, Stokes, and divergence theorems tie those integrals back to the derivatives from this module. Then Module 10 packs all these partials into <b>matrices</b> — the Jacobian, the Hessian, and the chain rule as matrix multiplication — the formal bridge into machine learning.</p></div>`;
   setHints([]);unlock();
 }
 
