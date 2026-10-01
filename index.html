@@ -145,7 +145,7 @@ const MODULES=[
   beats:[c6_recall,c6_intro,c6_sequences,c6_geometric,c6_nthterm,c6_integraltest,c6_ratiotest,c6_powerseries,c6_taylor,c6_problems,c6_recap]},
  {id:'c7',title:'Multivariable Calculus',sub:'Partial derivatives, the gradient, directional derivatives, and multiple integrals.',ready:true,
   outro:`With several inputs, a partial derivative measures change in one direction at a time; the gradient $\\nabla f$ packs them together and points straight uphill, perpendicular to the level curves; the directional derivative $\\nabla f\\cdot\\mathbf{u}$ gives the rate in any direction. Setting $\\nabla f=\\mathbf 0$ finds the peaks, valleys, and saddles — and stepping along $-\\nabla f$ is gradient descent, the engine of machine learning. Double integrals accumulate over regions, computed as iterated single integrals.`,
-  beats:[c7_recall,c7_intro,c7_partials,c7_gradient,c7_directional,c7_critical,c7_secondderiv,c7_lagrange,c7_doubleint,c7_iterated,c7_changevars,c7_problems,c7_recap]},
+  beats:[c7_recall,c7_intro,c7_partials,c7_gradient,c7_directional,c7_chainrule,c7_critical,c7_taylor,c7_secondderiv,c7_convexity,c7_newton,c7_lagrange,c7_doubleint,c7_iterated,c7_polar,c7_jacobian,c7_problems,c7_recap]},
  {id:'c8',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:false},
  {id:'c9',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:false},
 ];
@@ -1994,6 +1994,148 @@ function c7_directional(){
   setHints([`Dᵤf = ∇f · u = (6,8)·(1,0) = 6·1 + 8·0.`,`= 6.`]);
 }
 
+function c7_chainrule(){
+  stage.innerHTML=`<div class="card"><h2>The multivariable chain rule: rates through a path</h2>
+    <p>A quantity often depends on variables that are themselves moving. A hiker's altitude depends on position $(x,y)$; the position depends on time $t$ as they walk. So how fast does altitude change? Below, a point walks the straight path $(x,y)=(t,\\tfrac12 t)$ across the bowl $f=x^2+y^2$ (drawn as contour rings). The <span class="grn">green arrow</span> is the gradient $\\nabla f$; the <span class="cy">blue arrow</span> is the walking velocity $(x',y')=(1,\\tfrac12)$. Drag to move along the path.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">t</div><div class="v" id="tv">—</div></div><div class="rdc"><div class="k">(x, y)</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">dz/dt = ∇f·(x′,y′)</div><div class="v" id="zv">—</div></div></div>
+    <div class="task"><b>Rate along the path</b>At $t=1$ the point is $(1,\\tfrac12)$, so $f_x=2x=2$ and $f_y=2y=1$; the velocity is $(x',y')=(1,\\tfrac12)$. Compute $\\dfrac{dz}{dt}=f_x\\,x'+f_y\\,y'$.</div>
+    <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>Why the rates add.</b> Take a small time step $dt$. The walker moves $dx=x'\\,dt$ in $x$ and $dy=y'\\,dt$ in $y$. Because near the point the surface is well-approximated by its tangent plane (the same fact behind directional derivatives), the height change is just the two contributions summed — this is the <em>total differential</em>:</p>
+    <div class="eqbox">$dz=f_x\\,dx+f_y\\,dy.$</div>
+    <p>Substitute $dx=x'\\,dt$ and $dy=y'\\,dt$, then divide by $dt$:</p>
+    <div class="eqbox">$\\frac{dz}{dt}=f_x\\,x'+f_y\\,y'=\\nabla f\\cdot(x',y').$</div>
+    <p>Each input feeds its own rate in, weighted by how sensitive $f$ is to it. With $n$ intermediate variables it reads the same way — one product per variable, summed:</p>
+    <div class="eqbox">$\\frac{\\partial z}{\\partial s}=\\sum_{i=1}^{n}\\frac{\\partial z}{\\partial x_i}\\,\\frac{\\partial x_i}{\\partial s}.$</div>
+    <p><b>This is backpropagation.</b> Read it as a graph: to get the rate of $z$ with respect to $s$, walk every path from $s$ to $z$, multiply the derivatives along each path, and add the paths. A neural network is a deep composition $z=f(\\cdots g(\\cdots h(w)))$, and training needs $\\partial(\\text{loss})/\\partial(\\text{each weight})$. The chain rule multiplies each layer's local derivative onto the gradient flowing back from the layer above — reusing the shared pieces instead of recomputing them. The entire training loop is this one rule, run backwards through the graph.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=78,cx=W/2,cy=H/2;
+  const px=x=>cx+x*S,py=y=>cy-y*S;
+  let t=0.6;
+  function arrow(X0,Y0,X1,Y1,col){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();const a=Math.atan2(Y1-Y0,X1-X0);ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-10*Math.cos(a-0.4),Y1-10*Math.sin(a-0.4));ctx.lineTo(X1-10*Math.cos(a+0.4),Y1-10*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,py(0));ctx.lineTo(W,py(0));ctx.moveTo(px(0),0);ctx.lineTo(px(0),H);ctx.stroke();
+    for(const r of [0.5,1,1.5,2,2.4]){ctx.strokeStyle='#3a4c66';ctx.lineWidth=1.1;ctx.beginPath();for(let i=0;i<=64;i++){const th=i/64*2*Math.PI;const X=px(r*Math.cos(th)),Y=py(r*Math.sin(th));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();}
+    ctx.strokeStyle='#5d7186';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(px(-2),py(-1));ctx.lineTo(px(2),py(1));ctx.stroke();ctx.setLineDash([]);
+    const x=t,y=0.5*t;
+    arrow(px(x),py(y),px(x+2*x*0.18),py(y+2*y*0.18),'#3fb98f');
+    arrow(px(x),py(y),px(x+1*0.5),py(y+0.5*0.5),'#7ab8ff');
+    ctx.fillStyle='#e8b84b';ctx.beginPath();ctx.arc(px(x),py(y),5,0,7);ctx.fill();
+    document.getElementById('tv').textContent=t.toFixed(2);
+    document.getElementById('pv').textContent='('+x.toFixed(2)+', '+y.toFixed(2)+')';
+    document.getElementById('zv').textContent=(2.5*t).toFixed(2);}
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));t=Math.max(-2,Math.min(2,(X/W*4-2)));draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),2.5,()=>{addReveal(`<div class="rh">✓ 2.5</div><p>$\\frac{dz}{dt}=f_x x'+f_y y'=2\\cdot1+1\\cdot\\tfrac12=2.5$. Equivalently $\\nabla f\\cdot(x',y')=(2,1)\\cdot(1,\\tfrac12)$ — the gradient dotted with the velocity. Drag along the path and the rate scales as $2.5\\,t$; it's zero only at the center, where $\\nabla f=\\mathbf 0$. Stack this rule through many layers and you have backprop.</p>`);});
+  setHints([`dz/dt = f_x·x′ + f_y·y′ with f_x=2, f_y=1, x′=1, y′=½.`,`2·1 + 1·½ = 2 + 0.5 = 2.5.`]);
+}
+
+function c7_taylor(){
+  stage.innerHTML=`<div class="card"><h2>Taylor in 2-D: the local linear + quadratic model</h2>
+    <p>Near a point, a surface is captured by two pieces: a <em>linear</em> part (the tangent plane, built from $\\nabla f$) and a <em>quadratic</em> part (the curvature, built from the second partials). To see it cleanly, we slice: pick a point $P=(1,0)$ on $f=x^2+xy+y^2$ and walk in a direction $\\mathbf p=(\\cos\\theta,\\sin\\theta)$. The <span class="cy">blue curve</span> is the true height $g(s)=f(P+s\\mathbf p)$; the <span style="color:#e8b84b">gold line</span> is the tangent (linear) approximation. The gap between them is the quadratic term. Drag to swing the direction.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">direction θ</div><div class="v" id="thv">—</div></div><div class="rdc"><div class="k">slope g′(0)=∇f·p</div><div class="v" id="g1">—</div></div><div class="rdc"><div class="k">curvature g″(0)=pᵀHp</div><div class="v" id="g2">—</div></div></div>
+    <div class="task"><b>Curvature in a direction</b>Point the direction along the $x$-axis, $\\mathbf p=(1,0)$. The Hessian of $f=x^2+xy+y^2$ is $H=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}$. Compute the directional curvature $g''(0)=\\mathbf p^{\\mathsf T}H\\mathbf p$.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>Reduce the surface to a single-variable function.</b> Walking in a fixed direction turns $f$ into an ordinary 1-D function of how far you've gone, $g(s)=f(P+s\\mathbf p)$. Now just use the 1-D Taylor expansion from Module 6:</p>
+    <div class="eqbox">$g(1)\\approx g(0)+g'(0)+\\tfrac12 g''(0).$</div>
+    <p><b>Differentiate $g$ with the chain rule.</b> By the multivariable chain rule, moving at "velocity" $\\mathbf p$,</p>
+    <div class="eqbox">$g'(s)=\\nabla f(P+s\\mathbf p)\\cdot\\mathbf p\\;\\Rightarrow\\; g'(0)=\\nabla f(P)\\cdot\\mathbf p.$</div>
+    <p>Differentiate once more: each component $\\partial f/\\partial x_i$ changes at rate $\\sum_j f_{ij}p_j$ (chain rule again), and dotting with $\\mathbf p$ collects the double sum into $\\mathbf p^{\\mathsf T}H\\mathbf p$, where $H$ is the matrix of second partials — the <b>Hessian</b>:</p>
+    <div class="eqbox">$g''(0)=\\mathbf p^{\\mathsf T}H\\,\\mathbf p,\\qquad H=\\begin{pmatrix}f_{xx}&f_{xy}\\\\ f_{xy}&f_{yy}\\end{pmatrix}.$</div>
+    <p>Put the pieces back (write $\\mathbf p$ as the step vector, so $s\\mathbf p\\to\\mathbf p$) and you have the <b>two-variable Taylor expansion</b>:</p>
+    <div class="eqbox">$f(P+\\mathbf p)\\approx f(P)+\\underbrace{\\nabla f(P)\\cdot\\mathbf p}_{\\text{tangent plane}}+\\underbrace{\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\,\\mathbf p}_{\\text{curvature}}.$</div>
+    <p>The gradient gives the best flat approximation; the Hessian corrects it with the bowl-or-saddle curvature. This one model is the workhorse ahead: the next beat classifies critical points by the sign of $\\mathbf p^{\\mathsf T}H\\mathbf p$, and Newton's method jumps straight to this quadratic's minimum. It's also the exact language ML papers use for a loss surface — "curvature," "sharp vs. flat minima" — all live in $H$.</p></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-2.5,xmax:2.5,ymin:-2,ymax:14});
+  const f=(x,y)=>x*x+x*y+y*y;
+  let th=0;
+  function draw(){pl.grid();const c=Math.cos(th),s=Math.sin(th);
+    const g=u=>f(1+u*c, 0+u*s);
+    const g1=2*c+1*s, g2=2+Math.sin(2*th);
+    pl.curve(g,'#7ab8ff');
+    pl.curve(u=>f(1,0)+g1*u,'#e8b84b',2);
+    pl.point(0,f(1,0),'#dbe6f4',5);
+    pl.vline(0,'#2b3a4f',true);
+    document.getElementById('thv').textContent=(th*180/Math.PI).toFixed(0)+'°';
+    document.getElementById('g1').textContent=g1.toFixed(2);
+    document.getElementById('g2').textContent=g2.toFixed(2);}
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(cv.width/Math.max(1,r.width));th=X/cv.width*2*Math.PI;draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ p&#7488;Hp = 2</div><p>With $\\mathbf p=(1,0)$: $\\mathbf p^{\\mathsf T}H\\mathbf p = H_{xx}=f_{xx}=2$. So along $x$ the quadratic term is $\\tfrac12(2)s^2=s^2$ — the gold tangent line undershoots the blue curve by exactly $s^2$. Swing the direction and the curvature readout traces $2+\\sin2\\theta$: the Hessian gives a different curvature every way you turn.</p>`);});
+  setHints([`pᵀHp with p=(1,0) just picks out the top-left Hessian entry, f_xx.`,`f_xx = 2.`]);
+}
+
+function c7_convexity(){
+  stage.innerHTML=`<div class="card"><h2>Convexity and saddles: when is a bowl really a bowl?</h2>
+    <p>A function is <b>convex</b> if it curves upward in <em>every</em> direction — a true bowl with no hidden dips. That's the dream for optimization: a convex function has exactly one valley, so "roll downhill" always finds the global minimum. The test lives in the Hessian. Below is the <b>directional curvature</b> $\\mathbf p^{\\mathsf T}H\\mathbf p$ of $f=x^2+c\\,xy+y^2$ plotted against direction angle, where $H=\\begin{pmatrix}2&c\\\\c&2\\end{pmatrix}$; it works out to $2+c\\sin2\\theta$. Drag $c$ and watch whether the curve ever dips below zero.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">c</div><div class="v" id="cv0">—</div></div><div class="rdc"><div class="k">min curvature = 2 − |c|</div><div class="v" id="mn">—</div></div><div class="rdc"><div class="k">convex here?</div><div class="v" id="cx">—</div></div></div>
+    <div class="task"><b>The knife-edge</b>Drag to $c=3$. The minimum directional curvature is $2-|c|$ (the smaller Hessian eigenvalue). What is it at $c=3$?</div>
+    <div class="entry"><input id="ni" inputmode="text" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>Why the Hessian decides convexity.</b> From the Taylor beat, the curvature along any direction $\\mathbf p$ is $g''(0)=\\mathbf p^{\\mathsf T}H\\mathbf p$. A 1-D function is convex exactly when $g''\\ge0$ (Module 3: non-negative second derivative). A surface is convex when it's convex along <em>every</em> line through it — that is, when</p>
+    <div class="eqbox">$\\mathbf p^{\\mathsf T}H\\,\\mathbf p\\ge 0\\quad\\text{for every direction }\\mathbf p\\qquad(\\text{a <b>positive-semidefinite</b> Hessian}).$</div>
+    <p>For our family this minimum curvature is $2-|c|$, so $f$ is convex until $|c|=2$ and <b>indefinite</b> — a saddle — past it. (That minimum is the smaller eigenvalue of $H$; the full eigenvalue machinery is a linear-algebra topic, but here it's just $2-c$.) Note this is the same $D=4-c^2$ flip as the second-derivative test, seen from the curvature side.</p>
+    <p><b>Why saddles dominate in high dimensions.</b> A critical point is a minimum only if the curvature is positive in <em>all</em> $n$ directions — every one of the Hessian's $n$ eigenvalues positive. As $n$ climbs into the millions (a neural network's parameters), getting <em>all</em> of them to line up positive is vanishingly unlikely; generically some are positive and some negative, which is a <b>saddle</b>. So deep-learning loss surfaces are riddled with saddles far more than with bad local minima — and because a saddle still has downhill directions, gradient descent slides off them and keeps going. That realization is a big part of why first-order optimization works as well as it does.</p></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:0,xmax:6.2832,ymin:-2,ymax:5});
+  let c=1;
+  function draw(){pl.grid();pl.hline(0,'#2b3a4f',true);
+    pl.curve(th=>2+c*Math.sin(2*th), (2-Math.abs(c))>=0?'#7ab8ff':'#e8b84b');
+    const thmin=c>=0?3*Math.PI/4:Math.PI/4;pl.point(thmin,2-Math.abs(c),(2-Math.abs(c))>=0?'#7ab8ff':'#e8b84b',5);
+    document.getElementById('cv0').textContent=c.toFixed(2);
+    document.getElementById('mn').textContent=(2-Math.abs(c)).toFixed(2);
+    document.getElementById('cx').textContent=(2-Math.abs(c))>=-1e-9?'yes — convex':'no — saddle';}
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(cv.width/Math.max(1,r.width));c=Math.max(0,Math.min(3,X/cv.width*3));draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),-1,()=>{addReveal(`<div class="rh">✓ −1</div><p>$2-|3|=-1$. A negative minimum curvature means there's a direction where the surface bends <em>down</em> — so it's not convex; it's a saddle. On the plot, $2+3\\sin2\\theta$ dips to $-1$. Pull $c$ back under $2$ and the whole curve lifts above zero: convex again, and gradient descent is guaranteed its one true minimum.</p>`);},s=>parseFloat(s));
+  setHints([`Just evaluate 2 − |c| at c = 3.`,`2 − 3 = −1 (type a negative sign).`]);
+}
+
+function c7_newton(){
+  stage.innerHTML=`<div class="card"><h2>Newton's method: jump to the model's minimum</h2>
+    <p>Gradient descent creeps downhill one cautious step at a time. Newton's method is bolder: it builds the local <em>quadratic</em> model from the Taylor beat and jumps straight to <em>its</em> minimum. Below is $f(x)=\\tfrac18 x^4$ (<span class="cy">blue</span>); at your current point it fits the matching parabola (<span style="color:#e8b84b">gold</span>) and marks that parabola's vertex — the next Newton point. Drag the point and watch the model and its vertex track along.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">step f′/f″</div><div class="v" id="sv">—</div></div><div class="rdc"><div class="k">next x = x − f′/f″</div><div class="v" id="nx">—</div></div></div>
+    <div class="task"><b>One Newton step</b>For $f=\\tfrac18x^4$: $f'=\\tfrac12x^3$ and $f''=\\tfrac32x^2$. Starting at $x=3$, where does one step $x-\\dfrac{f'}{f''}$ land?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>Derive the step.</b> The quadratic model around $\\mathbf x$ (from Taylor) is $m(\\mathbf p)=f+\\nabla f\\cdot\\mathbf p+\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\mathbf p$. Minimize it: set its gradient in $\\mathbf p$ to zero,</p>
+    <div class="eqbox">$\\nabla_{\\mathbf p}\\,m=\\nabla f+H\\mathbf p=\\mathbf 0\\;\\Rightarrow\\; \\mathbf p=-H^{-1}\\nabla f,$</div>
+    <p>so the update is $\\;\\mathbf x_{\\text{next}}=\\mathbf x-H^{-1}\\nabla f$. In one dimension $H$ is just $f''$ and $\\nabla f$ is $f'$:</p>
+    <div class="eqbox">$x_{\\text{next}}=x-\\frac{f'(x)}{f''(x)}.$</div>
+    <p><b>Read what the curvature does.</b> Compare gradient descent, $x-\\alpha f'$, with a <em>guessed</em> step size $\\alpha$. Newton replaces $\\alpha$ with $1/f''$ — the reciprocal curvature. Steep, sharply-curved directions get small careful steps; flat, gently-curved ones get big strides. The matrix version $H^{-1}$ does this independently in every direction at once. For an exactly quadratic $f$ the model is perfect, so Newton lands on the true minimum in a single step; for general $f$ it iterates and converges extremely fast near the bottom.</p>
+    <p><b>The catch — and the ML connection.</b> Newton needs the Hessian and its inverse: for $n$ parameters that's $n^2$ numbers to store and about $n^3$ work to invert. At a million-plus parameters that's hopeless, which is exactly why deep learning runs on first-order gradient descent instead — and why so much research is cheap <em>approximations</em> of $H^{-1}$: L-BFGS, K-FAC, natural gradient, and Adam's per-coordinate curvature estimate all chase Newton's rescaling without paying for the full inverse.</p></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.8,xmax:3.6,ymin:-2,ymax:16});
+  const f=x=>x*x*x*x/8, fp=x=>x*x*x/2, fpp=x=>1.5*x*x;
+  let x0=3;
+  function draw(){pl.grid();pl.curve(f,'#7ab8ff');
+    const nx=x0-fp(x0)/fpp(x0);
+    pl.curve(u=>f(x0)+fp(x0)*(u-x0)+0.5*fpp(x0)*(u-x0)*(u-x0),'#e8b84b',2);
+    pl.point(x0,f(x0),'#dbe6f4',5);
+    pl.vline(nx,'#3fb98f',true);
+    pl.point(nx,f(x0)-0.5*fp(x0)*fp(x0)/fpp(x0),'#3fb98f',5,true);
+    document.getElementById('xv').textContent=x0.toFixed(2);
+    document.getElementById('sv').textContent=(fp(x0)/fpp(x0)).toFixed(2);
+    document.getElementById('nx').textContent=nx.toFixed(2);}
+  xdrag(cv,pl,x=>{x0=Math.max(0.3,Math.min(3.4,x));draw();});
+  draw();
+  numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ 2</div><p>$x-\\dfrac{f'}{f''}=3-\\dfrac{\\frac12(27)}{\\frac32(9)}=3-\\dfrac{13.5}{13.5}=3-1=2$. The gold parabola's vertex sits right above $x=2$. Keep stepping and it runs $3\\to2\\to\\tfrac43\\to\\cdots\\to0$, homing in on the minimum far faster than fixed-size gradient steps would — each step divides the distance, because the curvature in the denominator sizes the jump for you.</p>`);});
+  setHints([`f′(3)=½·27=13.5, f″(3)=1.5·9=13.5, so f′/f″=1.`,`3 − 1 = 2.`]);
+}
+
 function c7_critical(){
   stage.innerHTML=`<div class="card"><h2>Critical points and gradient descent</h2>
     <p>Where is a surface flat? At a peak or valley, <em>every</em> slice has a horizontal tangent, so both partials vanish — the multivariable version of Fermat's rule: interior extrema occur where $\\nabla f=\\mathbf 0$. Drag around the bowl $f=x^2+y^2$ and watch the <span class="grn">green descent arrow</span> $-\\nabla f$ (the downhill direction) and $|\\nabla f|$; steer toward the bottom and the gradient shrinks to nothing.</p>
@@ -2031,61 +2173,79 @@ function c7_critical(){
 }
 
 function c7_secondderiv(){
-  stage.innerHTML=`<div class="card"><h2>Classifying a critical point: the second-derivative test</h2>
-    <p>A zero gradient only says the surface is flat — it could be a valley, a peak, or a <b>saddle</b>. To tell them apart we look at the <em>curvature</em>, which lives in the second partials $f_{xx},f_{yy},f_{xy}$. Watch it happen on $f=x^2+c\\,xy+y^2$: the origin is always a critical point, but as you crank the cross-term $c$ the round bowl gets stretched, tips over, and finally splits into a saddle. Drag to change $c$.</p>
+  stage.innerHTML=`<div class="card"><h2>Min, max, or saddle? The second-derivative test</h2>
+    <p>Setting $\\nabla f=\\mathbf 0$ finds the flat spots — but flat spots come in three kinds: the bottom of a <b>bowl</b> (minimum), the top of a <b>dome</b> (maximum), or a mountain <b>pass</b> — a <em>saddle</em> — that climbs one way and falls another. In one variable we told these apart with $f''$: $f''&gt;0$ curves up (min), $f''&lt;0$ curves down (max). We want that same test in two variables.</p>
+    <p>Here is $f=x^2+c\\,xy+y^2$, drawn as a surface. The origin is a critical point for <em>every</em> $c$. <span style="color:#7ab8ff">Blue</span> marks where the surface rises <b>above</b> the flat tangent plane, <span style="color:#e8b84b">gold</span> where it dips <b>below</b>. Drag to change the cross-term $c$ and watch a clean all-blue bowl tip over and split into a saddle.</p>
     <canvas id="cv" width="640" height="380"></canvas>
-    <div class="readout"><div class="rdc"><div class="k">c (the xy term)</div><div class="v" id="cv0">—</div></div><div class="rdc"><div class="k">D = f&#8339;&#8339;f&#8339;&#8339;&#8722;f&#8339;&#8339;&#178;</div><div class="v" id="dv">—</div></div><div class="rdc"><div class="k">verdict</div><div class="v" id="vd">—</div></div></div>
-    <div class="task"><b>Compute the discriminant</b>For $f=x^2+xy+y^2$ (that's $c=1$) the second partials are $f_{xx}=2$, $f_{yy}=2$, $f_{xy}=1$. Evaluate $D=f_{xx}\\,f_{yy}-f_{xy}^{\\,2}$.</div>
+    <p class="small" id="obs" style="margin-top:8px;color:#9fb0c4"></p>
+    <div class="readout"><div class="rdc"><div class="k">c</div><div class="v" id="cv0">—</div></div><div class="rdc"><div class="k">D = f&#8339;&#8339;·f&#7527;&#7527; &#8722; f&#8339;&#7527;&#178;</div><div class="v" id="dv">—</div></div><div class="rdc"><div class="k">verdict</div><div class="v" id="vd">—</div></div></div>
+    <div class="task"><b>Compute the deciding number</b>For $f=x^2+xy+y^2$ (that is $c=1$) the second partials are $f_{xx}=2$, $f_{yy}=2$, $f_{xy}=1$. Evaluate $D=f_{xx}\\,f_{yy}-f_{xy}^{\\,2}$.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
-    <p style="margin-top:16px"><b>Why one number decides it.</b> Shift the critical point to the origin with $f=0$ there. Since $\\nabla f=\\mathbf 0$, the first-order terms vanish and the Taylor expansion starts at second order — near the point the surface <em>is</em> a quadratic:</p>
-    <div class="eqbox">$f(x,y)\\approx\\tfrac12\\big(f_{xx}\\,x^2+2f_{xy}\\,xy+f_{yy}\\,y^2\\big)=\\tfrac12\\,Q(x,y).$</div>
-    <p>So the point is a minimum exactly when $Q&gt;0$ in every direction, a maximum when $Q&lt;0$ everywhere, and a saddle when $Q$ takes both signs. Write $A=f_{xx}$, $B=f_{xy}$, $C=f_{yy}$ and <b>complete the square</b> (assume $A\\neq0$):</p>
-    <div class="eqbox">$Q=Ax^2+2Bxy+Cy^2=A\\Big(x+\\tfrac{B}{A}y\\Big)^{2}+\\Big(C-\\tfrac{B^2}{A}\\Big)y^{2}=A\\Big(x+\\tfrac{B}{A}y\\Big)^{2}+\\frac{AC-B^{2}}{A}\\,y^{2}.$</div>
-    <p>Now $Q$ is a sum of two squares, with coefficients $A$ and $\\dfrac{AC-B^2}{A}$. Let $D=AC-B^{2}=f_{xx}f_{yy}-f_{xy}^{\\,2}$. Reading off the signs:</p>
-    <p>&bull; <b>$D&gt;0$:</b> then $\\frac{AC-B^2}{A}$ has the same sign as $A$, so <em>both</em> squared terms carry that sign — $Q$ is one-signed. If $A=f_{xx}&gt;0$ it's a <b>minimum</b>; if $f_{xx}&lt;0$, a <b>maximum</b>.</p>
-    <p>&bull; <b>$D&lt;0$:</b> the two coefficients have opposite signs, so $Q$ is positive along one axis and negative along another — a <b>saddle</b>.</p>
-    <p>&bull; <b>$D=0$:</b> one square drops out; the quadratic is flat in a direction and the test is <b>inconclusive</b> (higher terms decide).</p>
-    <p>That is the whole test. For $f=x^2+cxy+y^2$: $A=C=2$, $B=c$, so $D=4-c^2$. It is positive (a bowl) until $|c|=2$, then negative (a saddle) — exactly the flip you dragged through above.</p></div>`;
-  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=40,cx=W/2,cy=H/2;
-  let c=0;
+
+    <p style="margin-top:16px"><b>Step 1 — up close, every critical point is a quadratic.</b> Zoom way in on a critical point. Because $\\nabla f=\\mathbf 0$ there, the surface has no tilt — the flat plane just touches it. The first thing that departs from flat is the <em>curvature</em>: the second-order terms. So near the point the surface looks exactly like a pure quadratic — the two-variable Taylor expansion from the last beat, with the linear $\\nabla f\\cdot\\mathbf p$ term gone because $\\nabla f=\\mathbf 0$, leaving only the curvature term $\\tfrac12\\mathbf p^{\\mathsf T}H\\mathbf p$:</p>
+    <div class="eqbox">$$f(x,y)\\;\\approx\\;\\tfrac12\\big(f_{xx}\\,x^2+2f_{xy}\\,xy+f_{yy}\\,y^2\\big)\\;=\\;\\tfrac12\\,Q(x,y).$$</div>
+    <p>Classifying the critical point is therefore just reading the sign of this quadratic $Q$: if $Q&gt;0$ in <em>every</em> direction it's a bowl (min); if $Q&lt;0$ everywhere, a dome (max); if $Q$ is positive some ways and negative others, a saddle.</p>
+
+    <p><b>Step 2 — why the cross term $f_{xy}$ has to be in the test.</b> The tempting shortcut is to just check $f_{xx}$ and $f_{yy}$. But look at the surface above: $f_{xx}=f_{yy}=2&gt;0$ for <em>every</em> $c$, yet it is plainly a saddle once $c&gt;2$. The middle term $2f_{xy}\\,xy$ can drag $Q$ negative along a diagonal even while both pure terms are positive. So all three second partials must appear together.</p>
+
+    <p><b>Step 3 — complete the square.</b> Write $A=f_{xx}$, $B=f_{xy}$, $C=f_{yy}$ (take $A\\neq0$). Pull $A$ out of the $x$-terms, then complete the square:</p>
+    <div class="eqbox">$$Q=Ax^2+2Bxy+Cy^2=A\\Big(x^2+\\tfrac{2B}{A}xy\\Big)+Cy^2.$$</div>
+    <p>Inside the bracket, $x^2+\\tfrac{2B}{A}xy=\\big(x+\\tfrac{B}{A}y\\big)^2-\\tfrac{B^2}{A^2}y^2$. Substitute and tidy the $y^2$ pieces over a common denominator:</p>
+    <div class="eqbox">$$Q=A\\Big(x+\\tfrac{B}{A}y\\Big)^{2}-\\tfrac{B^2}{A}y^2+Cy^2=A\\Big(x+\\tfrac{B}{A}y\\Big)^{2}+\\frac{AC-B^{2}}{A}\\,y^{2}.$$</div>
+
+    <p><b>Step 4 — read off the signs.</b> Now $Q$ is a sum of two <em>squares</em>, weighted by $A$ and by $\\dfrac{AC-B^2}{A}$. Let $D=AC-B^{2}=f_{xx}f_{yy}-f_{xy}^{\\,2}$:</p>
+    <p>&bull; <b>$D&gt;0$:</b> the second weight $\\frac{AC-B^2}{A}$ has the same sign as $A$, so both squares carry that sign — $Q$ is one-signed. If $A=f_{xx}&gt;0$ it's a <b>minimum</b>; if $f_{xx}&lt;0$, a <b>maximum</b>.</p>
+    <p>&bull; <b>$D&lt;0$:</b> the two weights have opposite signs, so $Q$ is positive along one square's axis and negative along the other — a <b>saddle</b>.</p>
+    <p>&bull; <b>$D=0$:</b> a weight vanishes; $Q$ is flat in a whole direction and the test is <b>inconclusive</b> (higher-order terms decide).</p>
+    <p>That's the second-derivative test. For our family $A=C=2,\\ B=c$, so $D=4-c^2$: a bowl until $c=2$, a saddle after — exactly the tip-over you dragged through. (ML echo: "$D&gt;0$ with $f_{xx}&gt;0$" is precisely the <em>Hessian being positive-definite</em> — every eigenvalue positive — which is what makes a loss surface a nice local bowl for gradient descent.)</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
+  const cx0=W/2,cy0=225,sx=38,sy=14,sz=5.5;
+  const P=(x,y,z)=>[cx0+(x-y)*sx, cy0+(x+y)*sy - z*sz];
+  let c=0;const fc=(x,y)=>x*x+c*x*y+y*y;
   function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
-    const step=3,wp=step/S,lvl=2.2;
-    for(let X=0;X<W;X+=step)for(let Y=0;Y<H;Y+=step){
-      const x=(X-cx)/S,y=(cy-Y)/S;const v=x*x+c*x*y+y*y;
-      const gx=2*x+c*y,gy=c*x+2*y,g=Math.sqrt(gx*gx+gy*gy)+1e-6;
-      const d=v-Math.round(v/lvl)*lvl;
-      if(Math.abs(d)<0.7*g*wp){const near0=Math.abs(Math.round(v/lvl))<0.5;ctx.fillStyle=near0?'#e8b84b':'#4f7bb0';ctx.fillRect(X,Y,step,step);}}
-    ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(W,cy);ctx.moveTo(cx,0);ctx.lineTo(cx,H);ctx.stroke();
-    ctx.fillStyle='#3fb98f';ctx.beginPath();ctx.arc(cx,cy,4,0,7);ctx.fill();
+    ctx.strokeStyle='#22303f';ctx.lineWidth=1;
+    for(let i=0;i<=8;i++){const t=-2+4*i/8;let a=P(t,-2,0),b=P(t,2,0);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();let e=P(-2,t,0),g=P(2,t,0);ctx.beginPath();ctx.moveTo(e[0],e[1]);ctx.lineTo(g[0],g[1]);ctx.stroke();}
+    const N=14,a=2,quads=[];
+    for(let i=0;i<N;i++)for(let j=0;j<N;j++){const X0=-a+2*a*i/N,X1=-a+2*a*(i+1)/N,Y0=-a+2*a*j/N,Y1=-a+2*a*(j+1)/N;
+      const zc=0.25*(fc(X0,Y0)+fc(X1,Y0)+fc(X1,Y1)+fc(X0,Y1));quads.push({p:[[X0,Y0],[X1,Y0],[X1,Y1],[X0,Y1]],z:zc,d:X0+X1+Y0+Y1});}
+    quads.sort((p,q)=>p.d-q.d);
+    for(const q of quads){ctx.beginPath();q.p.forEach((pt,k)=>{const pr=P(pt[0],pt[1],fc(pt[0],pt[1]));k?ctx.lineTo(pr[0],pr[1]):ctx.moveTo(pr[0],pr[1]);});ctx.closePath();
+      ctx.fillStyle=q.z>=0?'rgba(90,140,205,0.80)':'rgba(232,184,75,0.82)';ctx.fill();ctx.strokeStyle='rgba(15,23,36,0.5)';ctx.lineWidth=1;ctx.stroke();}
+    const o=P(0,0,0);ctx.fillStyle='#3fb98f';ctx.beginPath();ctx.arc(o[0],o[1],4,0,7);ctx.fill();
     const D=4-c*c;
     document.getElementById('cv0').textContent=c.toFixed(2);
     document.getElementById('dv').textContent=D.toFixed(2);
-    document.getElementById('vd').textContent=D>0.06?'bowl → minimum':(D<-0.06?'saddle':'borderline');}
+    document.getElementById('vd').textContent=D>0.06?'bowl → minimum':(D<-0.06?'saddle':'borderline');
+    const ob=document.getElementById('obs');if(ob)ob.textContent = D>0.06?'All blue — the surface sits entirely above the flat plane: a minimum. Note f_xx=f_yy=2 the whole time.':(D<-0.06?'Blue AND gold — it rises one way and drops another: a saddle, even though f_xx=f_yy=2 are still both positive.':'Borderline: the bowl has flattened along a diagonal (D≈0).');}
   cv.style.touchAction='none';let drg=false;
   function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));c=Math.max(0,Math.min(3,X/W*3));draw();}
   cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),3,()=>{addReveal(`<div class="rh">✓ D = 3</div><p>$D=(2)(2)-1^2=4-1=3&gt;0$, and $f_{xx}=2&gt;0$, so the origin is a <b>minimum</b> — the gently tilted bowl you see at $c=1$. Push $c$ past $2$ on the canvas and $D=4-c^2$ turns negative: the closed loops open into the crossing curves of a saddle, and the gold curve is the zero-level $Q=0$ where the two directions of curvature cancel.</p>`);});
-  setHints([`D = f_xx·f_yy − f_xy². Here f_xx=2, f_yy=2, f_xy=1.`,`2·2 − 1·1 = 4 − 1 = 3. Positive with f_xx>0 ⇒ minimum.`]);
+  numChk(stage.querySelector('.card'),3,()=>{addReveal(`<div class="rh">✓ D = 3</div><p>$D=(2)(2)-1^2=4-1=3&gt;0$, and $f_{xx}=2&gt;0$, so the origin is a <b>minimum</b> — the gently tilted all-blue bowl at $c=1$. Now drag $c$ past $2$: $D=4-c^2$ goes negative, gold appears, and the bowl has become a saddle — the surface drops below its own tangent plane along one diagonal while rising along the other.</p>`);});
+  setHints([`D = f_xx·f_yy − f_xy². Here f_xx=2, f_yy=2, f_xy=1.`,`2·2 − 1·1 = 4 − 1 = 3. Positive, and f_xx>0, so: minimum.`]);
 }
 
 function c7_lagrange(){
-  stage.innerHTML=`<div class="card"><h2>Lagrange multipliers: optimizing on a constraint</h2>
-    <p>Often you don't want the free minimum of $f$ — you want the best value <em>along a curve</em> $g=c$. Concretely: split $10$ into two pieces $x+y=10$ so the product $f=xy$ is as large as possible (the largest rectangle of a fixed perimeter). Drag the split below; the rectangle's area $xy$ is the readout, and the faint hyperbolas are the level curves $xy=\\text{const}$.</p>
+  stage.innerHTML=`<div class="card"><h2>Lagrange multipliers: the best point <em>on a curve</em></h2>
+    <p>Free optimization asks for the lowest point <em>anywhere</em>. Constrained optimization asks for the best point while you're forced to stay on a curve — the far more common situation. Here's the cleanest example: you have a fixed budget of $10$ for the two sides of a rectangle, so $x+y=10$. Which split makes the area $A=xy$ largest? Slide the split and watch the rectangle and its area.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">y = 10 &#8722; x</div><div class="v" id="yv">—</div></div><div class="rdc"><div class="k">area f = xy</div><div class="v" id="av">—</div></div></div>
-    <div class="task"><b>Maximize the product</b>Slide to the largest area, or solve it: what is the maximum of $f=xy$ subject to $x+y=10$?</div>
+    <div class="task"><b>Find the biggest area</b>Slide to the largest rectangle. What is the maximum area of $xy$ when $x+y=10$?</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
-    <p style="margin-top:16px"><b>The tangency idea.</b> Walk along the constraint curve $g=c$. The rate of change of $f$ as you move in the tangent direction $\\mathbf T$ is the directional derivative $\\nabla f\\cdot\\mathbf T$ (from the directional-derivative beat). At a constrained max or min there's no first-order change along the curve, so</p>
-    <div class="eqbox">$\\nabla f\\cdot\\mathbf T=0\\quad\\Longrightarrow\\quad \\nabla f\\perp\\mathbf T.$</div>
-    <p>But the constraint curve <em>is</em> a level curve of $g$, and the gradient is always perpendicular to its own level curves (the gradient beat), so $\\nabla g\\perp\\mathbf T$ too. Two vectors perpendicular to the same tangent line must be parallel:</p>
-    <div class="eqbox">$\\boxed{\\;\\nabla f=\\lambda\\,\\nabla g\\;}$</div>
-    <p>That single scalar $\\lambda$ (the <b>Lagrange multiplier</b>) plus the constraint $g=c$ give enough equations to solve. Geometrically it says: at the optimum the level curve of $f$ is <em>tangent</em> to the constraint — which is exactly the gold hyperbola kissing the line in the picture when you hit the best split.</p>
-    <p><b>Solve our problem.</b> Here $f=xy$ and $g=x+y$, so $\\nabla f=(y,x)$ and $\\nabla g=(1,1)$:</p>
-    <div class="eqbox">$(y,x)=\\lambda(1,1)\\;\\Rightarrow\\; y=\\lambda,\\ x=\\lambda\\;\\Rightarrow\\; x=y.$</div>
-    <p>Combined with $x+y=10$ this gives $x=y=5$, so the maximum product is $f=5\\cdot5=25$. The best rectangle of fixed perimeter is the <b>square</b> — Lagrange recovers the classic result, and the same $\\nabla f=\\lambda\\nabla g$ scales up to constrained optimization in any number of variables.</p></div>`;
+
+    <p style="margin-top:16px"><b>Why the square wins — the geometry.</b> The gold curves are the <em>level curves of area</em>, $xy=\\text{const}$ (they're hyperbolas). Slide to any split that isn't the best: the area-hyperbola through your point <b>crosses</b> the blue constraint line. Crossing is bad news — it means the line pokes through to a higher-area hyperbola just to one side, so you can slide that way and do better. Only at the maximum does the hyperbola stop crossing and just <b>touch</b> the line — it is <em>tangent</em>. So:</p>
+    <div class="eqbox">constrained maximum $\\iff$ the objective's level curve is <b>tangent</b> to the constraint.</div>
+
+    <p><b>From tangency to a formula.</b> Two curves that are tangent share the same tangent line at the touch point — and therefore the same <em>perpendicular</em> direction. Now recall the fact from the gradient beat: $\\nabla f$ always points perpendicular to the level curves of $f$. That's true for <em>both</em> functions here — $\\nabla f\\perp$ (the area curve) and $\\nabla g\\perp$ (the constraint line, which is the level curve $g=x+y=10$). Both gradients are perpendicular to the same line, so they must point along the same axis — they are parallel:</p>
+    <div class="eqbox">$$\\boxed{\\;\\nabla f=\\lambda\\,\\nabla g\\;}$$</div>
+    <p>The single number $\\lambda$ (the <b>Lagrange multiplier</b>) just soaks up any difference in the two gradients' lengths.</p>
+
+    <p><b>Solve it, component by component.</b> With $f=xy$ we get $\\nabla f=(f_x,f_y)=(y,x)$, and with $g=x+y$ we get $\\nabla g=(1,1)$. The condition $\\nabla f=\\lambda\\nabla g$ reads:</p>
+    <div class="eqbox">$$y=\\lambda\\cdot1,\\qquad x=\\lambda\\cdot1\\quad\\Longrightarrow\\quad x=y.$$</div>
+    <p>Both equal $\\lambda$, so $x=y$. Put that into the constraint $x+y=10$: $2x=10$, giving $x=y=5$. The best rectangle is the $5\\times5$ <b>square</b>, area $25$.</p>
+    <p>That recipe — set $\\nabla f=\\lambda\\nabla g$, add the constraint, solve — is the whole method, and it scales straight up: many variables, and one $\\lambda$ per constraint. It's the backbone of constrained optimization across ML — the dual view of support-vector machines, maximum-entropy models, and the KKT conditions (its extension to inequality constraints) all begin exactly here.</p></div>`;
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=30,ox=60,oy=340;
   const px=x=>ox+x*S,py=y=>oy-y*S;
   let x0=2;
@@ -2093,20 +2253,16 @@ function c7_lagrange(){
   function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);const y0=10-x0;
     ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=0;g<=11;g++){ctx.beginPath();ctx.moveTo(px(g),py(0));ctx.lineTo(px(g),py(11));ctx.stroke();ctx.beginPath();ctx.moveTo(px(0),py(g));ctx.lineTo(px(11),py(g));ctx.stroke();}
     ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(px(0),py(0));ctx.lineTo(px(11),py(0));ctx.moveTo(px(0),py(0));ctx.lineTo(px(0),py(11));ctx.stroke();
-    // faint level curves xy=k
-    for(const k of [9,16,25]){ctx.strokeStyle=k===25?'#5a4a24':'#233042';ctx.lineWidth=k===25?1.6:1.2;ctx.beginPath();let st=false;for(let xx=k/11;xx<=11;xx+=0.05){const yy=k/xx;if(yy>11)continue;const X=px(xx),Y=py(yy);st?ctx.lineTo(X,Y):ctx.moveTo(X,Y);st=true;}ctx.stroke();}
-    // current level curve xy=x0*y0 gold
+    for(const k of [9,16,25]){ctx.strokeStyle=k===25?'#5a4a24':'#233042';ctx.lineWidth=1.2;ctx.beginPath();let st=false;for(let xx=k/11;xx<=11;xx+=0.05){const yy=k/xx;if(yy>11)continue;const X=px(xx),Y=py(yy);st?ctx.lineTo(X,Y):ctx.moveTo(X,Y);st=true;}ctx.stroke();}
     const k0=x0*y0;ctx.strokeStyle='#e8b84b';ctx.lineWidth=2;ctx.beginPath();let s2=false;for(let xx=Math.max(0.05,k0/11);xx<=11;xx+=0.03){const yy=k0/xx;if(yy>11)continue;const X=px(xx),Y=py(yy);s2?ctx.lineTo(X,Y):ctx.moveTo(X,Y);s2=true;}ctx.stroke();
-    // rectangle
     ctx.fillStyle='rgba(122,184,255,0.10)';ctx.fillRect(px(0),py(y0),x0*S,y0*S);
     ctx.strokeStyle='#3a4c66';ctx.lineWidth=1;ctx.strokeRect(px(0),py(y0),x0*S,y0*S);
-    // constraint line x+y=10
     ctx.strokeStyle='#7ab8ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(px(0),py(10));ctx.lineTo(px(10),py(0));ctx.stroke();
-    // gradients at point
-    arrow(px(x0),py(y0),px(x0)+y0*6,py(y0)-x0*6,'#e8b84b'); // grad f = (y,x)
-    arrow(px(x0),py(y0),px(x0)+1*22,py(y0)-1*22,'#3fb98f'); // grad g = (1,1)
+    arrow(px(x0),py(y0),px(x0)+y0*6,py(y0)-x0*6,'#e8b84b');
+    arrow(px(x0),py(y0),px(x0)+22,py(y0)-22,'#3fb98f');
     ctx.fillStyle='#dbe6f4';ctx.beginPath();ctx.arc(px(x0),py(y0),5,0,7);ctx.fill();
-    ctx.fillStyle='#5d7186';ctx.font='12px sans-serif';ctx.fillText('x + y = 10',px(6.4),py(4.2));
+    ctx.fillStyle='#5d7186';ctx.font='12px sans-serif';ctx.fillText('x + y = 10',px(6.6),py(4.0));
+    if(Math.abs(x0-y0)<0.2){ctx.fillStyle='#3fb98f';ctx.font='600 13px sans-serif';ctx.fillText('tangent — best split',px(5.3),py(6.3));}
     document.getElementById('xv').textContent=x0.toFixed(2);
     document.getElementById('yv').textContent=y0.toFixed(2);
     document.getElementById('av').textContent=(x0*y0).toFixed(2);}
@@ -2116,25 +2272,24 @@ function c7_lagrange(){
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),25,()=>{addReveal(`<div class="rh">✓ 25</div><p>At $x=y=5$ the product is $25$. Notice on the canvas that this is exactly where the gold hyperbola $xy=25$ just touches the line $x+y=10$ — tangent — and where the two arrows $\\nabla f=(y,x)$ and $\\nabla g=(1,1)$ point the same way, i.e. $\\nabla f=\\lambda\\nabla g$. Move off the square and the hyperbola cuts the line instead of kissing it, and the area drops.</p>`);});
-  setHints([`∇f=(y,x)=λ(1,1)=λ∇g forces x=y. Put that into x+y=10.`,`x=y=5, so f=xy=25.`]);
+  numChk(stage.querySelector('.card'),25,()=>{addReveal(`<div class="rh">✓ 25</div><p>At $x=y=5$ the area is $25$. On the canvas that's exactly where the gold hyperbola $xy=25$ stops crossing and just kisses the line — tangent — and where the two arrows $\\nabla f=(y,x)$ and $\\nabla g=(1,1)$ line up ($\\nabla f=\\lambda\\nabla g$, here $\\lambda=5$). Slide off the square and the hyperbola cuts the line again and the area falls.</p>`);});
+  setHints([`Tangency happens where x=y. Combine x=y with x+y=10.`,`x=y=5, so the maximum area is 5·5=25.`]);
 }
 
-function c7_changevars(){
-  stage.innerHTML=`<div class="card"><h2>Change of variables: where the extra r comes from</h2>
-    <p>Some regions — disks, rings, anything round — are painful in $x,y$ but easy in <b>polar</b> coordinates $x=r\\cos\\theta,\\ y=r\\sin\\theta$. But you can't just swap $dx\\,dy$ for $dr\\,d\\theta$: a little polar cell isn't the same size as a little rectangle. Below is the polar grid; drag to move the gold cell outward and watch its area grow even though $dr$ and $d\\theta$ never change.</p>
+function c7_polar(){
+  stage.innerHTML=`<div class="card"><h2>Polar coordinates: the $r$ that makes round regions easy</h2>
+    <p>Disks, rings, wedges — anything round — are painful to integrate in $x,y$ (the limits involve $\\sqrt{1-x^2}$). Polar coordinates $x=r\\cos\\theta,\\ y=r\\sin\\theta$ describe them effortlessly. But you can't just swap $dx\\,dy$ for $dr\\,d\\theta$: a little polar cell is not the same size as a little square. Below is the polar grid — drag the gold cell outward and watch its area <em>grow</em> even though $dr$ and $d\\theta$ never change.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">radius r</div><div class="v" id="rv">—</div></div><div class="rdc"><div class="k">arc = r·dθ</div><div class="v" id="arcv">—</div></div><div class="rdc"><div class="k">cell area ≈ r·dr·dθ</div><div class="v" id="cav">—</div></div></div>
-    <div class="task"><b>The payoff integral</b>With $dA=r\\,dr\\,d\\theta$, the unit disk's area is $\\int_0^{2\\pi}\\!\\!\\int_0^1 r\\,dr\\,d\\theta$. First do the inner piece: evaluate $\\int_0^1 r\\,dr$.</div>
+    <div class="task"><b>The payoff integral</b>With $dA=r\\,dr\\,d\\theta$, the unit disk's area is $\\int_0^{2\\pi}\\!\\!\\int_0^1 r\\,dr\\,d\\theta$. Do the inner piece first: evaluate $\\int_0^1 r\\,dr$.</div>
     <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
-    <p style="margin-top:16px"><b>Why the cell area is $r\\,dr\\,d\\theta$.</b> Look at one polar cell, between radii $r$ and $r+dr$ and angles $\\theta$ and $\\theta+d\\theta$. Two of its sides are straight radial segments of length $dr$. The other two are little arcs; an arc of angle $d\\theta$ at radius $r$ has length $r\\,d\\theta$ (arc $=$ radius $\\times$ angle). For a thin cell it's nearly a rectangle:</p>
-    <div class="eqbox">$dA\\approx(\\text{radial side})\\times(\\text{arc side})=dr\\cdot(r\\,d\\theta)=r\\,dr\\,d\\theta.$</div>
-    <p>Same $dr$, same $d\\theta$, but a cell out at large $r$ has a longer arc — so it's bigger. That growing factor is the $r$.</p>
-    <p><b>The general rule.</b> Under any change $(u,v)\\mapsto(x,y)$, a $du\\times dv$ cell maps to a parallelogram. Its edges are the vectors $\\big(\\tfrac{\\partial x}{\\partial u},\\tfrac{\\partial y}{\\partial u}\\big)du$ and $\\big(\\tfrac{\\partial x}{\\partial v},\\tfrac{\\partial y}{\\partial v}\\big)dv$, and the area of a parallelogram spanned by $(a,b)$ and $(c,d)$ is $|ad-bc|$ — a $2\\times2$ determinant, the <b>Jacobian</b>:</p>
-    <div class="eqbox">$dx\\,dy=|J|\\,du\\,dv,\\qquad J=\\frac{\\partial x}{\\partial u}\\frac{\\partial y}{\\partial v}-\\frac{\\partial x}{\\partial v}\\frac{\\partial y}{\\partial u}.$</div>
-    <p>For polar, $\\tfrac{\\partial x}{\\partial r}=\\cos\\theta,\\ \\tfrac{\\partial y}{\\partial r}=\\sin\\theta,\\ \\tfrac{\\partial x}{\\partial\\theta}=-r\\sin\\theta,\\ \\tfrac{\\partial y}{\\partial\\theta}=r\\cos\\theta$, so</p>
-    <div class="eqbox">$J=\\cos\\theta\\,(r\\cos\\theta)-(-r\\sin\\theta)\\,\\sin\\theta=r\\cos^2\\theta+r\\sin^2\\theta=r.$</div>
-    <p>The determinant confirms the picture: $|J|=r$. And the payoff — the disk area $\\int_0^{2\\pi}\\!\\int_0^1 r\\,dr\\,d\\theta=2\\pi\\cdot\\tfrac12=\\pi$, i.e. $\\pi r^2$ with $r=1$ — falls out in two easy single integrals, where Cartesian would have fought $\\sqrt{1-x^2}$ limits.</p></div>`;
+
+    <p style="margin-top:16px"><b>Why the cell area is $r\\,dr\\,d\\theta$.</b> Look at one polar cell — between radii $r$ and $r+dr$, and angles $\\theta$ and $\\theta+d\\theta$. Two of its sides are straight radial segments of length $dr$. The other two are little arcs, and an arc that subtends angle $d\\theta$ at radius $r$ has length $r\\,d\\theta$ (arc $=$ radius $\\times$ angle). For a thin cell it's almost a rectangle:</p>
+    <div class="eqbox">$$dA\\approx(\\text{radial side})\\times(\\text{arc side})=dr\\cdot(r\\,d\\theta)=r\\,dr\\,d\\theta.$$</div>
+    <p>Same $dr$, same $d\\theta$ — but a cell far out at large $r$ has a longer arc, so it is bigger. That growing factor <em>is</em> the extra $r$, and it's exactly the arc-growth you dragged through.</p>
+    <p><b>The payoff.</b> The unit disk's area now falls out in two one-line integrals:</p>
+    <div class="eqbox">$$\\int_0^{2\\pi}\\!\\!\\int_0^1 r\\,dr\\,d\\theta=\\Big(\\int_0^{2\\pi}\\!d\\theta\\Big)\\Big(\\int_0^1 r\\,dr\\Big)=2\\pi\\cdot\\tfrac12=\\pi,$$</div>
+    <p>the familiar $\\pi r^2$ with $r=1$ — where Cartesian coordinates would have fought those square-root limits the whole way. Next we'll ask the same question for <em>any</em> change of coordinates, not just polar.</p></div>`;
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=40,cx=W/2,cy=H/2;
   const dth=Math.PI/6,dr=0.6,th0=Math.PI/6;
   const P=(r,t)=>[cx+r*Math.cos(t)*S,cy-r*Math.sin(t)*S];
@@ -2143,13 +2298,11 @@ function c7_changevars(){
     ctx.strokeStyle='#1c2838';ctx.lineWidth=1;
     for(let r=1;r<=4;r++){ctx.beginPath();for(let i=0;i<=80;i++){const t=i/80*2*Math.PI;const p=P(r,t);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}ctx.stroke();}
     for(let k=0;k<12;k++){const t=k*Math.PI/6;ctx.beginPath();const a=P(0,t),b=P(4.3,t);ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();}
-    // highlighted cell
     ctx.fillStyle='rgba(232,184,75,0.28)';ctx.strokeStyle='#e8b84b';ctx.lineWidth=2;ctx.beginPath();
     for(let i=0;i<=20;i++){const t=th0+dth*i/20;const p=P(r0,t);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}
     for(let i=20;i>=0;i--){const t=th0+dth*i/20;const p=P(r0+dr,t);ctx.lineTo(p[0],p[1]);}
     ctx.closePath();ctx.fill();ctx.stroke();
-    // labels dr and arc
-    const mid=th0+dth/2;const pr=P(r0+dr/2,th0);ctx.fillStyle='#dbe6f4';ctx.font='12px sans-serif';
+    const mid=th0+dth/2;ctx.fillStyle='#dbe6f4';ctx.font='12px sans-serif';
     const pa=P(r0+dr+0.15,mid);ctx.fillText('r·dθ',pa[0]-6,pa[1]);
     const pdr=P(r0+dr/2,th0-0.12);ctx.fillText('dr',pdr[0]+2,pdr[1]+4);
     ctx.fillStyle='#5d7186';ctx.fillText('x',P(4.4,0)[0],P(4.4,0)[1]+4);ctx.fillText('y',P(4.4,Math.PI/2)[0]-4,P(4.4,Math.PI/2)[1]-4);
@@ -2162,8 +2315,55 @@ function c7_changevars(){
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),0.5,()=>{addReveal(`<div class="rh">✓ 1/2</div><p>$\\int_0^1 r\\,dr=\\big[\\tfrac{r^2}{2}\\big]_0^1=\\tfrac12$. The outer integral just sweeps the angle: $\\int_0^{2\\pi}d\\theta=2\\pi$, so the disk area is $2\\pi\\cdot\\tfrac12=\\pi$ — the familiar $\\pi r^2$. The whole trick was replacing $dx\\,dy$ with $r\\,dr\\,d\\theta$; that extra $r$ is the Jacobian, and it's exactly the arc-growth you dragged through.</p>`);});
+  numChk(stage.querySelector('.card'),0.5,()=>{addReveal(`<div class="rh">✓ 1/2</div><p>$\\int_0^1 r\\,dr=\\big[\\tfrac{r^2}{2}\\big]_0^1=\\tfrac12$. The outer integral just sweeps the angle, $\\int_0^{2\\pi}d\\theta=2\\pi$, so the disk area is $2\\pi\\cdot\\tfrac12=\\pi$. The whole trick was replacing $dx\\,dy$ with $r\\,dr\\,d\\theta$ — and that extra $r$ is the arc-growth you dragged.</p>`);});
   setHints([`∫₀¹ r dr = [r²/2] from 0 to 1.`,`(1²/2) − 0 = 1/2 = 0.5.`]);
+}
+
+function c7_jacobian(){
+  stage.innerHTML=`<div class="card"><h2>The Jacobian: the area factor for <em>any</em> change of variables</h2>
+    <p>Polar worked because we found its exact area factor, $r$. But polar is one map among many — you might stretch coordinates to fit an ellipse, shear them, or invent new coordinates $(u,v)$ tailored to whatever region a problem hands you (that's where $u,v$ come from: they're <em>your</em> chosen replacements for $x,y$). Each such change has its own area factor. We need one formula that produces it every time.</p>
+    <p>The key idea: zoom in far enough and <em>any</em> smooth change of coordinates looks <b>linear</b> — it sends a tiny grid square to a tiny <b>parallelogram</b>. So first answer the purely linear question: if the square's two edges become the vectors $\\mathbf e_1$ and $\\mathbf e_2$, what is the area of the parallelogram they span? Drag the tip of $\\mathbf e_2$ and watch.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">e&#8321;</div><div class="v" id="e1v">(2, 0)</div></div><div class="rdc"><div class="k">e&#8322;</div><div class="v" id="e2v">—</div></div><div class="rdc"><div class="k">area = |e&#8321;&#8339;e&#8322;&#7527; &#8722; e&#8321;&#7527;e&#8322;&#8339;|</div><div class="v" id="arv">—</div></div></div>
+    <div class="task"><b>Read off the area rule</b>With edges $\\mathbf e_1=(2,0)$ and $\\mathbf e_2=(1,3)$, what is the area of the parallelogram they span? (Drag to check, or compute $|e_{1x}e_{2y}-e_{1y}e_{2x}|$.)</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>That area is a determinant.</b> The parallelogram built from $\\mathbf e_1=(a,b)$ and $\\mathbf e_2=(c,d)$ has area $|ad-bc|$ — biggest when the edges are perpendicular, and shrinking to $0$ as they line up (a squashed, degenerate cell). That combination is the <b>$2\\times2$ determinant</b>:</p>
+    <div class="eqbox">$$\\text{area}=\\left|\\det\\begin{pmatrix}a&c\\\\ b&d\\end{pmatrix}\\right|=|ad-bc|.$$</div>
+
+    <p><b>Now make the map curvy.</b> A real change of variables $(u,v)\\mapsto\\big(x(u,v),\\,y(u,v)\\big)$ isn't linear — but on a tiny cell it is, to first order. Step $du$ in $u$ (holding $v$): the point $(x,y)$ moves by $\\big(\\tfrac{\\partial x}{\\partial u},\\tfrac{\\partial y}{\\partial u}\\big)du$ — the partials just measure "how far $x$ and $y$ shift per unit $u$." Likewise a step $dv$ moves it by $\\big(\\tfrac{\\partial x}{\\partial v},\\tfrac{\\partial y}{\\partial v}\\big)dv$. Those two vectors are the edges $\\mathbf e_1,\\mathbf e_2$ of the little parallelogram, so its area is their determinant:</p>
+    <div class="eqbox">$$dx\\,dy=|J|\\,du\\,dv,\\qquad J=\\det\\begin{pmatrix}\\tfrac{\\partial x}{\\partial u}&\\tfrac{\\partial x}{\\partial v}\\\\[2pt]\\tfrac{\\partial y}{\\partial u}&\\tfrac{\\partial y}{\\partial v}\\end{pmatrix}=\\frac{\\partial x}{\\partial u}\\frac{\\partial y}{\\partial v}-\\frac{\\partial x}{\\partial v}\\frac{\\partial y}{\\partial u}.$$</div>
+    <p>This determinant $J$ is the <b>Jacobian</b> — the local area-stretch factor of the map.</p>
+
+    <p><b>Check it against polar.</b> For $x=r\\cos\\theta,\\ y=r\\sin\\theta$ (so $u=r,\\ v=\\theta$): $\\tfrac{\\partial x}{\\partial r}=\\cos\\theta,\\ \\tfrac{\\partial y}{\\partial r}=\\sin\\theta,\\ \\tfrac{\\partial x}{\\partial\\theta}=-r\\sin\\theta,\\ \\tfrac{\\partial y}{\\partial\\theta}=r\\cos\\theta$, so</p>
+    <div class="eqbox">$$J=\\cos\\theta\\,(r\\cos\\theta)-(-r\\sin\\theta)\\,\\sin\\theta=r(\\cos^2\\theta+\\sin^2\\theta)=r.$$</div>
+    <p>The formula reproduces the $r$ we found by hand — but now it will hand you the factor for a stretch, a shear, or any coordinate change you cook up. (ML echo: this is exactly the machinery behind <b>normalizing flows</b>, where a network warps a simple distribution into a complex one and the log-likelihood picks up a $\\log|\\det J|$ term — the same Jacobian, tracking how the map stretches probability mass.)</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=44,ox=150,oy=250;
+  const px=x=>ox+x*S,py=y=>oy-y*S;
+  const e1=[2,0];let e2=[1,2];
+  function arrow(X0,Y0,X1,Y1,col,w){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=w||2.5;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();const a=Math.atan2(Y1-Y0,X1-X0);ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-11*Math.cos(a-0.4),Y1-11*Math.sin(a-0.4));ctx.lineTo(X1-11*Math.cos(a+0.4),Y1-11*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=-1;g<=8;g++){ctx.beginPath();ctx.moveTo(px(g),py(-1));ctx.lineTo(px(g),py(5));ctx.stroke();ctx.beginPath();ctx.moveTo(px(-1),py(g));ctx.lineTo(px(8),py(g));ctx.stroke();}
+    ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(px(-1),py(0));ctx.lineTo(px(8),py(0));ctx.moveTo(px(0),py(-1));ctx.lineTo(px(0),py(5));ctx.stroke();
+    // parallelogram 0, e1, e1+e2, e2
+    const O=[px(0),py(0)],A=[px(e1[0]),py(e1[1])],B=[px(e1[0]+e2[0]),py(e1[1]+e2[1])],C=[px(e2[0]),py(e2[1])];
+    ctx.fillStyle='rgba(122,184,255,0.16)';ctx.beginPath();ctx.moveTo(O[0],O[1]);ctx.lineTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.lineTo(C[0],C[1]);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#3a4c66';ctx.lineWidth=1;ctx.stroke();
+    arrow(O[0],O[1],A[0],A[1],'#7ab8ff');
+    arrow(O[0],O[1],C[0],C[1],'#e8b84b');
+    ctx.fillStyle='#7ab8ff';ctx.font='600 13px sans-serif';ctx.fillText('e\u2081',A[0]+6,A[1]+16);
+    ctx.fillStyle='#e8b84b';ctx.fillText('e\u2082',C[0]-22,C[1]-2);
+    const area=Math.abs(e1[0]*e2[1]-e1[1]*e2[0]);
+    document.getElementById('e2v').textContent='('+e2[0].toFixed(1)+', '+e2[1].toFixed(1)+')';
+    document.getElementById('arv').textContent=area.toFixed(2);}
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));e2=[Math.max(-1.5,Math.min(4.5,(X-ox)/S)),Math.max(-1,Math.min(4.5,(oy-Y)/S))];draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),6,()=>{addReveal(`<div class="rh">✓ 6</div><p>$|e_{1x}e_{2y}-e_{1y}e_{2x}|=|2\\cdot3-0\\cdot1|=6$. Because $\\mathbf e_1$ lies flat along the $x$-axis (height $0$), the area is just base $2$ times height $3$ — and the determinant $ad-bc$ is exactly that "base times perpendicular height," for edges pointing any which way. Slide $\\mathbf e_2$ down onto the $x$-axis and the area collapses to $0$: the cell is squashed flat, the determinant vanishes, and the coordinate change is degenerate there.</p>`);});
+  setHints([`Area = |e1x·e2y − e1y·e2x| with e1=(2,0), e2=(1,3).`,`|2·3 − 0·1| = |6| = 6.`]);
 }
 
 function c7_doubleint(){
@@ -2310,6 +2510,31 @@ function c7_problems(){
     <p>Using $dA=r\\,dr\\,d\\theta$, find the area of the disk of radius $R$ by evaluating $\\displaystyle\\int_0^{2\\pi}\\!\\!\\int_0^{R} r\\,dr\\,d\\theta$.</p>
     <details><summary>Show solution</summary><div class="sol">
     <p>Inner: $\\int_0^{R} r\\,dr=\\tfrac{R^2}{2}$. Outer: $\\int_0^{2\\pi}\\tfrac{R^2}{2}\\,d\\theta=\\tfrac{R^2}{2}\\cdot2\\pi=\\pi R^2$ — the classic disk area, recovered in two one-line integrals thanks to the Jacobian factor $r$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">Jacobian</span><div class="ph">Problem 12</div>
+    <p>A change of variables has $x=2u,\\ y=u+3v$. Find its Jacobian $J=\\dfrac{\\partial x}{\\partial u}\\dfrac{\\partial y}{\\partial v}-\\dfrac{\\partial x}{\\partial v}\\dfrac{\\partial y}{\\partial u}$, the local area-stretch factor.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\tfrac{\\partial x}{\\partial u}=2,\\ \\tfrac{\\partial x}{\\partial v}=0,\\ \\tfrac{\\partial y}{\\partial u}=1,\\ \\tfrac{\\partial y}{\\partial v}=3$. So $J=(2)(3)-(0)(1)=6$: every area is stretched by a constant factor $6$, so $dx\\,dy=6\\,du\\,dv$. (This map is linear, so the factor is the same everywhere.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">multivariable chain rule</span><div class="ph">Problem 13</div>
+    <p>Let $z=x^2y$ with $x=t^2$ and $y=t$. Find $\\dfrac{dz}{dt}$ at $t=1$ using the chain rule.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\frac{dz}{dt}=\\frac{\\partial z}{\\partial x}\\frac{dx}{dt}+\\frac{\\partial z}{\\partial y}\\frac{dy}{dt}=(2xy)(2t)+(x^2)(1)$. At $t=1$: $x=1,y=1$, so $(2)(2)+(1)=5$. (Check: $z=(t^2)^2 t=t^5$, $\\frac{dz}{dt}=5t^4=5$ at $t=1$.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">Hessian / Taylor</span><div class="ph">Problem 14</div>
+    <p>For $f(x,y)=x^2+xy+y^2$, write the Hessian $H$ and find the directional curvature $\\mathbf p^{\\mathsf T}H\\mathbf p$ along $\\mathbf p=\\tfrac{1}{\\sqrt2}(1,1)$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$H=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}$. With $\\mathbf p=\\tfrac1{\\sqrt2}(1,1)$: $\\mathbf p^{\\mathsf T}H\\mathbf p=\\tfrac12\\big(2+1+1+2\\big)=3$. (Along the $(1,1)$ diagonal the curvature is $3$ — the larger Hessian eigenvalue; along $(1,-1)$ it would be $1$.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">convexity</span><div class="ph">Problem 15</div>
+    <p>Is $f(x,y)=x^2-xy+y^2$ convex? Use the discriminant $D=f_{xx}f_{yy}-f_{xy}^2$ and the sign of $f_{xx}$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$f_{xx}=2,\\ f_{yy}=2,\\ f_{xy}=-1$, so $D=(2)(2)-(-1)^2=3&gt;0$ with $f_{xx}=2&gt;0$: the Hessian is positive-definite everywhere, so $f$ is <b>convex</b> — one global minimum (at the origin).</p></div></details></div>
+
+    <div class="prob"><span class="lvl">Newton's method</span><div class="ph">Problem 16</div>
+    <p>Minimize $f(x)=x^2-4x+7$ with one Newton step $x-\\dfrac{f'}{f''}$, starting anywhere, say $x=0$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$f'=2x-4$, $f''=2$. From $x=0$: $0-\\tfrac{-4}{2}=2$. One step lands exactly on $x=2$, the true minimum — because $f$ is a quadratic, so its Taylor model <em>is</em> $f$ and Newton is exact in a single step.</p></div></details></div>
   </div>`;
   setHints([]);unlock();
 }
@@ -2317,8 +2542,8 @@ function c7_problems(){
 function c7_recap(){
   stage.innerHTML=`<div class="card"><h2>What you built</h2>
     <div class="eqbox" style="line-height:2.3">$$\\nabla f=\\Big(\\tfrac{\\partial f}{\\partial x},\\tfrac{\\partial f}{\\partial y}\\Big)\\ \\text{(steepest ascent, }\\perp\\text{ level curves)}\\qquad D_{\\mathbf u}f=\\nabla f\\cdot\\mathbf u$$
-    <div style="text-align:center;line-height:2;color:#dbe6f4;margin-top:6px">partial = ordinary derivative, other variables held constant<br>critical points: $\\nabla f=\\mathbf 0$ · classify by $D=f_{xx}f_{yy}-f_{xy}^2$ · gradient descent: $\\mathbf x-\\alpha\\nabla f$<br>constrained optima: $\\nabla f=\\lambda\\nabla g$ · $\\iint_R f\\,dA=\\lim\\sum\\sum f\\,\\Delta A$ (volume)<br>iterated single integrals (Fubini), inside-out · change of variables: $dx\\,dy=|J|\\,du\\,dv$ (polar: $r\\,dr\\,d\\theta$)</div></div>
-    <p>Multivariable calculus is single-variable calculus applied one direction at a time and then reassembled: partials are slice-slopes, the gradient bundles them into the steepest-ascent vector, second partials curve it into a min/max/saddle, and double integrals are areas-under-a-curve stacked into volumes. The gradient — and descending it — is the exact machinery underneath training a model.</p>
+    <div style="text-align:center;line-height:2;color:#dbe6f4;margin-top:6px">partial = ordinary derivative, other variables held constant · chain rule: $\\frac{dz}{dt}=\\sum \\frac{\\partial z}{\\partial x_i}\\frac{dx_i}{dt}$ (backprop)<br>Taylor: $f(P{+}\\mathbf p)\\approx f+\\nabla f\\cdot\\mathbf p+\\tfrac12\\mathbf p^{\\mathsf T}H\\mathbf p$ · critical pts $\\nabla f=\\mathbf 0$, classify by $D=f_{xx}f_{yy}-f_{xy}^2$<br>convex $\\iff$ $H$ positive-semidefinite · descent $\\mathbf x-\\alpha\\nabla f$ · Newton $\\mathbf x-H^{-1}\\nabla f$ · constrained $\\nabla f=\\lambda\\nabla g$<br>$\\iint_R f\\,dA$ by iterated integrals (Fubini) · change of variables $dx\\,dy=|J|\\,du\\,dv$ (polar: $r\\,dr\\,d\\theta$)</div></div>
+    <p>Multivariable calculus is single-variable calculus applied one direction at a time and then reassembled: partials are slice-slopes, the gradient bundles them into the steepest-ascent vector, the chain rule threads rates through a composition (backprop), Taylor fits a local bowl whose Hessian decides min/max/saddle and convexity, and double integrals stack areas into volumes. Descending the gradient — and, where it's cheap, dividing by the curvature — is the exact machinery underneath training a model.</p>
     <p><b>Next — Module 9:</b> <b>vector calculus</b>. Attach a vector to every point of the plane (a <em>vector field</em> — think flow or force), then integrate along curves and over surfaces; the Green, Stokes, and divergence theorems tie those integrals back to the derivatives from this module. Then Module 10 packs all these partials into <b>matrices</b> — the Jacobian, the Hessian, and the chain rule as matrix multiplication — the formal bridge into machine learning.</p></div>`;
   setHints([]);unlock();
 }
