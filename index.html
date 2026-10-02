@@ -145,7 +145,7 @@ const MODULES=[
   beats:[c6_recall,c6_intro,c6_sequences,c6_geometric,c6_nthterm,c6_integraltest,c6_ratiotest,c6_powerseries,c6_taylor,c6_problems,c6_recap]},
  {id:'c7',title:'Multivariable Differentiation',sub:'Surfaces and contour maps, partial derivatives, the tangent plane, the gradient, directional derivatives, and the multivariable chain rule.',ready:true,
   outro:`Several inputs, one idea at a time: a partial derivative is the slope of a slice, the tangent plane is the local flat approximation built from those slopes, the gradient packs them into the steepest-uphill vector perpendicular to the contours, the directional derivative reads the slope in any direction as $\\nabla f\\cdot\\mathbf u$, and the chain rule threads rates through a composition — the exact engine of backpropagation.`,
-  beats:[c7_recall,c7_intro,c7_partials,c7_gradient,c7_directional,c7_chainrule,c7_problems,c7_recap]},
+  beats:[c7_recall,c7_intro,c7_partials,c7_tangentplane,c7_gradient,c7_directional,c7_chainrule,c7_problems,c7_recap]},
  {id:'c8',title:'Multivariable Optimization',sub:'Critical points and gradient descent, the local quadratic model and the Hessian, the second-derivative test, convexity, Newton’s method, and Lagrange multipliers.',ready:true,
   outro:`Optimization is calculus hunting for the best point: $\\nabla f=\\mathbf 0$ locates the flat spots, the Taylor quadratic model and its Hessian say whether each is a bowl, dome, or saddle, convexity guarantees a single global minimum, gradient descent and Newton’s method walk to it, and Lagrange multipliers handle a constraint. This is the mathematical core of training a model.`,
   beats:[c7_critical,c7_taylor,c7_secondderiv,c7_convexity,c7_newton,c7_lagrange]},
@@ -2013,6 +2013,60 @@ function c7_partials(){
   build();draw();
   numChk(stage.querySelector('.card'),4,()=>{addReveal(`<div class="rh">✓ ∂f/∂x = 4</div><p>Holding $y=2$, the trace is $z=x^2+2x$; its slope is $2x+2$, which at $x=1$ is $4$. That's $\\partial f/\\partial x = 2x+y$ evaluated at $(1,2)$. Slide the point and the blue tangent tilts — the $x$-slope genuinely changes from place to place. Flip to "hold $x=1$" and the trace becomes a straight line of slope $1$: that constant is $\\partial f/\\partial y = x$.</p>`);});
   setHints([`Hold y fixed, differentiate x²+xy in x: that's 2x+y. Then plug in (1,2).`,`2(1)+2 = 4.`]);
+}
+
+function c7_tangentplane(){
+  stage.innerHTML=`<div class="card"><h2>The tangent plane: zooming in until the surface looks flat</h2>
+    <p>Here's the idea the whole module quietly runs on. Take a smooth curve and zoom in on a point: it looks straighter and straighter, until up close it's indistinguishable from its <b>tangent line</b>. A surface does the same thing one dimension up — zoom in on a point and the hills flatten into a single <b>tangent plane</b>. "Smooth" just means this works: up close, the surface <em>is</em> a flat plane.</p>
+    <p>Below is $f(x,y)=x^2+xy$ near the point $P=(1,2)$. The <span class="cy">blue plane</span> is the tangent plane there; the <span style="color:#e8b84b">gold mesh</span> is the real surface. <b>Drag to zoom in</b> toward $P$ and watch the mesh settle onto the plane — the "largest gap" readout melts toward zero.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">zoom</div><div class="v" id="zm">—</div></div><div class="rdc"><div class="k">window radius</div><div class="v" id="rr">—</div></div><div class="rdc"><div class="k">largest gap (surface − plane)</div><div class="v" id="gp">—</div></div></div>
+    <div class="task"><b>Use the plane as a shortcut</b>At $P=(1,2)$: $f=3$, $f_x=2x+y=4$, $f_y=x=1$. Use the tangent plane $L=f+f_x\\,\\Delta x+f_y\\,\\Delta y$ to estimate $f(1.1,\\,2)$.</div>
+    <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>From one dimension to two.</b> In 1-D, "zoom in → looks like a line" gave the tangent-line approximation $f(x)\\approx f(a)+f'(a)(x-a)$. In 2-D, "zoom in → looks like a plane" gives the same thing with a slope in <em>each</em> direction — and those two slopes are exactly the partials from the last beat:</p>
+    <div class="eqbox">$z=\\underbrace{f(x_0,y_0)}_{\\text{height at }P}+\\underbrace{f_x(x_0,y_0)\\,(x-x_0)}_{\\text{climb from the }x\\text{-slope}}+\\underbrace{f_y(x_0,y_0)\\,(y-y_0)}_{\\text{climb from the }y\\text{-slope}}.$</div>
+    <p>Read it as a recipe: start at the height $f(P)$; step $\\Delta x$ and you climb $f_x\\,\\Delta x$; step $\\Delta y$ and you climb $f_y\\,\\Delta y$; the two climbs just <b>add</b>. For our surface at $P=(1,2)$, with $f(P)=3$, $f_x=4$, $f_y=1$:</p>
+    <div class="eqbox">$L(x,y)=3+4(x-1)+1(y-2).$</div>
+    <p><b>This is the linear approximation.</b> Near $P$, the real $f$ and this flat $L$ agree: $f(x,y)\\approx L(x,y)$, and the gap shrinks <em>faster</em> than your distance from $P$ (that vanishing gap is precisely what we mean by "differentiable," our smoothness floor). Because this surface curves upward, the flat plane sits just below it, so $L$ slightly <em>under</em>-estimates — exactly the tiny gap you watched collapse as you zoomed.</p>
+    <p><b>The one idea to carry forward.</b> Moving $\\Delta x$ and $\\Delta y$, the height changes <b>add</b> — each direction contributes (its slope) $\\times$ (its step). That single fact is the whole foundation of the next two beats: the directional derivative reads this plane's slope in a chosen direction, and the chain rule threads rates of change through this same linear sum.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
+  const f=(x,y)=>x*x+x*y;const x0=1,y0=2,fP=f(x0,y0),fx=2*x0+y0,fy=x0;
+  const cx=320,cy=212,WX=132,WY=33,WZ=16;
+  const PL=(u,v,zz)=>[cx+(u-v)*WX, cy+(u+v)*WY - zz*WZ];
+  let r=1.6;
+  function surfZ(u,v){return (f(x0+u*r,y0+v*r)-fP)/r;}
+  function planeZ(u,v){return (fx*(u*r)+fy*(v*r))/r;}
+  function pathPts(pts,color,w,dash){if(!ctx)return;ctx.strokeStyle=color;ctx.lineWidth=w||1;if(dash)ctx.setLineDash(dash);ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.setLineDash([]);}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    // tangent plane quad
+    const C=[PL(-1,-1,planeZ(-1,-1)),PL(1,-1,planeZ(1,-1)),PL(1,1,planeZ(1,1)),PL(-1,1,planeZ(-1,1))];
+    ctx.beginPath();C.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();
+    ctx.fillStyle='rgba(122,184,255,0.16)';ctx.fill();ctx.strokeStyle='rgba(122,184,255,0.55)';ctx.lineWidth=1.5;ctx.stroke();
+    // surface wireframe
+    const G=10;
+    for(let i=0;i<=G;i++){const u=-1+2*i/G;const row=[];for(let k=0;k<=30;k++){const v=-1+2*k/30;row.push(PL(u,v,surfZ(u,v)));}pathPts(row,'rgba(232,184,75,0.85)',1);}
+    for(let i=0;i<=G;i++){const v=-1+2*i/G;const row=[];for(let k=0;k<=30;k++){const u=-1+2*k/30;row.push(PL(u,v,surfZ(u,v)));}pathPts(row,'rgba(232,184,75,0.85)',1);}
+    // gap sticks at corners
+    let maxgap=0;
+    for(const [u,v] of [[1,1],[1,-1],[-1,1],[-1,-1]]){const a=PL(u,v,surfZ(u,v)),b=PL(u,v,planeZ(u,v));pathPts([a,b],'rgba(255,255,255,0.4)',1,[3,3]);}
+    for(let i=0;i<=12;i++)for(let j=0;j<=12;j++){const u=-1+2*i/12,v=-1+2*j/12;const g=Math.abs(f(x0+u*r,y0+v*r)-(fP+fx*u*r+fy*v*r));if(g>maxgap)maxgap=g;}
+    // center point
+    const o=PL(0,0,0);ctx.fillStyle='#fff';ctx.strokeStyle='#0a111b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(o[0],o[1],5,0,7);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#7ab8ff';ctx.font='12px sans-serif';ctx.fillText('tangent plane',20,24);
+    ctx.fillStyle='#e8b84b';ctx.fillText('surface  z = x² + xy',20,42);
+    ctx.fillStyle='#9fb0c4';ctx.fillText('P = (1, 2)',o[0]+9,o[1]+4);
+    document.getElementById('zm').textContent=(1.6/r).toFixed(1)+'×';
+    document.getElementById('rr').textContent='±'+r.toFixed(2);
+    document.getElementById('gp').textContent=maxgap.toFixed(3);}
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const rc=cv.getBoundingClientRect();const X=(e.clientX-rc.left)*(W/Math.max(1,rc.width));r=Math.max(0.1,Math.min(1.6,1.6-(X/W)*1.5));draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),3.4,()=>{addReveal(`<div class="rh">✓ ≈ 3.4</div><p>$L(1.1,2)=3+4(0.1)+1(0)=3.4$. The true value is $f(1.1,2)=1.21+2.2=3.41$ — off by just $0.01$, the surface poking a hair above its own flat plane. Zoom in on the canvas and that gap vanishes: close to $P$, the plane and the surface are the same thing, which is exactly why the linear approximation works.</p>`);},s=>parseFloat(s));
+  setHints([`L = f + f_x·Δx + f_y·Δy. Here Δx = 1.1−1 = 0.1 and Δy = 0.`,`3 + 4(0.1) + 1(0) = 3.4.`]);
 }
 
 function c7_gradient(){
