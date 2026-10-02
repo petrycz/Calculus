@@ -1879,7 +1879,7 @@ function c7_intro(){
     <p>A phone screen is flat, so we also draw the landscape the way a hiker's map does: looking straight down, with a <b>contour line</b> drawn through all the points at each chosen height. Below, the same hill $f(x,y)=9-x^2-y^2$ is shown both ways — the 3-D surface on the left, its contour map on the right. <b>Drag the dot on the map</b> and watch its twin climb the hill; the box reports the height there.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">point (x, y)</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">height f(x, y)</div><div class="v" id="hv">—</div></div><div class="rdc"><div class="k">this contour ring</div><div class="v" id="rv">—</div></div></div>
-    <div class="task"><b>Read a height off the map</b>Every point on one ring sits at the same height. Drag to the point $(2,1)$ — or just evaluate $f=9-x^2-y^2$ there. What height is that ring?</div>
+    <div class="task"><b>Read a height off the map</b>Every point on one ring sits at the same height. Drag the dot onto $(2,1)$ — whole-number points are magnetic, so it snaps there — or just evaluate $f=9-x^2-y^2$. What height is that ring?</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
 
     <p style="margin-top:16px"><b>What you're looking at.</b> Three ideas, and we'll lean on all of them for the rest of the module:</p>
@@ -1921,7 +1921,8 @@ function c7_intro(){
     document.getElementById('hv').textContent=fp.toFixed(2);
     document.getElementById('rv').textContent=fp>0?('all points at height '+fp.toFixed(2)):'below the hill';}
   cv.style.touchAction='none';let drg=false;
-  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));xp=Math.max(-3,Math.min(3,mxR(X)));yp=Math.max(-3,Math.min(3,myR(Y)));draw();}
+  const snap=v=>{const q=Math.round(v);return Math.abs(v-q)<0.14?q:v;};
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));xp=Math.max(-3,Math.min(3,snap(mxR(X))));yp=Math.max(-3,Math.min(3,snap(myR(Y))));draw();}
   cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
@@ -1931,35 +1932,87 @@ function c7_intro(){
 }
 
 function c7_partials(){
-  stage.innerHTML=`<div class="card"><h2>Partial derivatives: change one input at a time</h2>
-    <p>With two inputs, "the derivative" splits in two. The <b>partial derivative</b> $\\dfrac{\\partial f}{\\partial x}$ measures how $f$ changes as you nudge $x$ while <em>holding $y$ fixed</em> — and vice versa. Geometrically: slice the surface with a plane (fix one variable) and take the ordinary slope of the curve you get. Take $f(x,y)=x^2+xy$; tap to choose which variable to freeze, and drag along the slice to read its slope.</p>
+  stage.innerHTML=`<div class="card"><h2>Partial derivatives: slope one direction at a time</h2>
+    <p>On a curve there was just one way to move, so "the slope" meant one thing. On a surface you can head in infinitely many directions, and the steepness is different in each. The fix is to start simple: pin down the slope along the two axis directions, one at a time. That's a <b>partial derivative</b>.</p>
+    <p>The trick is <b>slicing</b>. To find the slope in the $x$-direction, hold $y$ fixed at some value — that cuts the surface with a vertical plane and exposes a single curve (a <em>trace</em>). The slope of that ordinary 1-D curve <em>is</em> the partial derivative $\\partial f/\\partial x$. Below, the surface is $f(x,y)=x^2+xy$; the gold plane makes the cut, and the right panel shows the exposed trace with its tangent. Tap to choose which variable to freeze, and drag to slide the point along the cut.</p>
     <div class="seg" id="seg"></div>
     <canvas id="cv" width="640" height="380"></canvas>
-    <div class="readout"><div class="rdc"><div class="k" id="pk">—</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">slope of this slice</div><div class="v" id="sv">—</div></div></div>
-    <div class="task"><b>Compute a partial</b>For $f(x,y)=x^2+xy$, find $\\dfrac{\\partial f}{\\partial x}$ at the point $(x,y)=(1,2)$.</div>
+    <div class="readout"><div class="rdc"><div class="k" id="hk">holding —</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k" id="slk">slope of the trace</div><div class="v" id="sv">—</div></div></div>
+    <div class="task"><b>Compute a partial</b>For $f(x,y)=x^2+xy$, find $\\dfrac{\\partial f}{\\partial x}$ at the point $(x,y)=(1,2)$ (hold $y=2$, slide to $x=1$).</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
-    <p style="margin-top:16px"><b>How to compute one.</b> A partial derivative is an ordinary derivative with the other variable treated as a <em>constant</em>. Straight from the limit definition, freezing $y$:</p>
-    <div class="eqbox">$$\\frac{\\partial f}{\\partial x}=\\lim_{h\\to0}\\frac{f(x+h,y)-f(x,y)}{h}$$</div>
-    <p>Apply it to $f=x^2+xy$. Holding $y$ constant, $x^2$ differentiates to $2x$ and $xy$ (a constant $y$ times $x$) differentiates to $y$:</p>
-    <div class="eqbox">$$\\frac{\\partial f}{\\partial x}=2x+y,\\qquad \\frac{\\partial f}{\\partial y}=x$$</div>
-    <p>(For $\\partial f/\\partial y$, freeze $x$: $x^2$ is now a constant, gone; $xy$ gives $x$.) At $(1,2)$: $\\frac{\\partial f}{\\partial x}=2(1)+2=4$. Notice it depends on $y$ — the slope in the $x$-direction changes with where you're standing.</p></div>`;
-  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-4,xmax:4,ymin:-3,ymax:9});
-  let sel='y', a=1;
-  const slice=x=>sel==='y'? x*x+2*x : 4+2*x;       // hold y=2 -> x²+2x ; hold x=2 -> 4+2y (var plotted on x-axis)
-  const slope=x=>sel==='y'? 2*x+2 : 2;
-  function draw(){pl.grid();pl.curve(slice,'#7ab8ff');
-    const m=slope(a),{ctx}=pl;ctx.strokeStyle='#e8b84b';ctx.lineWidth=2;ctx.beginPath();
-    const y0=slice(a)+m*(pl.xmin-a),y1=slice(a)+m*(pl.xmax-a);ctx.moveTo(pl.px(pl.xmin),pl.py(y0));ctx.lineTo(pl.px(pl.xmax),pl.py(y1));ctx.stroke();
-    pl.point(a,slice(a),'#e8b84b',5);
-    document.getElementById('pk').textContent=sel==='y'?'∂f/∂x (y = 2 fixed)':'∂f/∂y (x = 2 fixed)';
-    document.getElementById('pv').textContent=slope(a).toFixed(2);
-    document.getElementById('sv').textContent=slope(a).toFixed(2);}
-  function build(){const labs={'y':'hold y = 2 (vary x)','x':'hold x = 2 (vary y)'};document.getElementById('seg').innerHTML=Object.keys(labs).map(k=>`<span class="segb ${k===sel?'on':''}" data-k="${k}">${labs[k]}</span>`).join('');
-    document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{sel=b.dataset.k;a=1;build();draw();});}
+
+    <p style="margin-top:16px"><b>How to actually compute one.</b> A partial derivative is just an ordinary derivative taken with the <em>other</em> variable treated as a frozen constant. Straight from the limit definition, nudging only $x$ and leaving $y$ alone:</p>
+    <div class="eqbox">$$\\frac{\\partial f}{\\partial x}=\\lim_{h\\to0}\\frac{f(x+h,\\,y)-f(x,\\,y)}{h}.$$</div>
+    <p>Apply it to $f=x^2+xy$. Holding $y$ constant, $x^2$ differentiates to $2x$, and $xy$ — a constant ($y$) times $x$ — differentiates to $y$. Freezing $x$ instead, $x^2$ is now a constant (gone) and $xy$ gives $x$:</p>
+    <div class="eqbox">$$\\frac{\\partial f}{\\partial x}=2x+y,\\qquad \\frac{\\partial f}{\\partial y}=x.$$</div>
+    <p>At $(1,2)$: $\\ \\partial f/\\partial x = 2(1)+2 = 4$. Two things worth pausing on:</p>
+    <p>&bull; <b>A partial is itself a function.</b> $\\partial f/\\partial x = 2x+y$ still depends on where you stand — the $x$-slope at $(1,2)$ is $4$, but at $(0,0)$ it's $0$. Slide the point on the gold trace and watch the tangent tilt.</p>
+    <p>&bull; <b>Don't confuse the trace with its slope.</b> Switch to "hold $x=1$": the exposed trace is a straight slanted line, and the partial $\\partial f/\\partial y$ is the single number that is its slope — here $x=1$, the same all along the line. The curve is the cross-section; the derivative is just how steep it is.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
+  const f=(x,y)=>x*x+x*y, fx=(x,y)=>2*x+y, fy=(x,y)=>x;
+  const PL=(x,y,z)=>[150+(x-y)*23, 238+(x+y)*6 - z*6.3];
+  let mode='y', pa=1, pb=2;           // pa = x-position (mode y); pb = y-position (mode x)
+  function poly(pts,fill,stroke,w){if(!ctx)return;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=w||1;ctx.stroke();}}
+  function pathPts(pts,color,w){if(!ctx)return;ctx.strokeStyle=color;ctx.lineWidth=w||1;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#7f93a8';ctx.font='12px sans-serif';ctx.fillText('the surface z = x² + xy',16,22);
+    // wireframe surface
+    const G=8;
+    for(let gi=0;gi<=G;gi++){const yv=-3+6*gi/G;const row=[];for(let k=0;k<=24;k++){const x=-3+6*k/24;row.push(PL(x,yv,f(x,yv)));}pathPts(row,'#26384f',1);}
+    for(let gi=0;gi<=G;gi++){const xv=-3+6*gi/G;const row=[];for(let k=0;k<=24;k++){const y=-3+6*k/24;row.push(PL(xv,y,f(xv,y)));}pathPts(row,'#26384f',1);}
+    // slice
+    const zf=-4,zt=20;
+    if(mode==='y'){const y0=2;
+      poly([PL(-3,y0,zf),PL(3,y0,zf),PL(3,y0,zt),PL(-3,y0,zt)],'rgba(232,184,75,0.10)','rgba(232,184,75,0.35)',1);
+      const tr=[];for(let k=0;k<=48;k++){const x=-3+6*k/48;tr.push(PL(x,y0,f(x,y0)));}pathPts(tr,'#e8b84b',2.6);
+      const a=pa,z=f(a,y0),m=fx(a,y0);
+      pathPts([PL(a-1.3,y0,z-m*1.3),PL(a+1.3,y0,z+m*1.3)],'#7ab8ff',2.4);
+      const d=PL(a,y0,z);ctx.fillStyle='#fff';ctx.strokeStyle='#0a111b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(d[0],d[1],5,0,7);ctx.fill();ctx.stroke();
+    } else {const x0=1;
+      poly([PL(x0,-3,zf),PL(x0,3,zf),PL(x0,3,zt),PL(x0,-3,zt)],'rgba(232,184,75,0.10)','rgba(232,184,75,0.35)',1);
+      const tr=[];for(let k=0;k<=48;k++){const y=-3+6*k/48;tr.push(PL(x0,y,f(x0,y)));}pathPts(tr,'#e8b84b',2.6);
+      const b=pb,z=f(x0,b),m=fy(x0,b);
+      pathPts([PL(x0,b-1.3,z-m*1.3),PL(x0,b+1.3,z+m*1.3)],'#7ab8ff',2.4);
+      const d=PL(x0,b,z);ctx.fillStyle='#fff';ctx.strokeStyle='#0a111b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(d[0],d[1],5,0,7);ctx.fill();ctx.stroke();}
+    // divider
+    ctx.strokeStyle='#1c2838';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(322,8);ctx.lineTo(322,372);ctx.stroke();
+    // right: 2D trace
+    const freeLabel=mode==='y'?'x':'y';
+    ctx.fillStyle='#7f93a8';ctx.fillText('the trace (a 1-D curve in '+freeLabel+')',334,22);
+    const tr=t=> mode==='y'? f(t,2): f(1,t);
+    const pt= mode==='y'? pa: pb;
+    const sl= mode==='y'? fx(pa,2): fy(1,pb);
+    let zmin=1e9,zmax=-1e9;for(let i=0;i<=48;i++){const v=tr(-3+6*i/48);if(v<zmin)zmin=v;if(v>zmax)zmax=v;}
+    const pad=(zmax-zmin)*0.18+0.6;zmin-=pad;zmax+=pad;
+    const RX=t=>344+(t+3)/6*280, RZ=z=>352-(z-zmin)/(zmax-zmin)*318;
+    // axes
+    ctx.strokeStyle='#243347';ctx.lineWidth=1;ctx.strokeRect(344,34,280,318);
+    if(zmin<0&&zmax>0){ctx.strokeStyle='#2b3a4f';ctx.beginPath();ctx.moveTo(344,RZ(0));ctx.lineTo(624,RZ(0));ctx.stroke();}
+    if(0>=-3&&0<=3){ctx.strokeStyle='#2b3a4f';ctx.beginPath();ctx.moveTo(RX(0),34);ctx.lineTo(RX(0),352);ctx.stroke();}
+    // trace curve
+    const cpts=[];for(let i=0;i<=120;i++){const t=-3+6*i/120;cpts.push([RX(t),RZ(tr(t))]);}pathPts(cpts,'#e8b84b',2.6);
+    // tangent
+    const z0=tr(pt);pathPts([[RX(pt-2),RZ(z0-sl*2)],[RX(pt+2),RZ(z0+sl*2)]],'#7ab8ff',2);
+    const dd=[RX(pt),RZ(z0)];ctx.fillStyle='#fff';ctx.strokeStyle='#0a111b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(dd[0],dd[1],5,0,7);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#5d7186';ctx.font='11px sans-serif';ctx.fillText(freeLabel,616,RZ(0)-4>40?RZ(0)-4:48);
+    // readouts
+    const xx= mode==='y'?pa:1, yy= mode==='y'?2:pb;
+    document.getElementById('hk').textContent= mode==='y'?'holding y = 2':'holding x = 1';
+    document.getElementById('pv').textContent='('+xx.toFixed(1)+', '+yy.toFixed(1)+')';
+    document.getElementById('slk').textContent= mode==='y'?'slope = ∂f/∂x':'slope = ∂f/∂y';
+    document.getElementById('sv').textContent=sl.toFixed(2);}
+  function build(){document.getElementById('seg').innerHTML=
+    `<span class="segb ${mode==='y'?'on':''}" data-m="y">hold y = 2 (slope in x)</span><span class="segb ${mode==='x'?'on':''}" data-m="x">hold x = 1 (slope in y)</span>`;
+    document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{mode=b.dataset.m;build();draw();});}
+  cv.style.touchAction='none';let drg=false;
+  const snap=v=>{const q=Math.round(v);return Math.abs(v-q)<0.14?q:v;};
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));let t=Math.max(-3,Math.min(3,snap(X/W*6-3)));if(mode==='y')pa=t;else pb=t;draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   build();draw();
-  xdrag(cv,pl,x=>{a=x;draw();});
-  numChk(stage.querySelector('.card'),4,()=>{addReveal(`<div class="rh">✓ 4</div><p>$\\frac{\\partial f}{\\partial x}=2x+y$, so at $(1,2)$ it is $2+2=4$. The slice with $y$ fixed is an ordinary curve, and its slope <em>is</em> the partial derivative — calculus you already know, applied one axis at a time. Two partials, one per input; the next beat packs them into a single vector.</p>`);});
-  setHints([`∂f/∂x means differentiate x²+xy in x, treating y as a constant. So x²→2x and xy→y.`,`2x+y at (1,2) = 2+2 = 4.`]);
+  numChk(stage.querySelector('.card'),4,()=>{addReveal(`<div class="rh">✓ ∂f/∂x = 4</div><p>Holding $y=2$, the trace is $z=x^2+2x$; its slope is $2x+2$, which at $x=1$ is $4$. That's $\\partial f/\\partial x = 2x+y$ evaluated at $(1,2)$. Slide the point and the blue tangent tilts — the $x$-slope genuinely changes from place to place. Flip to "hold $x=1$" and the trace becomes a straight line of slope $1$: that constant is $\\partial f/\\partial y = x$.</p>`);});
+  setHints([`Hold y fixed, differentiate x²+xy in x: that's 2x+y. Then plug in (1,2).`,`2(1)+2 = 4.`]);
 }
 
 function c7_gradient(){
