@@ -2240,21 +2240,32 @@ function c7_taylor(){
 
     <p style="margin-top:16px"><b>The second-order model.</b> Take the tangent-plane (linear) approximation and tack on a quadratic term in the steps $\\Delta x,\\Delta y$. Written out in full:</p>
     <div class="eqbox">$$f(P+\\Delta)\\approx \\underbrace{f(P)}_{\\text{height}}+\\underbrace{f_x\\,\\Delta x+f_y\\,\\Delta y}_{\\text{tangent plane}}+\\underbrace{\\tfrac12\\big(f_{xx}\\,\\Delta x^2+2f_{xy}\\,\\Delta x\\,\\Delta y+f_{yy}\\,\\Delta y^2\\big)}_{\\text{curvature}}.$$</div>
-    <p>The three second partials in that last bracket pack into a little $2\\times2$ table — the <b>Hessian</b> $H$ — and the whole curvature term is written compactly as $\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\,\\mathbf p$, which is just shorthand for that same expansion:</p>
+    <p>That last bracket is a <b>quadratic form</b> — a sum of squared terms and a cross-term in $\\Delta x,\\Delta y$. Every quadratic form is carried by a symmetric matrix, and here that matrix is the <b>Hessian</b> $H$, the little table of second partials. It's symmetric because the mixed partials agree, $f_{xy}=f_{yx}$ (true for any smooth surface), which is also why the cross-term carries the factor $2$:</p>
     <div class="eqbox">$$H=\\begin{pmatrix}f_{xx}&f_{xy}\\\\ f_{xy}&f_{yy}\\end{pmatrix},\\qquad \\tfrac12\\,\\mathbf p^{\\mathsf T}H\\,\\mathbf p=\\tfrac12\\big(f_{xx}\\,\\Delta x^2+2f_{xy}\\,\\Delta x\\,\\Delta y+f_{yy}\\,\\Delta y^2\\big).$$</div>
-    <p>(The off-diagonal entries are both $f_{xy}$ because the mixed partials agree, $f_{xy}=f_{yx}$, for any smooth surface — that's why the $\\Delta x\\Delta y$ term carries the factor $2$.)</p>
-    <p><b>Where it comes from.</b> Walk a straight line out of $P$, $g(s)=f(P+s\\mathbf p)$ — an ordinary 1-D function of distance $s$. Its 1-D Taylor expansion is $g(s)\\approx g(0)+g'(0)\\,s+\\tfrac12 g''(0)\\,s^2$, and the multivariable chain rule (last module) evaluates the two derivatives:</p>
-    <div class="eqbox">$$g'(0)=\\nabla f\\cdot\\mathbf p,\\qquad g''(0)=\\mathbf p^{\\mathsf T}H\\,\\mathbf p.$$</div>
-    <p>So the slope of the slice is the gradient's component along $\\mathbf p$, and <em>the curvature of the slice is $\\mathbf p^{\\mathsf T}H\\mathbf p$</em> — that's the bend you see on the canvas. Spin the direction and the curvature readout traces $2+\\sin2\\theta$: the Hessian gives a possibly different curvature every way you turn. Here it stays positive (always a bowl), but for a saddle it would go positive one way and negative another. That single object — curvature in every direction, bundled into $H$ — is what the next beat reads to classify a critical point, what convexity checks, and what Newton's method uses to size its jump.</p></div>`;
+
+    <p><b>Where it comes from — deriving it with the chain rule.</b> The trick is to collapse the surface back to one variable. Walk a straight line out of $P$ in a fixed direction $\\mathbf p=(p_1,p_2)$; your position after distance $s$ is</p>
+    <div class="eqbox">$$x(s)=x_0+s\\,p_1,\\qquad y(s)=y_0+s\\,p_2,\\qquad\\text{so}\\quad \\frac{dx}{ds}=p_1,\\ \\ \\frac{dy}{ds}=p_2.$$</div>
+    <p>Let $g(s)=f\\big(x(s),y(s)\\big)$ — your height as you walk. It's an ordinary function of the single variable $s$, so the familiar 1-D Taylor expansion from Module 6 applies:</p>
+    <div class="eqbox">$$g(s)\\approx g(0)+g'(0)\\,s+\\tfrac12\\,g''(0)\\,s^2.$$</div>
+    <p><b>First derivative (chain rule, once).</b> $f$ changes with $s$ only through $x$ and $y$, so the multivariable chain rule adds the two routes:</p>
+    <div class="eqbox">$$g'(s)=f_x\\,\\frac{dx}{ds}+f_y\\,\\frac{dy}{ds}=f_x\\,p_1+f_y\\,p_2=\\nabla f\\cdot\\mathbf p.$$</div>
+    <p>That's the <em>slope</em> of the slice: the gradient's component along $\\mathbf p$.</p>
+    <p><b>Second derivative (chain rule, a second time).</b> Differentiate $g'(s)=f_x\\,p_1+f_y\\,p_2$ again in $s$. The constants $p_1,p_2$ stay put, but $f_x$ and $f_y$ are <em>themselves</em> functions of $(x,y)$ that move as you walk — so each one needs the chain rule again, exactly like $f$ did:</p>
+    <div class="eqbox">$$\\frac{d}{ds}f_x=f_{xx}\\,\\frac{dx}{ds}+f_{xy}\\,\\frac{dy}{ds}=f_{xx}\\,p_1+f_{xy}\\,p_2,$$</div>
+    <div class="eqbox">$$\\frac{d}{ds}f_y=f_{yx}\\,\\frac{dx}{ds}+f_{yy}\\,\\frac{dy}{ds}=f_{xy}\\,p_1+f_{yy}\\,p_2.$$</div>
+    <p>Feed those back in:</p>
+    <div class="eqbox">$$g''(s)=p_1\\big(f_{xx}p_1+f_{xy}p_2\\big)+p_2\\big(f_{xy}p_1+f_{yy}p_2\\big)=f_{xx}\\,p_1^2+2f_{xy}\\,p_1p_2+f_{yy}\\,p_2^2.$$</div>
+    <p>And that final line is precisely $\\mathbf p$ dotted with $H\\mathbf p$ — the quadratic form again:</p>
+    <div class="eqbox">$$g''(0)=\\mathbf p^{\\mathsf T}H\\,\\mathbf p.$$</div>
+    <p>So the Hessian term is nothing mysterious: it is the chain rule applied <em>twice</em>. The mixed partial $f_{xy}$ shows up once from differentiating $f_x$ and once from differentiating $f_y$, and the two copies merge into the single $2f_{xy}\\,p_1p_2$ cross-term. Dropping $g(0)=f(P)$, $g'(0)=\\nabla f\\cdot\\mathbf p$, and $g''(0)=\\mathbf p^{\\mathsf T}H\\mathbf p$ into the 1-D expansion (with $s\\mathbf p\\to\\Delta$) rebuilds the second-order model up top.</p>
+    <p>The upshot is on the canvas: the slope of the slice is $\\nabla f\\cdot\\mathbf p$ and <em>its curvature is $\\mathbf p^{\\mathsf T}H\\mathbf p$</em>. Spin the direction and the curvature readout traces $2+\\sin2\\theta$ — the Hessian hands you a possibly different curvature every way you turn. Here it stays positive (always a bowl); for a saddle it would go positive one way and negative another. That one object — curvature in every direction, bundled into $H$ — is what the next beat reads to classify a critical point, what convexity checks, and what Newton's method uses to size its jump.</p></div>`;
   const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-2.5,xmax:2.5,ymin:-4,ymax:13});
   const f=(x,y)=>x*x+x*y+y*y;let th=0;
   function draw(){const cz=Math.cos(th),sz=Math.sin(th);
     const g=u=>f(1+u*cz, u*sz);const g1=2*cz+sz, g2=2+Math.sin(2*th);
     pl.grid();
     pl.curve(g,'#7ab8ff',2.6);
-    // flat tangent line (dashed)
     const {ctx,px,py}=pl;ctx.strokeStyle='#e8b84b';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(px(-2.5),py(f(1,0)+g1*(-2.5)));ctx.lineTo(px(2.5),py(f(1,0)+g1*2.5));ctx.stroke();ctx.setLineDash([]);
-    // curvature gap at s0
     const s0=1.4,yl=f(1,0)+g1*s0,yc=g(s0);
     ctx.strokeStyle='#3fb98f';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(px(s0),py(yl));ctx.lineTo(px(s0),py(yc));ctx.stroke();
     ctx.fillStyle='#3fb98f';ctx.font='11px sans-serif';ctx.fillText('½ pᵀHp·s²',px(s0)+6,py((yl+yc)/2));
@@ -2436,31 +2447,24 @@ function c7_graddescent(){
 }
 
 function c7_secondderiv(){
-  stage.innerHTML=`<div class="card"><h2>Min, max, or saddle? The second-derivative test</h2>
-    <p>Setting $\\nabla f=\\mathbf 0$ finds the flat spots — but flat spots come in three kinds: the bottom of a <b>bowl</b> (minimum), the top of a <b>dome</b> (maximum), or a mountain <b>pass</b> — a <em>saddle</em> — that climbs one way and falls another. In one variable we told these apart with $f''$: $f''&gt;0$ curves up (min), $f''&lt;0$ curves down (max). We want that same test in two variables.</p>
-    <p>Here is $f=x^2+c\\,xy+y^2$, drawn as a surface. The origin is a critical point for <em>every</em> $c$. <span style="color:#7ab8ff">Blue</span> marks where the surface rises <b>above</b> the flat tangent plane, <span style="color:#e8b84b">gold</span> where it dips <b>below</b>. Drag to change the cross-term $c$ and watch a clean all-blue bowl tip over and split into a saddle.</p>
+  stage.innerHTML=`<div class="card"><h2>The second-derivative test: min, max, or saddle</h2>
+    <p>We can find flat spots ($\\nabla f=\\mathbf 0$) and we can measure curvature (the Hessian). Put them together. From the quadratic model, at a critical point the gradient term drops out, so right around it the surface is pure curvature:</p>
+    <div class="eqbox">$$f(P+\\mathbf p)\\approx f(P)+\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\,\\mathbf p.$$</div>
+    <p>So the <em>type</em> of the critical point is decided entirely by the curvature form $Q(\\mathbf p)=\\mathbf p^{\\mathsf T}H\\mathbf p$: if it's positive for <em>every</em> direction $\\mathbf p$, the surface rises whichever way you leave $P$ — a <b>minimum</b>; negative every way — a <b>maximum</b>; positive some ways and negative others — a <b>saddle</b>. Below is $f=x^2+c\\,xy+y^2$; <span class="cy">blue</span> marks where it rises above the flat tangent plane, <span style="color:#e8b84b">gold</span> where it dips below. <b>Drag $c$</b> and watch an all-blue bowl tip over into a two-toned saddle.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <p class="small" id="obs" style="margin-top:8px;color:#9fb0c4"></p>
-    <div class="readout"><div class="rdc"><div class="k">c</div><div class="v" id="cv0">—</div></div><div class="rdc"><div class="k">D = f&#8339;&#8339;·f&#7527;&#7527; &#8722; f&#8339;&#7527;&#178;</div><div class="v" id="dv">—</div></div><div class="rdc"><div class="k">verdict</div><div class="v" id="vd">—</div></div></div>
-    <div class="task"><b>Compute the deciding number</b>For $f=x^2+xy+y^2$ (that is $c=1$) the second partials are $f_{xx}=2$, $f_{yy}=2$, $f_{xy}=1$. Evaluate $D=f_{xx}\\,f_{yy}-f_{xy}^{\\,2}$.</div>
+    <div class="readout"><div class="rdc"><div class="k">c</div><div class="v" id="cv0">—</div></div><div class="rdc"><div class="k">D = f&#8339;&#8339;·f&#7527;&#7527; − f&#8339;&#7527;²</div><div class="v" id="dv">—</div></div><div class="rdc"><div class="k">verdict</div><div class="v" id="vd">—</div></div></div>
+    <div class="task"><b>Compute the deciding number</b>For $f=x^2+xy+y^2$ ($c=1$): $f_{xx}=2$, $f_{yy}=2$, $f_{xy}=1$. Evaluate the discriminant $D=f_{xx}f_{yy}-f_{xy}^{\\,2}$.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
 
-    <p style="margin-top:16px"><b>Step 1 — up close, every critical point is a quadratic.</b> Zoom way in on a critical point. Because $\\nabla f=\\mathbf 0$ there, the surface has no tilt — the flat plane just touches it. The first thing that departs from flat is the <em>curvature</em>: the second-order terms. So near the point the surface looks exactly like a pure quadratic — the two-variable Taylor expansion from the last beat, with the linear $\\nabla f\\cdot\\mathbf p$ term gone because $\\nabla f=\\mathbf 0$, leaving only the curvature term $\\tfrac12\\mathbf p^{\\mathsf T}H\\mathbf p$:</p>
-    <div class="eqbox">$$f(x,y)\\;\\approx\\;\\tfrac12\\big(f_{xx}\\,x^2+2f_{xy}\\,xy+f_{yy}\\,y^2\\big)\\;=\\;\\tfrac12\\,Q(x,y).$$</div>
-    <p>Classifying the critical point is therefore just reading the sign of this quadratic $Q$: if $Q&gt;0$ in <em>every</em> direction it's a bowl (min); if $Q&lt;0$ everywhere, a dome (max); if $Q$ is positive some ways and negative others, a saddle.</p>
-
-    <p><b>Step 2 — why the cross term $f_{xy}$ has to be in the test.</b> The tempting shortcut is to just check $f_{xx}$ and $f_{yy}$. But look at the surface above: $f_{xx}=f_{yy}=2&gt;0$ for <em>every</em> $c$, yet it is plainly a saddle once $c&gt;2$. The middle term $2f_{xy}\\,xy$ can drag $Q$ negative along a diagonal even while both pure terms are positive. So all three second partials must appear together.</p>
-
-    <p><b>Step 3 — complete the square.</b> Write $A=f_{xx}$, $B=f_{xy}$, $C=f_{yy}$ (take $A\\neq0$). Pull $A$ out of the $x$-terms, then complete the square:</p>
-    <div class="eqbox">$$Q=Ax^2+2Bxy+Cy^2=A\\Big(x^2+\\tfrac{2B}{A}xy\\Big)+Cy^2.$$</div>
-    <p>Inside the bracket, $x^2+\\tfrac{2B}{A}xy=\\big(x+\\tfrac{B}{A}y\\big)^2-\\tfrac{B^2}{A^2}y^2$. Substitute and tidy the $y^2$ pieces over a common denominator:</p>
-    <div class="eqbox">$$Q=A\\Big(x+\\tfrac{B}{A}y\\Big)^{2}-\\tfrac{B^2}{A}y^2+Cy^2=A\\Big(x+\\tfrac{B}{A}y\\Big)^{2}+\\frac{AC-B^{2}}{A}\\,y^{2}.$$</div>
-
-    <p><b>Step 4 — read off the signs.</b> Now $Q$ is a sum of two <em>squares</em>, weighted by $A$ and by $\\dfrac{AC-B^2}{A}$. Let $D=AC-B^{2}=f_{xx}f_{yy}-f_{xy}^{\\,2}$:</p>
-    <p>&bull; <b>$D&gt;0$:</b> the second weight $\\frac{AC-B^2}{A}$ has the same sign as $A$, so both squares carry that sign — $Q$ is one-signed. If $A=f_{xx}&gt;0$ it's a <b>minimum</b>; if $f_{xx}&lt;0$, a <b>maximum</b>.</p>
-    <p>&bull; <b>$D&lt;0$:</b> the two weights have opposite signs, so $Q$ is positive along one square's axis and negative along the other — a <b>saddle</b>.</p>
-    <p>&bull; <b>$D=0$:</b> a weight vanishes; $Q$ is flat in a whole direction and the test is <b>inconclusive</b> (higher-order terms decide).</p>
-    <p>That's the second-derivative test. For our family $A=C=2,\\ B=c$, so $D=4-c^2$: a bowl until $c=2$, a saddle after — exactly the tip-over you dragged through. (ML echo: "$D&gt;0$ with $f_{xx}&gt;0$" is precisely the <em>Hessian being positive-definite</em> — every eigenvalue positive — which is what makes a loss surface a nice local bowl for gradient descent.)</p></div>`;
+    <p style="margin-top:16px"><b>Why checking $f_{xx}$ and $f_{yy}$ isn't enough.</b> The tempting shortcut is to look at the two straight-ahead curvatures $f_{xx}$ and $f_{yy}$. But on the surface above, $f_{xx}=f_{yy}=2&gt;0$ for <em>every</em> $c$ — yet past $c=2$ it's clearly a saddle. The cross term $2f_{xy}\\,xy$ can drag the curvature negative along a <em>diagonal</em> even while both axis-curvatures stay positive. All three second partials have to be weighed together.</p>
+    <p><b>Completing the square.</b> Write $A=f_{xx}$, $B=f_{xy}$, $C=f_{yy}$ (take $A\\neq0$), so $Q=A\\,\\Delta x^2+2B\\,\\Delta x\\Delta y+C\\,\\Delta y^2$. Pull $A$ out of the $\\Delta x$ terms and complete the square:</p>
+    <div class="eqbox">$$Q=A\\Big(\\Delta x+\\tfrac{B}{A}\\Delta y\\Big)^2+\\Big(C-\\tfrac{B^2}{A}\\Big)\\Delta y^2=A\\Big(\\Delta x+\\tfrac{B}{A}\\Delta y\\Big)^2+\\frac{AC-B^2}{A}\\,\\Delta y^2.$$</div>
+    <p>Now $Q$ is a sum of two <em>squares</em>, weighted by $A$ and by $\\dfrac{AC-B^2}{A}$. Everything hinges on the number $D=AC-B^2=f_{xx}f_{yy}-f_{xy}^{\\,2}$:</p>
+    <p>&bull; <b>$D&gt;0$:</b> the second weight shares $A$'s sign, so both squares carry that sign and $Q$ is one-signed. If $f_{xx}&gt;0$ it's a <b>minimum</b>; if $f_{xx}&lt;0$, a <b>maximum</b>.</p>
+    <p>&bull; <b>$D&lt;0$:</b> the two weights have opposite signs, so $Q$ is positive one way and negative another — a <b>saddle</b>.</p>
+    <p>&bull; <b>$D=0$:</b> a weight vanishes; $Q$ is flat along a whole direction and the test is <b>inconclusive</b> (higher-order terms decide).</p>
+    <p>For our family $A=C=2,\\ B=c$, so $D=4-c^2$ — positive (bowl) until $c=2$, negative (saddle) after, exactly the tip-over you dragged through. Two footnotes that pay off soon: $D$ is the <em>determinant</em> of $H$, and it equals the product of $H$'s two eigenvalues — the curvatures along its special perpendicular directions — so $D&gt;0$ means they share a sign (both up, or both down) and $D&lt;0$ means they disagree. And "$D&gt;0$ with $f_{xx}&gt;0$" is exactly the Hessian being <b>positive-definite</b> — the clean local bowl that makes gradient descent behave.</p></div>`;
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
   const cx0=W/2,cy0=225,sx=38,sy=14,sz=5.5;
   const P=(x,y,z)=>[cx0+(x-y)*sx, cy0+(x+y)*sy - z*sz];
@@ -2479,14 +2483,14 @@ function c7_secondderiv(){
     document.getElementById('cv0').textContent=c.toFixed(2);
     document.getElementById('dv').textContent=D.toFixed(2);
     document.getElementById('vd').textContent=D>0.06?'bowl → minimum':(D<-0.06?'saddle':'borderline');
-    const ob=document.getElementById('obs');if(ob)ob.textContent = D>0.06?'All blue — the surface sits entirely above the flat plane: a minimum. Note f_xx=f_yy=2 the whole time.':(D<-0.06?'Blue AND gold — it rises one way and drops another: a saddle, even though f_xx=f_yy=2 are still both positive.':'Borderline: the bowl has flattened along a diagonal (D≈0).');}
+    const ob=document.getElementById('obs');if(ob)ob.textContent = D>0.06?'All blue — rises above the flat plane in every direction: a minimum. (f_xx=f_yy=2 the whole time.)':(D<-0.06?'Blue AND gold — it rises one way, falls another: a saddle, even though f_xx=f_yy=2 are both still positive.':'Borderline: the bowl has flattened along a diagonal (D ≈ 0).');}
   cv.style.touchAction='none';let drg=false;
   function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));c=Math.max(0,Math.min(3,X/W*3));draw();}
   cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),3,()=>{addReveal(`<div class="rh">✓ D = 3</div><p>$D=(2)(2)-1^2=4-1=3&gt;0$, and $f_{xx}=2&gt;0$, so the origin is a <b>minimum</b> — the gently tilted all-blue bowl at $c=1$. Now drag $c$ past $2$: $D=4-c^2$ goes negative, gold appears, and the bowl has become a saddle — the surface drops below its own tangent plane along one diagonal while rising along the other.</p>`);});
+  numChk(stage.querySelector('.card'),3,()=>{addReveal(`<div class="rh">✓ D = 3</div><p>$D=(2)(2)-1^2=4-1=3&gt;0$, and $f_{xx}=2&gt;0$, so the origin is a <b>minimum</b> — the gently tilted all-blue bowl at $c=1$. Push $c$ past $2$ and $D=4-c^2$ turns negative: gold appears and the bowl has become a saddle, dropping below its own tangent plane along one diagonal while rising along the other.</p>`);});
   setHints([`D = f_xx·f_yy − f_xy². Here f_xx=2, f_yy=2, f_xy=1.`,`2·2 − 1·1 = 4 − 1 = 3. Positive, and f_xx>0, so: minimum.`]);
 }
 
