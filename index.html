@@ -2333,39 +2333,49 @@ function c7_newton(){
 }
 
 function c7_critical(){
-  stage.innerHTML=`<div class="card"><h2>Critical points and gradient descent</h2>
-    <p>Where is a surface flat? At a peak or valley, <em>every</em> slice has a horizontal tangent, so both partials vanish — the multivariable version of Fermat's rule: interior extrema occur where $\\nabla f=\\mathbf 0$. Drag around the bowl $f=x^2+y^2$ and watch the <span class="grn">green descent arrow</span> $-\\nabla f$ (the downhill direction) and $|\\nabla f|$; steer toward the bottom and the gradient shrinks to nothing.</p>
+  stage.innerHTML=`<div class="card"><h2>Critical points: finding the flat spots</h2>
+    <p>Optimization is the hunt for best points — the bottom of a loss surface, the top of a profit curve. In one variable the candidates were where $f'=0$: the flat spots. The same idea lifts to a surface, but now "flat" has to mean flat in <em>every</em> direction at once.</p>
+    <p>Below is the landscape $f(x,y)=x^3-3x+y^2$ as a heat map (dark = low, bright = high) with the <span class="grn">gradient arrow</span> at your point. <b>Drag around and hunt for the spots where the arrow shrinks to nothing</b> — where $|\\nabla f|=0$. There are two of them, and they're not the same kind of place.</p>
     <canvas id="cv" width="640" height="380"></canvas>
-    <div class="readout"><div class="rdc"><div class="k">point (x, y)</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">|∇f|</div><div class="v" id="gm">—</div></div></div>
-    <div class="task"><b>Locate the minimum</b>At the lowest point of $f=x^2+y^2$, the gradient is zero. What is $\\dfrac{\\partial f}{\\partial x}$ there?</div>
+    <div class="readout"><div class="rdc"><div class="k">point (x, y)</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">∇f = (3x²−3, 2y)</div><div class="v" id="gv">—</div></div><div class="rdc"><div class="k">|∇f|</div><div class="v" id="mv">—</div></div></div>
+    <div class="task"><b>Solve for a critical point</b>A critical point needs <em>both</em> parts of $\\nabla f=(3x^2-3,\\,2y)$ to vanish. The second gives $y=0$. Solve $3x^2-3=0$ for the positive $x$.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
-    <p style="margin-top:16px"><b>Critical points.</b> Setting $\\nabla f=\\mathbf 0$ means solving $\\frac{\\partial f}{\\partial x}=0$ and $\\frac{\\partial f}{\\partial y}=0$ together. For $f=x^2+y^2$: $2x=0$ and $2y=0$, so the only critical point is the origin — the minimum, where $|\\nabla f|=0$. (As in 1-D, a zero gradient is a <em>candidate</em>: it can be a peak, a valley, or a <b>saddle</b> like $x^2-y^2$, which climbs one way and drops the other.)</p>
-    <p><b>Gradient descent — the ML engine.</b> The gradient points uphill, so to <em>minimize</em> a function you repeatedly step in the opposite direction:</p>
-    <div class="eqbox">$$\\mathbf x_{\\text{next}}=\\mathbf x-\\alpha\\,\\nabla f(\\mathbf x)$$</div>
-    <p>with a small step size $\\alpha$. Each step walks downhill; the steps shrink as $\\nabla f\\to\\mathbf 0$ near the bottom. This one line — slide opposite the gradient — is how essentially every neural network is trained, on loss surfaces with millions of variables instead of two.</p></div>`;
-  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=30,cx=W/2,cy=H/2;
+
+    <p style="margin-top:16px"><b>Fermat's idea, lifted to a surface.</b> At a genuine peak or valley the tangent plane can't tilt — if it leaned <em>any</em> way, you could step that way to go higher (or the opposite way to go lower), so it wouldn't be the top or bottom. A flat tangent plane means every slope is zero, i.e. both partials vanish:</p>
+    <div class="eqbox">$$\\nabla f=\\mathbf 0\\quad\\Longleftrightarrow\\quad \\frac{\\partial f}{\\partial x}=0\\ \\text{ and }\\ \\frac{\\partial f}{\\partial y}=0.$$</div>
+    <p>A point where this holds is a <b>critical point</b>. Note both parts must be zero — a point where only one partial vanishes is not critical. To find them you solve that little system. For our surface:</p>
+    <div class="eqbox">$$f_x=3x^2-3=0\\Rightarrow x=\\pm1,\\qquad f_y=2y=0\\Rightarrow y=0,$$</div>
+    <p>so there are two critical points: $(1,0)$ and $(-1,0)$ — exactly the two spots where you watched the arrow die.</p>
+    <p><b>But flat doesn't mean "best."</b> A zero gradient is <em>necessary</em> for an interior max or min, but not <em>sufficient</em>. A flat spot can be one of three things:</p>
+    <p>&bull; a <b>valley</b> (local minimum) — like $(1,0)$, sitting in the dark basin;</p>
+    <p>&bull; a <b>peak</b> (local maximum) — a dome;</p>
+    <p>&bull; a <b>saddle</b> — like $(-1,0)$: uphill if you go one way, downhill if you go another, so it's neither a max nor a min. This is brand new in two dimensions; a single variable has nothing quite like it.</p>
+    <p>So $\\nabla f=\\mathbf 0$ narrows the search to a handful of candidates. The next beat shows how to actually travel to one — gradient descent — and the beat after tells min from max from saddle using the second derivatives.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=118,cx=320,cy=196;
+  const f=(x,y)=>x*x*x-3*x+y*y;
   const px=x=>cx+x*S,py=y=>cy-y*S,mx=X=>(X-cx)/S,my=Y=>(cy-Y)/S;
-  let x0=4,y0=3;
+  const LO=[18,30,48],HI=[232,184,75];
+  const col=z=>{const t=Math.max(0,Math.min(1,(z+4)/8));return 'rgb('+Math.round(LO[0]+(HI[0]-LO[0])*t)+','+Math.round(LO[1]+(HI[1]-LO[1])*t)+','+Math.round(LO[2]+(HI[2]-LO[2])*t)+')';};
+  let xp=0,yp=1;
+  function arrow(X0,Y0,X1,Y1,c){if(!ctx)return;ctx.strokeStyle=c;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();const a=Math.atan2(Y1-Y0,X1-X0);ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-11*Math.cos(a-0.4),Y1-11*Math.sin(a-0.4));ctx.lineTo(X1-11*Math.cos(a+0.4),Y1-11*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
   function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
-    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=-10;g<=10;g++){ctx.beginPath();ctx.moveTo(px(g),0);ctx.lineTo(px(g),H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,py(g));ctx.lineTo(W,py(g));ctx.stroke();}
-    ctx.strokeStyle='#2b3a4f';ctx.beginPath();ctx.moveTo(0,py(0));ctx.lineTo(W,py(0));ctx.moveTo(px(0),0);ctx.lineTo(px(0),H);ctx.stroke();
-    for(const r of [1,2,3,4,5,6]){ctx.strokeStyle='#3a4c66';ctx.lineWidth=1.2;ctx.beginPath();for(let i=0;i<=64;i++){const t=i/64*2*Math.PI;const X=px(r*Math.cos(t)),Y=py(r*Math.sin(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();}
-    ctx.fillStyle='#3fb98f';ctx.beginPath();ctx.arc(px(0),py(0),4,0,7);ctx.fill();
-    const gx=2*x0,gy=2*y0,gmag=Math.sqrt(gx*gx+gy*gy);
-    if(gmag>0.05){const sc=0.35,X0=px(x0),Y0=py(y0),X1=px(x0-gx*sc),Y1=py(y0-gy*sc);
-      ctx.strokeStyle='#3fb98f';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();
-      const ang=Math.atan2(Y1-Y0,X1-X0);ctx.fillStyle='#3fb98f';ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-11*Math.cos(ang-0.4),Y1-11*Math.sin(ang-0.4));ctx.lineTo(X1-11*Math.cos(ang+0.4),Y1-11*Math.sin(ang+0.4));ctx.closePath();ctx.fill();}
-    ctx.fillStyle='#7ab8ff';ctx.beginPath();ctx.arc(px(x0),py(y0),5,0,7);ctx.fill();
-    document.getElementById('pv').textContent='('+x0.toFixed(1)+', '+y0.toFixed(1)+')';
-    document.getElementById('gm').textContent=gmag.toFixed(2);}
-  let drg=false;cv.style.touchAction='none';
-  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));x0=Math.max(-8,Math.min(8,mx(X)));y0=Math.max(-5.5,Math.min(5.5,my(Y)));draw();}
+    for(let X=0;X<W;X+=8)for(let Y=0;Y<H;Y+=8){ctx.fillStyle=col(f(mx(X+4),my(Y+4)));ctx.fillRect(X,Y,8,8);}
+    const gx=3*xp*xp-3,gy=2*yp,gm=Math.sqrt(gx*gx+gy*gy);
+    if(gm>0.08)arrow(px(xp),py(yp),px(xp+0.14*gx),py(yp+0.14*gy),'#3fb98f');
+    else{ctx.strokeStyle='#3fb98f';ctx.lineWidth=2;ctx.beginPath();ctx.arc(px(xp),py(yp),12,0,7);ctx.stroke();ctx.fillStyle='#3fb98f';ctx.font='11px sans-serif';ctx.fillText('∇f = 0',px(xp)+16,py(yp)-8);}
+    ctx.fillStyle='#fff';ctx.strokeStyle='#0a111b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(px(xp),py(yp),5,0,7);ctx.fill();ctx.stroke();
+    document.getElementById('pv').textContent='('+xp.toFixed(1)+', '+yp.toFixed(1)+')';
+    document.getElementById('gv').textContent='('+gx.toFixed(1)+', '+gy.toFixed(1)+')';
+    document.getElementById('mv').textContent=gm.toFixed(2);}
+  cv.style.touchAction='none';let drg=false;
+  const snap=v=>{const q=Math.round(v);return Math.abs(v-q)<0.14?q:v;};
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));xp=Math.max(-2.6,Math.min(2.6,snap(mx(X))));yp=Math.max(-1.6,Math.min(1.6,snap(my(Y))));draw();}
   cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),0,()=>{addReveal(`<div class="rh">✓ 0</div><p>At the minimum $(0,0)$, $\\frac{\\partial f}{\\partial x}=2x=0$ (and $\\frac{\\partial f}{\\partial y}=2y=0$) — the whole gradient vanishes, which is what "flat in every direction" means. Drag the point to the center and $|\\nabla f|$ drops to $0$; the descent arrow shrinks to nothing. Everywhere else it points home, and stepping along it is gradient descent.</p>`);});
-  setHints([`The minimum is at the origin (0,0). ∂f/∂x = 2x — evaluate at x = 0.`,`2·0 = 0.`]);
+  numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ x = 1</div><p>$3x^2-3=0\\Rightarrow x^2=1\\Rightarrow x=\\pm1$, and $y=0$, so the critical points are $(1,0)$ and $(-1,0)$ — both answers matter (don't drop the negative root). On the map, $(1,0)$ sits in the dark basin (a minimum) while $(-1,0)$ is a saddle: slide away from it along $y$ and the ground falls, along $x$ and it climbs. Same zero gradient, completely different places — which is why we still need a test to tell them apart.</p>`);});
+  setHints([`Both components of ∇f must be zero. Solve 3x²−3 = 0.`,`x² = 1, so the positive root is x = 1 (the other is −1).`]);
 }
 
 function c7_secondderiv(){
