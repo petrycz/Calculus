@@ -2523,28 +2523,33 @@ function c7_secondderiv(){
 }
 
 function c7_lagrange(){
-  stage.innerHTML=`<div class="card"><h2>Lagrange multipliers: the best point <em>on a constraint</em></h2>
-    <p>Free optimization asks for the lowest point anywhere. Far more often you're <em>constrained</em>: find the best point while stuck on a curve. The cleanest example — you have a fixed budget of $10$ for the two sides of a rectangle, so $x+y=10$; which split makes the area $A=xy$ biggest? <b>Slide the split</b> and watch the rectangle and its area.</p>
+  stage.innerHTML=`<div class="card"><h2>Lagrange multipliers: the best point on a constraint</h2>
+    <p>So far we've hunted for the best point <em>anywhere</em>. Usually life is more restrictive: find the best point while <b>stuck on a curve</b>. Here's the cleanest example to build the idea on.</p>
+    <p>You have $10$ units of edging for the two sides of a rectangle; call the sides $x$ and $y$. You want the largest area. Two different roles are in play, and it pays to name them:</p>
+    <p>&bull; the <b>objective</b> — the thing you're maximizing — is the area $f(x,y)=xy$;</p>
+    <p>&bull; the <b>constraint</b> — the rule you can't break — is that the two sides sum to $10$. Write that rule as its own function pinned to a fixed value: $g(x,y)=x+y$, held at $g=10$. The split-points you're <em>allowed</em> to stand on form the <b>constraint curve</b> $g=10$ — here, the line $x+y=10$.</p>
+    <p><b>Slide the split</b> along that line and find the biggest area.</p>
     <canvas id="cv" width="640" height="380"></canvas>
-    <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">y = 10 − x</div><div class="v" id="yv">—</div></div><div class="rdc"><div class="k">area f = xy</div><div class="v" id="av">—</div></div></div>
-    <div class="task"><b>Find the biggest area</b>Slide to the largest rectangle. What is the maximum of $f=xy$ subject to $x+y=10$?</div>
+    <p class="small" id="obs" style="margin-top:8px;color:#9fb0c4"></p>
+    <div class="readout"><div class="rdc"><div class="k">split (x, y)</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">objective f = xy</div><div class="v" id="fv">—</div></div><div class="rdc"><div class="k">constraint g = x + y</div><div class="v" id="gv">—</div></div></div>
+    <div class="task"><b>Find the biggest area</b>Slide to the largest rectangle. What is the maximum of the objective $f=xy$ while $g=x+y$ stays at $10$?</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
 
-    <p style="margin-top:16px"><b>Why the square wins — the tangency picture.</b> The gold curves are the <em>level curves of area</em>, $xy=\\text{const}$ (hyperbolas). Pick any split that isn't the best: the area-hyperbola through it <b>crosses</b> the blue constraint line, which means the line pokes through to a higher-area hyperbola just to one side — so you can slide that way and do better. Only at the maximum does the hyperbola stop crossing and merely <b>touch</b> the line — it is <em>tangent</em>:</p>
-    <div class="eqbox">constrained optimum $\\iff$ the objective's level curve is <b>tangent</b> to the constraint.</div>
+    <p style="margin-top:16px"><b>Why is the square best? Watch the contours.</b> The gold curves are the objective's <b>level curves</b> $f=xy=\\text{const}$ — each one a set of splits with equal area, labelled by that area. Stand at a split that isn't the square: the area-curve through you <em>cuts across</em> the constraint line. That crossing is the tell — it means a point just beside you on the line sits on a <em>higher</em> area-curve, so you can slide there and gain. You keep gaining until the area-curve stops crossing and merely <b>touches</b> the line at a single point. There, sliding either way drops you to a lower area: you're at the maximum.</p>
+    <div class="eqbox">constrained optimum $\\iff$ the objective's level curve is <b>tangent</b> to the constraint curve.</div>
 
-    <p><b>From tangency to a formula — with the gradients.</b> Let $\\mathbf T$ be the direction tangent to the constraint curve at the point. Two facts pin the gradients down:</p>
-    <p>&bull; $g$ is constant along the constraint, so stepping along $\\mathbf T$ doesn't change it — the directional derivative is zero, $\\nabla g\\cdot\\mathbf T=0$, i.e. $\\nabla g\\perp\\mathbf T$. (The gradient is always perpendicular to its own level curve.)</p>
-    <p>&bull; At the optimum, stepping along $\\mathbf T$ — the only motion the constraint allows — can't improve $f$ to first order either, so $\\nabla f\\cdot\\mathbf T=0$, i.e. $\\nabla f\\perp\\mathbf T$.</p>
-    <p>Two vectors in the plane both perpendicular to the same direction $\\mathbf T$ must point along a common line — they're parallel. So, for some scalar $\\lambda$,</p>
+    <p><b>Turn tangency into an equation.</b> We need to convert "the curves are tangent" into something we can solve. Two facts about gradients do it:</p>
+    <p>&bull; A gradient points perpendicular to its own level curves (from the gradient beat). The constraint curve $g=10$ <em>is</em> a level curve of $g$, so $\\nabla g$ is perpendicular to it.</p>
+    <p>&bull; At the optimum the objective's level curve is tangent to the constraint — they share one tangent line. And $\\nabla f$ is perpendicular to that objective level curve.</p>
+    <p>So $\\nabla f$ and $\\nabla g$ are both perpendicular to the <em>same</em> tangent line. Two vectors perpendicular to one line (in the plane) point along a single direction — they're <b>parallel</b>. Parallel means one is a scalar multiple of the other:</p>
     <div class="eqbox">$$\\nabla f=\\lambda\\,\\nabla g.$$</div>
-    <p>The number $\\lambda$ (the <b>Lagrange multiplier</b>) just absorbs the difference in the gradients' lengths — they share a <em>direction</em>, not a magnitude.</p>
+    <p>The scalar $\\lambda$ — the <b>Lagrange multiplier</b> — just soaks up the difference in their lengths; the two gradients share a direction, not a size.</p>
 
-    <p><b>The full system.</b> That vector equation is two scalar equations, and — easy to forget — you still need the constraint itself to locate the point. Three equations in all:</p>
+    <p><b>Write the whole system.</b> That single vector equation is one scalar equation per component — and, easy to forget, you still have to state that you're actually <em>on</em> the constraint. Three equations:</p>
     <div class="eqbox">$$f_x=\\lambda\\,g_x,\\qquad f_y=\\lambda\\,g_y,\\qquad g(x,y)=c.$$</div>
-    <p>Solve ours. With $f=xy$, $\\nabla f=(f_x,f_y)=(y,x)$; with $g=x+y$, $\\nabla g=(1,1)$. Component by component:</p>
-    <div class="eqbox">$$y=\\lambda\\cdot1,\\qquad x=\\lambda\\cdot1\\ \\Rightarrow\\ x=y;\\qquad\\text{then }x+y=10\\Rightarrow x=y=5.$$</div>
-    <p>So $x=y=5$ (and $\\lambda=5$): the best rectangle of a fixed perimeter is the <b>square</b>, area $25$. That recipe — set $\\nabla f=\\lambda\\nabla g$, add the constraint, solve — is the whole method, and it scales up directly: many variables, and one multiplier $\\lambda$ per constraint. It's the backbone of constrained optimization across ML — the dual view of support-vector machines, maximum-entropy models, and the KKT conditions that extend it to inequality constraints all begin right here.</p></div>`;
+    <p><b>Solve ours.</b> The objective $f=xy$ has $\\nabla f=(f_x,f_y)=(y,x)$; the constraint $g=x+y$ has $\\nabla g=(g_x,g_y)=(1,1)$. Component by component, then drop in the constraint:</p>
+    <div class="eqbox">$$y=\\lambda\\cdot1,\\quad x=\\lambda\\cdot1\\ \\Rightarrow\\ x=y;\\qquad g=x+y=10\\ \\Rightarrow\\ x=y=5.$$</div>
+    <p>So $x=y=5$ (with $\\lambda=5$): the best rectangle of a fixed perimeter is the <b>square</b>, area $25$. The recipe — set $\\nabla f=\\lambda\\nabla g$, add the constraint $g=c$, solve — is the entire method, and it scales straight up: many variables, and one multiplier $\\lambda$ for each constraint you add. It's the backbone of constrained optimization in ML — the dual view of support-vector machines, maximum-entropy models, and the KKT conditions that extend it to inequality constraints all start exactly here.</p></div>`;
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=30,ox=60,oy=340;
   const px=x=>ox+x*S,py=y=>oy-y*S;
   let x0=2;
@@ -2552,7 +2557,8 @@ function c7_lagrange(){
   function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);const y0=10-x0;
     ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=0;g<=11;g++){ctx.beginPath();ctx.moveTo(px(g),py(0));ctx.lineTo(px(g),py(11));ctx.stroke();ctx.beginPath();ctx.moveTo(px(0),py(g));ctx.lineTo(px(11),py(g));ctx.stroke();}
     ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(px(0),py(0));ctx.lineTo(px(11),py(0));ctx.moveTo(px(0),py(0));ctx.lineTo(px(0),py(11));ctx.stroke();
-    for(const k of [9,16,25]){ctx.strokeStyle=k===25?'#5a4a24':'#233042';ctx.lineWidth=1.2;ctx.beginPath();let st=false;for(let xx=k/11;xx<=11;xx+=0.05){const yy=k/xx;if(yy>11)continue;const X=px(xx),Y=py(yy);st?ctx.lineTo(X,Y):ctx.moveTo(X,Y);st=true;}ctx.stroke();}
+    for(const k of [9,16,25]){ctx.strokeStyle=k===25?'#5a4a24':'#233042';ctx.lineWidth=1.2;ctx.beginPath();let st=false;for(let xx=k/11;xx<=11;xx+=0.05){const yy=k/xx;if(yy>11)continue;const X=px(xx),Y=py(yy);st?ctx.lineTo(X,Y):ctx.moveTo(X,Y);st=true;}ctx.stroke();
+      if(k<25){const yy=k/8.8;if(yy<=11){ctx.fillStyle='#3a4c66';ctx.font='10px sans-serif';ctx.fillText('xy='+k,px(8.8)+2,py(yy));}}}
     const k0=x0*y0;ctx.strokeStyle='#e8b84b';ctx.lineWidth=2;ctx.beginPath();let s2=false;for(let xx=Math.max(0.05,k0/11);xx<=11;xx+=0.03){const yy=k0/xx;if(yy>11)continue;const X=px(xx),Y=py(yy);s2?ctx.lineTo(X,Y):ctx.moveTo(X,Y);s2=true;}ctx.stroke();
     ctx.fillStyle='rgba(122,184,255,0.10)';ctx.fillRect(px(0),py(y0),x0*S,y0*S);
     ctx.strokeStyle='#3a4c66';ctx.lineWidth=1;ctx.strokeRect(px(0),py(y0),x0*S,y0*S);
@@ -2560,20 +2566,22 @@ function c7_lagrange(){
     arrow(px(x0),py(y0),px(x0)+y0*6,py(y0)-x0*6,'#e8b84b');
     arrow(px(x0),py(y0),px(x0)+22,py(y0)-22,'#3fb98f');
     ctx.fillStyle='#dbe6f4';ctx.beginPath();ctx.arc(px(x0),py(y0),5,0,7);ctx.fill();
-    ctx.fillStyle='#5d7186';ctx.font='12px sans-serif';ctx.fillText('x + y = 10',px(6.6),py(4.0));
+    ctx.fillStyle='#7ab8ff';ctx.font='12px sans-serif';ctx.fillText('constraint g = x+y = 10',px(4.1),py(2.1));
     ctx.fillStyle='#e8b84b';ctx.fillText('∇f',px(x0)+y0*6+4,py(y0)-x0*6);ctx.fillStyle='#3fb98f';ctx.fillText('∇g',px(x0)+26,py(y0)-24);
-    if(Math.abs(x0-y0)<0.2){ctx.fillStyle='#3fb98f';ctx.font='600 13px sans-serif';ctx.fillText('tangent — best split',px(5.2),py(6.6));}
-    document.getElementById('xv').textContent=x0.toFixed(2);
-    document.getElementById('yv').textContent=y0.toFixed(2);
-    document.getElementById('av').textContent=(x0*y0).toFixed(2);}
+    const tang=Math.abs(x0-y0)<0.25;
+    if(tang){ctx.fillStyle='#3fb98f';ctx.font='600 13px sans-serif';ctx.fillText('tangent — best split',px(5.1),py(6.7));}
+    document.getElementById('pv').textContent='('+x0.toFixed(1)+', '+y0.toFixed(1)+')';
+    document.getElementById('fv').textContent=(x0*y0).toFixed(2);
+    document.getElementById('gv').textContent=(x0+y0).toFixed(1)+' (fixed)';
+    const ob=document.getElementById('obs');if(ob)ob.textContent=tang?'The area-curve is tangent to the line — sliding either way lowers the area. This is the maximum.':'The gold area-curve crosses the line — a higher area-curve lies just to one side, so you can still do better.';}
   cv.style.touchAction='none';let drg=false;
   function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));x0=Math.max(0.5,Math.min(9.5,(X-ox)/S));draw();}
   cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),25,()=>{addReveal(`<div class="rh">✓ 25</div><p>At $x=y=5$ the area is $25$. On the canvas that's exactly where the gold hyperbola $xy=25$ stops crossing and just kisses the line — tangent — and where the two arrows $\\nabla f=(y,x)=(5,5)$ and $\\nabla g=(1,1)$ point the same way, so $\\nabla f=5\\,\\nabla g$ ($\\lambda=5$). Slide off the square and the hyperbola cuts the line again and the area drops.</p>`);});
-  setHints([`At the optimum ∇f=λ∇g forces x=y. Put x=y into x+y=10.`,`x=y=5, so the maximum area is 5·5=25.`]);
+  numChk(stage.querySelector('.card'),25,()=>{addReveal(`<div class="rh">✓ 25</div><p>At $x=y=5$ the area is $25$. That's exactly where the gold area-curve $xy=25$ stops crossing and just kisses the constraint line — tangent — and where $\\nabla f=(y,x)=(5,5)$ and $\\nabla g=(1,1)$ point the same way, so $\\nabla f=5\\,\\nabla g$ (that's $\\lambda=5$). Slide off the square and the area-curve cuts the line again and the area falls.</p>`);});
+  setHints([`At the optimum ∇f=λ∇g forces x=y. Put x=y into the constraint x+y=10.`,`x=y=5, so the maximum area is 5·5=25.`]);
 }
 
 function c7_polar(){
