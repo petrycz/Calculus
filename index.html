@@ -2650,97 +2650,62 @@ function c7_iterated(){
 
 function c7_problems(){
   stage.innerHTML=`<div class="card"><h2>Problem set</h2>
-    <p>Partials, gradients, optimization, and double integrals. Paper first; solutions fold open.</p>
+    <p>Surfaces, partials, the tangent plane, the gradient, directional derivatives, and the chain rule. Paper first; solutions fold open.</p>
 
     <div class="prob"><span class="lvl">partial derivatives</span><div class="ph">Problem 1</div>
     <p>For $f(x,y)=x^3y+y^2$, find $\\dfrac{\\partial f}{\\partial x}$ and $\\dfrac{\\partial f}{\\partial y}$.</p>
     <details><summary>Show solution</summary><div class="sol">
-    <p>Holding $y$ fixed: $\\frac{\\partial f}{\\partial x}=3x^2y$. Holding $x$ fixed: $\\frac{\\partial f}{\\partial y}=x^3+2y$.</p></div></details></div>
+    <p>Holding $y$ fixed, $x^3y\\to 3x^2y$ and $y^2$ is constant: $\\frac{\\partial f}{\\partial x}=3x^2y$. Holding $x$ fixed: $\\frac{\\partial f}{\\partial y}=x^3+2y$.</p></div></details></div>
 
-    <div class="prob"><span class="lvl">gradient</span><div class="ph">Problem 2</div>
+    <div class="prob"><span class="lvl">contour map</span><div class="ph">Problem 2</div>
+    <p>Describe the level curves (contours) of $f(x,y)=y-x^2$. What does the surface look like?</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>A contour is $y-x^2=c$, i.e. $y=x^2+c$ — a parabola, one for each height $c$, stacked vertically as $c$ grows. The surface is a parabolic trough (a "half-pipe") running along the $y$-direction, rising as you move up and to the sides.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">tangent plane · linear approx</span><div class="ph">Problem 3</div>
+    <p>For $f(x,y)=x^2+xy$ at $P=(1,2)$, write the tangent-plane approximation $L$ and use it to estimate $f(1.1,\\,1.9)$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$f(P)=1+2=3$, $f_x=2x+y=4$, $f_y=x=1$, so $L=3+4\\,\\Delta x+1\\,\\Delta y$. At $(1.1,1.9)$: $\\Delta x=0.1,\\ \\Delta y=-0.1$, giving $L=3+0.4-0.1=3.3$. (True value $f=1.21+2.09=3.30$ — the plane nails it to two decimals.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">gradient</span><div class="ph">Problem 4</div>
     <p>For $f(x,y)=x^2+3y^2$, find $\\nabla f$ at $(1,1)$ and its magnitude.</p>
     <details><summary>Show solution</summary><div class="sol">
-    <p>$\\nabla f=(2x,6y)$, so at $(1,1)$ it is $(2,6)$. Magnitude $=\\sqrt{2^2+6^2}=\\sqrt{40}=2\\sqrt{10}\\approx6.32$.</p></div></details></div>
+    <p>$\\nabla f=(2x,6y)$, so at $(1,1)$ it is $(2,6)$. Magnitude $=\\sqrt{2^2+6^2}=\\sqrt{40}=2\\sqrt{10}\\approx6.32$ — the steepest slope there, pointing across the contour toward higher ground.</p></div></details></div>
 
-    <div class="prob"><span class="lvl">directional derivative</span><div class="ph">Problem 3</div>
-    <p>For $f=x^2+y^2$ at $(3,4)$, find the directional derivative in the direction $\\mathbf u=\\left(\\tfrac35,\\tfrac45\\right)$.</p>
+    <div class="prob"><span class="lvl">directional derivative</span><div class="ph">Problem 5</div>
+    <p>For $f=x^2+y^2$ at $(3,4)$, find the directional derivative in the unit direction $\\mathbf u=\\left(\\tfrac35,\\tfrac45\\right)$.</p>
     <details><summary>Show solution</summary><div class="sol">
-    <p>$\\nabla f=(6,8)$; $\\mathbf u$ is a unit vector ($\\tfrac{9}{25}+\\tfrac{16}{25}=1$). $D_{\\mathbf u}f=(6,8)\\cdot(\\tfrac35,\\tfrac45)=\\tfrac{18}{5}+\\tfrac{32}{5}=\\tfrac{50}{5}=10$. It equals $|\\nabla f|$ — because $\\mathbf u$ points exactly along the gradient.</p></div></details></div>
+    <p>$\\nabla f=(6,8)$, and $\\mathbf u$ is a unit vector ($\\tfrac{9}{25}+\\tfrac{16}{25}=1$). $D_{\\mathbf u}f=(6,8)\\cdot(\\tfrac35,\\tfrac45)=\\tfrac{18}{5}+\\tfrac{32}{5}=10$. It equals $|\\nabla f|$ — because $\\mathbf u$ points exactly along the gradient (steepest ascent).</p></div></details></div>
 
-    <div class="prob"><span class="lvl">critical point</span><div class="ph">Problem 4</div>
-    <p>Find the critical point of $f(x,y)=x^2-4x+y^2+2y$.</p>
+    <div class="prob"><span class="lvl">directional derivative — normalize first</span><div class="ph">Problem 6</div>
+    <p>For $f=x^2+y^2$ at $(3,4)$, find the rate of change heading <em>toward the origin</em>, i.e. along the vector $\\mathbf v=(-3,-4)$.</p>
     <details><summary>Show solution</summary><div class="sol">
-    <p>$\\frac{\\partial f}{\\partial x}=2x-4=0\\Rightarrow x=2$; $\\frac{\\partial f}{\\partial y}=2y+2=0\\Rightarrow y=-1$. Critical point $(2,-1)$ — a minimum (an upward bowl shifted off the origin).</p></div></details></div>
-
-    <div class="prob"><span class="lvl">double integral</span><div class="ph">Problem 5</div>
-    <p>Evaluate $\\displaystyle\\int_0^1\\!\\!\\int_0^2 xy\\,dx\\,dy$.</p>
-    <details><summary>Show solution</summary><div class="sol">
-    <p>Inner: $\\int_0^2 xy\\,dx=y\\big[\\tfrac{x^2}{2}\\big]_0^2=2y$. Outer: $\\int_0^1 2y\\,dy=[y^2]_0^1=1$.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">double integral</span><div class="ph">Problem 6</div>
-    <p>Evaluate $\\displaystyle\\int_0^1\\!\\!\\int_0^1 (x^2+y^2)\\,dx\\,dy$.</p>
-    <details><summary>Show solution</summary><div class="sol">
-    <p>Inner: $\\int_0^1 (x^2+y^2)\\,dx=\\big[\\tfrac{x^3}{3}+xy^2\\big]_0^1=\\tfrac13+y^2$. Outer: $\\int_0^1(\\tfrac13+y^2)\\,dy=\\tfrac13+\\tfrac13=\\tfrac23$.</p></div></details></div>
+    <p>$\\mathbf v$ isn't a unit vector: $|\\mathbf v|=5$, so $\\mathbf u=(-\\tfrac35,-\\tfrac45)$. Then $D_{\\mathbf u}f=(6,8)\\cdot(-\\tfrac35,-\\tfrac45)=-\\tfrac{18}{5}-\\tfrac{32}{5}=-10=-|\\nabla f|$. Heading straight at the valley floor is the steepest <em>descent</em> — the direction $-\\nabla f$. (Forget to normalize and you'd wrongly get $-50$.)</p></div></details></div>
 
     <div class="prob"><span class="lvl">steepest ascent</span><div class="ph">Problem 7</div>
-    <p>At the point $(1,2)$ on $f(x,y)=x^2+y^2$, in which direction should you move to increase $f$ fastest, and how fast is that?</p>
+    <p>At $(1,2)$ on $f(x,y)=x^2+y^2$, which direction increases $f$ fastest, and how fast?</p>
     <details><summary>Show solution</summary><div class="sol">
-    <p>Fastest increase is along $\\nabla f=(2,4)$, i.e. direction $\\tfrac{1}{\\sqrt{20}}(2,4)=\\tfrac{1}{\\sqrt5}(1,2)$. The rate is $|\\nabla f|=\\sqrt{2^2+4^2}=\\sqrt{20}=2\\sqrt5\\approx4.47$.</p></div></details></div>
+    <p>Fastest increase is along $\\nabla f=(2,4)$, i.e. the unit direction $\\tfrac{1}{\\sqrt5}(1,2)$. The rate is $|\\nabla f|=\\sqrt{2^2+4^2}=\\sqrt{20}=2\\sqrt5\\approx4.47$.</p></div></details></div>
 
-    <div class="prob"><span class="lvl">challenge — order swap</span><div class="ph">Problem 8</div>
-    <p>Verify Fubini for $\\displaystyle\\iint_{[0,1]\\times[0,2]} x\\,dA$ by computing it both orders.</p>
+    <div class="prob"><span class="lvl">multivariable chain rule</span><div class="ph">Problem 8</div>
+    <p>Let $z=x^2y$ with $x=t^2$ and $y=t$. Find $\\dfrac{dz}{dt}$ at $t=1$ by the chain rule, and check directly.</p>
     <details><summary>Show solution</summary><div class="sol">
-    <p>$dx$ first: $\\int_0^2\\!\\big(\\int_0^1 x\\,dx\\big)dy=\\int_0^2\\tfrac12\\,dy=1$. $dy$ first: $\\int_0^1\\!\\big(\\int_0^2 x\\,dy\\big)dx=\\int_0^1 2x\\,dx=1$. Same answer, $1$ — the order doesn't matter.</p></div></details></div>
+    <p>$\\frac{dz}{dt}=\\frac{\\partial z}{\\partial x}\\frac{dx}{dt}+\\frac{\\partial z}{\\partial y}\\frac{dy}{dt}=(2xy)(2t)+(x^2)(1)$. At $t=1$ ($x=1,y=1$): $(2)(2)+(1)=5$. Direct check: $z=(t^2)^2\\,t=t^5$, so $\\frac{dz}{dt}=5t^4=5$ at $t=1$. The two routes ($4$ through $x$, $1$ through $y$) sum to the whole.</p></div></details></div>
 
-    <div class="prob"><span class="lvl">second-derivative test</span><div class="ph">Problem 9</div>
-    <p>The function $f(x,y)=x^2-y^2$ has a critical point at the origin. Classify it with $D=f_{xx}f_{yy}-f_{xy}^2$.</p>
+    <div class="prob"><span class="lvl">challenge — walking a contour</span><div class="ph">Problem 9</div>
+    <p>With $z=x^2+y^2$ and the path $x=\\cos t,\\ y=\\sin t$, compute $\\dfrac{dz}{dt}$. Explain the answer in one sentence.</p>
     <details><summary>Show solution</summary><div class="sol">
-    <p>$f_{xx}=2$, $f_{yy}=-2$, $f_{xy}=0$, so $D=(2)(-2)-0^2=-4&lt;0$. A negative discriminant means a <b>saddle</b> — it climbs along $x$ and falls along $y$, the textbook saddle surface.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">Lagrange multipliers</span><div class="ph">Problem 10</div>
-    <p>Maximize $f(x,y)=x+y$ subject to $x^2+y^2=2$.</p>
-    <details><summary>Show solution</summary><div class="sol">
-    <p>$\\nabla f=(1,1)$, $\\nabla g=(2x,2y)$. Setting $(1,1)=\\lambda(2x,2y)$ gives $x=y$. The constraint $x^2+y^2=2$ then yields $2x^2=2$, so $x=y=1$ (taking the $+$ root for the max). Maximum $f=1+1=2$.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">change of variables</span><div class="ph">Problem 11</div>
-    <p>Using $dA=r\\,dr\\,d\\theta$, find the area of the disk of radius $R$ by evaluating $\\displaystyle\\int_0^{2\\pi}\\!\\!\\int_0^{R} r\\,dr\\,d\\theta$.</p>
-    <details><summary>Show solution</summary><div class="sol">
-    <p>Inner: $\\int_0^{R} r\\,dr=\\tfrac{R^2}{2}$. Outer: $\\int_0^{2\\pi}\\tfrac{R^2}{2}\\,d\\theta=\\tfrac{R^2}{2}\\cdot2\\pi=\\pi R^2$ — the classic disk area, recovered in two one-line integrals thanks to the Jacobian factor $r$.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">Jacobian</span><div class="ph">Problem 12</div>
-    <p>A change of variables has $x=2u,\\ y=u+3v$. Find its Jacobian $J=\\dfrac{\\partial x}{\\partial u}\\dfrac{\\partial y}{\\partial v}-\\dfrac{\\partial x}{\\partial v}\\dfrac{\\partial y}{\\partial u}$, the local area-stretch factor.</p>
-    <details><summary>Show solution</summary><div class="sol">
-    <p>$\\tfrac{\\partial x}{\\partial u}=2,\\ \\tfrac{\\partial x}{\\partial v}=0,\\ \\tfrac{\\partial y}{\\partial u}=1,\\ \\tfrac{\\partial y}{\\partial v}=3$. So $J=(2)(3)-(0)(1)=6$: every area is stretched by a constant factor $6$, so $dx\\,dy=6\\,du\\,dv$. (This map is linear, so the factor is the same everywhere.)</p></div></details></div>
-
-    <div class="prob"><span class="lvl">multivariable chain rule</span><div class="ph">Problem 13</div>
-    <p>Let $z=x^2y$ with $x=t^2$ and $y=t$. Find $\\dfrac{dz}{dt}$ at $t=1$ using the chain rule.</p>
-    <details><summary>Show solution</summary><div class="sol">
-    <p>$\\frac{dz}{dt}=\\frac{\\partial z}{\\partial x}\\frac{dx}{dt}+\\frac{\\partial z}{\\partial y}\\frac{dy}{dt}=(2xy)(2t)+(x^2)(1)$. At $t=1$: $x=1,y=1$, so $(2)(2)+(1)=5$. (Check: $z=(t^2)^2 t=t^5$, $\\frac{dz}{dt}=5t^4=5$ at $t=1$.)</p></div></details></div>
-
-    <div class="prob"><span class="lvl">Hessian / Taylor</span><div class="ph">Problem 14</div>
-    <p>For $f(x,y)=x^2+xy+y^2$, write the Hessian $H$ and find the directional curvature $\\mathbf p^{\\mathsf T}H\\mathbf p$ along $\\mathbf p=\\tfrac{1}{\\sqrt2}(1,1)$.</p>
-    <details><summary>Show solution</summary><div class="sol">
-    <p>$H=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}$. With $\\mathbf p=\\tfrac1{\\sqrt2}(1,1)$: $\\mathbf p^{\\mathsf T}H\\mathbf p=\\tfrac12\\big(2+1+1+2\\big)=3$. (Along the $(1,1)$ diagonal the curvature is $3$ — the larger Hessian eigenvalue; along $(1,-1)$ it would be $1$.)</p></div></details></div>
-
-    <div class="prob"><span class="lvl">convexity</span><div class="ph">Problem 15</div>
-    <p>Is $f(x,y)=x^2-xy+y^2$ convex? Use the discriminant $D=f_{xx}f_{yy}-f_{xy}^2$ and the sign of $f_{xx}$.</p>
-    <details><summary>Show solution</summary><div class="sol">
-    <p>$f_{xx}=2,\\ f_{yy}=2,\\ f_{xy}=-1$, so $D=(2)(2)-(-1)^2=3&gt;0$ with $f_{xx}=2&gt;0$: the Hessian is positive-definite everywhere, so $f$ is <b>convex</b> — one global minimum (at the origin).</p></div></details></div>
-
-    <div class="prob"><span class="lvl">Newton's method</span><div class="ph">Problem 16</div>
-    <p>Minimize $f(x)=x^2-4x+7$ with one Newton step $x-\\dfrac{f'}{f''}$, starting anywhere, say $x=0$.</p>
-    <details><summary>Show solution</summary><div class="sol">
-    <p>$f'=2x-4$, $f''=2$. From $x=0$: $0-\\tfrac{-4}{2}=2$. One step lands exactly on $x=2$, the true minimum — because $f$ is a quadratic, so its Taylor model <em>is</em> $f$ and Newton is exact in a single step.</p></div></details></div>
+    <p>$\\frac{dz}{dt}=\\nabla z\\cdot(x',y')=(2\\cos t,\\,2\\sin t)\\cdot(-\\sin t,\\,\\cos t)=-2\\cos t\\sin t+2\\sin t\\cos t=0$. The path is the unit circle — a level curve of $z=x^2+y^2$ — so you're walking along a contour and your height never changes. (Equivalently, the velocity is perpendicular to $\\nabla z$, so the dot product is zero.)</p></div></details></div>
   </div>`;
   setHints([]);unlock();
 }
 
 function c7_recap(){
   stage.innerHTML=`<div class="card"><h2>What you built</h2>
-    <div class="eqbox" style="line-height:2.3">$$\\nabla f=\\Big(\\tfrac{\\partial f}{\\partial x},\\tfrac{\\partial f}{\\partial y}\\Big)\\ \\text{(steepest ascent, }\\perp\\text{ level curves)}\\qquad D_{\\mathbf u}f=\\nabla f\\cdot\\mathbf u$$
-    <div style="text-align:center;line-height:2;color:#dbe6f4;margin-top:6px">partial = ordinary derivative, other variables held constant · chain rule: $\\frac{dz}{dt}=\\sum \\frac{\\partial z}{\\partial x_i}\\frac{dx_i}{dt}$ (backprop)<br>Taylor: $f(P{+}\\mathbf p)\\approx f+\\nabla f\\cdot\\mathbf p+\\tfrac12\\mathbf p^{\\mathsf T}H\\mathbf p$ · critical pts $\\nabla f=\\mathbf 0$, classify by $D=f_{xx}f_{yy}-f_{xy}^2$<br>convex $\\iff$ $H$ positive-semidefinite · descent $\\mathbf x-\\alpha\\nabla f$ · Newton $\\mathbf x-H^{-1}\\nabla f$ · constrained $\\nabla f=\\lambda\\nabla g$<br>$\\iint_R f\\,dA$ by iterated integrals (Fubini) · change of variables $dx\\,dy=|J|\\,du\\,dv$ (polar: $r\\,dr\\,d\\theta$)</div></div>
-    <p>Multivariable calculus is single-variable calculus applied one direction at a time and then reassembled: partials are slice-slopes, the gradient bundles them into the steepest-ascent vector, the chain rule threads rates through a composition (backprop), Taylor fits a local bowl whose Hessian decides min/max/saddle and convexity, and double integrals stack areas into volumes. Descending the gradient — and, where it's cheap, dividing by the curvature — is the exact machinery underneath training a model.</p>
-    <p><b>Next — Module 9:</b> <b>vector calculus</b>. Attach a vector to every point of the plane (a <em>vector field</em> — think flow or force), then integrate along curves and over surfaces; the Green, Stokes, and divergence theorems tie those integrals back to the derivatives from this module. Then Module 10 packs all these partials into <b>matrices</b> — the Jacobian, the Hessian, and the chain rule as matrix multiplication — the formal bridge into machine learning.</p></div>`;
+    <div class="eqbox" style="line-height:2.2">$$z=f(x,y)\\ \\text{(a surface / contour map)}\\qquad \\frac{\\partial f}{\\partial x}=\\text{slope holding }y\\text{ fixed}$$</div>
+    <div style="text-align:center;line-height:2.1;color:#dbe6f4;margin-top:4px">tangent plane: $f(P{+}\\mathbf p)\\approx f(P)+f_x\\,\\Delta x+f_y\\,\\Delta y$ — the local flat model everything rests on<br>gradient $\\nabla f=(f_x,f_y)$: steepest ascent, $\\perp$ contours, $|\\nabla f|$ = steepest slope<br>directional derivative $D_{\\mathbf u}f=\\nabla f\\cdot\\mathbf u=|\\nabla f|\\cos\\varphi$ (slope in any direction)<br>chain rule $\\dfrac{dz}{dt}=\\displaystyle\\sum_i\\frac{\\partial z}{\\partial x_i}\\frac{dx_i}{dt}$ — multiply along each route, add the routes (backprop)</div>
+    <p>With several inputs, calculus works one direction at a time and then reassembles. A partial derivative is the slope of a vertical slice. Zooming in, the whole surface flattens to a <b>tangent plane</b> built from those slopes — the local linear model that quietly powers everything else. Bundle the slopes into the <b>gradient</b> and it points straight uphill, perpendicular to the contours, with length equal to the steepest slope; dot it with any unit direction to get the slope <em>that</em> way. And when the inputs are themselves moving, the <b>chain rule</b> threads the rates through the composition — the same "multiply along routes, add routes" that, run backward through a giant graph, is backpropagation.</p>
+    <p><b>Next — Module 9: Multivariable Optimization.</b> Now that you can measure slope in every direction, you can hunt for the best point: where $\\nabla f=\\mathbf 0$, whether it's a peak, valley, or saddle (the Hessian decides), how gradient descent and Newton's method walk downhill, and how Lagrange multipliers optimize under a constraint — the mathematical core of training a model. <b>Module 10</b> then turns to <b>multiple integrals</b>: accumulating a function over a region.</p></div>`;
   setHints([]);unlock();
 }
 
