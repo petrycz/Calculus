@@ -2073,6 +2073,7 @@ function c7_gradient(){
   stage.innerHTML=`<div class="card"><h2>The gradient: assembling the slopes into an arrow</h2>
     <p>You now have two separate slopes at every point — $f_x$ (steepness heading east) and $f_y$ (steepness heading north). Bundle them into a single vector and something remarkable falls out. That vector is the <b>gradient</b>:</p>
     <div class="eqbox">$$\\nabla f=\\Big(\\frac{\\partial f}{\\partial x},\\ \\frac{\\partial f}{\\partial y}\\Big).$$</div>
+    <p><b>It's the 1-D derivative, upgraded to a direction.</b> In one variable the derivative $f'(x)$ is a single number — and its <em>sign</em> already encodes a direction: with only two ways to move, you step right to climb when $f'&gt;0$ and left when $f'&lt;0$, while $|f'|$ says how steep. With two inputs, each partial plays that role for its own axis — $f_x$ says which way along $x$ is uphill, $f_y$ which way along $y$ — and the gradient just stacks them into one arrow. Its direction is the single combined uphill heading, and its length $|\\nabla f|$ is the steepness, exactly as $|f'|$ was in one dimension.</p>
     <p>A crucial point up front: the gradient is an arrow drawn <b>on the flat map</b> — in the input plane, where you choose which way to walk — not an arrow on the 3-D surface. Below is the contour map of the bowl $f=x^2+y^2$ (dark = low, bright = high). <b>Drag the point</b> and watch its gradient arrow. Notice two things: it always points <em>straight across the rings toward higher ground</em>, and it's <em>longer where the rings bunch up</em>.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">point (x, y)</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">∇f = (2x, 2y)</div><div class="v" id="gv">—</div></div><div class="rdc"><div class="k">steepest slope |∇f|</div><div class="v" id="mv">—</div></div></div>
@@ -2117,6 +2118,7 @@ function c7_gradient(){
 function c7_directional(){
   stage.innerHTML=`<div class="card"><h2>Directional derivatives: the slope in <em>any</em> direction</h2>
     <p>The gradient told you the <em>steepest</em> way up and how steep it is. But you don't always get to walk the steepest way — sometimes you're forced along a road, a ridge, a chosen heading. The <b>directional derivative</b> answers: if I step in direction $\\mathbf u$, how fast does the height change per step?</p>
+    <p>This is just the 1-D derivative set free. On a line there are only <em>two</em> ways to move, so "the slope" quietly meant two directional derivatives at once: $f'$ (stepping in $+x$) and $-f'$ (stepping in $-x$). On a surface there's a whole circle of headings to choose from, and $D_{\\mathbf u}f$ gives the slope for each — the old 1-D pair being nothing but the two special cases $\\mathbf u=(+1)$ and $\\mathbf u=(-1)$.</p>
     <p>Below, the point sits at $(3,4)$ on $f=x^2+y^2$, with its <span class="grn">gradient</span> $(6,8)$ fixed. <b>Drag to swing the <span class="cy">blue direction arrow</span></b> $\\mathbf u$ around, and read the slope in that direction on the right. Watch it peak when $\\mathbf u$ lines up with the gradient, pass through zero when $\\mathbf u$ runs along the contour, and go negative when you head downhill.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">direction</div><div class="v" id="th">—</div></div><div class="rdc"><div class="k">slope D&#7524;f = ∇f·u</div><div class="v" id="dv">—</div></div><div class="rdc"><div class="k">vs. steepest |∇f|</div><div class="v" id="mx">= 10</div></div></div>
@@ -2414,6 +2416,7 @@ function c7_graddescent(){
     <p>Finding critical points by hand means solving $\\nabla f=\\mathbf 0$ — fine for a textbook, hopeless for a loss surface with a million variables. So instead of <em>solving</em>, we <em>walk</em>: stand somewhere, look for the downhill direction, take a step, repeat. The gradient hands us the direction for free.</p>
     <p>From the directional-derivative beat, the steepest-<em>descent</em> direction is $-\\nabla f$ (the gradient points steepest uphill, so its negative points steepest down). Take a step that way, scaled by a number $\\alpha$ — the <b>learning rate</b> — and repeat:</p>
     <div class="eqbox">$\\mathbf x_{\\text{next}}=\\mathbf x-\\alpha\\,\\nabla f(\\mathbf x).$</div>
+    <p>In one variable this is simply $x_{\\text{next}}=x-\\alpha f'(x)$: step <em>against</em> the sign of the slope — left when $f'&gt;0$, right when $f'&lt;0$ — which is "downhill." The only thing higher dimensions add is that "against the slope" becomes "against the gradient vector," $-\\nabla f$.</p>
     <p>Below, descent runs on the bowl $f=x^2+y^2$ from the same start each time. <b>Drag left/right to change the learning rate $\\alpha$</b> and watch the whole path change character.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">learning rate α</div><div class="v" id="av">—</div></div><div class="rdc"><div class="k">step 1 lands at</div><div class="v" id="s1">—</div></div><div class="rdc"><div class="k">outcome</div><div class="v" id="st">—</div></div></div>
@@ -2467,6 +2470,7 @@ function c7_secondderiv(){
     <div class="eqbox">$$f(P+\\mathbf p)\\approx f(P)+\\nabla f\\cdot\\mathbf p+\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\,\\mathbf p.$$</div>
     <p>At a <em>critical</em> point the gradient is zero, $\\nabla f=\\mathbf 0$, so the entire linear term disappears — $\\nabla f\\cdot\\mathbf p=\\mathbf 0\\cdot\\mathbf p=0$ — and the surface, measured from $P$, is pure curvature:</p>
     <div class="eqbox">$$f(P+\\mathbf p)-f(P)\\approx \\tfrac12\\,\\mathbf p^{\\mathsf T}H\\,\\mathbf p.$$</div>
+    <p>This is the exact generalization of the single-variable second-derivative test. There, one number settled it — the sign of $f''$: positive meant a minimum, negative a maximum. With two variables that single $f''$ grows into the whole Hessian, and the verdict now comes from the sign of the quadratic form $\\mathbf p^{\\mathsf T}H\\mathbf p$ rather than a lone number — because, as we'll see, the two directions can interact and one sign no longer tells the whole story.</p>
     <p>So whether you end up <em>higher</em> or <em>lower</em> than $P$ after a small step $\\mathbf p$ is decided entirely by the sign of the quadratic form $Q(\\mathbf p)=\\mathbf p^{\\mathsf T}H\\mathbf p$: positive for every direction $\\Rightarrow$ you rise whichever way you go $\\Rightarrow$ a <b>minimum</b>; negative every way $\\Rightarrow$ a <b>maximum</b>; positive some ways and negative others $\\Rightarrow$ a <b>saddle</b>. Below is $f=x^2+c\\,xy+y^2$; <span class="cy">blue</span> marks where it rises above the flat tangent plane, <span style="color:#e8b84b">gold</span> where it dips below. <b>Drag $c$</b> and watch the all-blue bowl tip into a two-toned saddle.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <p class="small" id="obs" style="margin-top:8px;color:#9fb0c4"></p>
@@ -2531,19 +2535,19 @@ function c7_lagrange(){
     <p><b>Slide the split</b> along that line and find the biggest area.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <p class="small" id="obs" style="margin-top:8px;color:#9fb0c4"></p>
-    <div class="readout"><div class="rdc"><div class="k">split (x, y)</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">objective f = xy</div><div class="v" id="fv">—</div></div><div class="rdc"><div class="k">constraint g = x + y</div><div class="v" id="gv">—</div></div></div>
+    <div class="readout"><div class="rdc"><div class="k">split (x, y)</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">objective f = xy</div><div class="v" id="fv">—</div></div><div class="rdc"><div class="k">∇f vs ∇g angle</div><div class="v" id="agv">—</div></div></div>
     <div class="task"><b>Find the biggest area</b>Slide to the largest rectangle. What is the maximum of the objective $f=xy$ while $g=x+y$ stays at $10$?</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
 
-    <p style="margin-top:16px"><b>Why is the square best? Watch the contours.</b> The gold curves are the objective's <b>level curves</b> $f=xy=\\text{const}$ — each one a set of splits with equal area, labelled by that area. Stand at a split that isn't the square: the area-curve through you <em>cuts across</em> the constraint line. That crossing is the tell — it means a point just beside you on the line sits on a <em>higher</em> area-curve, so you can slide there and gain. You keep gaining until the area-curve stops crossing and merely <b>touches</b> the line at a single point. There, sliding either way drops you to a lower area: you're at the maximum.</p>
+    <p style="margin-top:16px"><b>Why is the square best? Watch the contours.</b> The gold curves are the objective's <b>level curves</b> $f=xy=\\text{const}$ — each one a set of splits with equal area, labelled by that area. Stand at a split that isn't the square: the area-curve through you <em>cuts across</em> the constraint line. That crossing is the tell — a point just beside you on the line sits on a <em>higher</em> area-curve, so you can slide there and gain. You keep gaining until the area-curve stops crossing and merely <b>touches</b> the line at a single point. There, sliding either way drops you to a lower area: you're at the maximum.</p>
     <div class="eqbox">constrained optimum $\\iff$ the objective's level curve is <b>tangent</b> to the constraint curve.</div>
 
-    <p><b>Turn tangency into an equation.</b> We need to convert "the curves are tangent" into something we can solve. Two facts about gradients do it:</p>
-    <p>&bull; A gradient points perpendicular to its own level curves (from the gradient beat). The constraint curve $g=10$ <em>is</em> a level curve of $g$, so $\\nabla g$ is perpendicular to it.</p>
-    <p>&bull; At the optimum the objective's level curve is tangent to the constraint — they share one tangent line. And $\\nabla f$ is perpendicular to that objective level curve.</p>
-    <p>So $\\nabla f$ and $\\nabla g$ are both perpendicular to the <em>same</em> tangent line. Two vectors perpendicular to one line (in the plane) point along a single direction — they're <b>parallel</b>. Parallel means one is a scalar multiple of the other:</p>
+    <p><b>Turn tangency into an equation — watch the two arrows.</b> Drag the point and keep your eye on the two gradient arrows and the angle readout. Away from the square they point in <em>different</em> directions; as you slide toward it they swing into alignment and the angle falls to $0^\\circ$. "Tangent" and "gradients parallel" turn out to be the same moment — and here's why, read straight off the picture:</p>
+    <p>&bull; $\\nabla g$ (green) is perpendicular to the constraint line — the gradient is always perpendicular to its own level curve, and the line is the level curve $g=10$. The little green square at the point marks that right angle.</p>
+    <p>&bull; $\\nabla f$ (gold) is perpendicular to the objective's level curve through the point — same fact, for $f$. The grey dashed segment is that contour's tangent direction, and $\\nabla f$ sticks out square to it.</p>
+    <p>At the optimum the grey dashed tangent lies right along the blue line: the two curves share <em>one</em> tangent direction. Both gradients are perpendicular to that same direction — and in the plane, two vectors perpendicular to one line can only point along a single line. So they're <b>parallel</b>: one is a scalar multiple of the other,</p>
     <div class="eqbox">$$\\nabla f=\\lambda\\,\\nabla g.$$</div>
-    <p>The scalar $\\lambda$ — the <b>Lagrange multiplier</b> — just soaks up the difference in their lengths; the two gradients share a direction, not a size.</p>
+    <p>The scalar $\\lambda$ — the <b>Lagrange multiplier</b> — just absorbs the difference in the gradients' lengths; they share a <em>direction</em>, not a size.</p>
 
     <p><b>Write the whole system.</b> That single vector equation is one scalar equation per component — and, easy to forget, you still have to state that you're actually <em>on</em> the constraint. Three equations:</p>
     <div class="eqbox">$$f_x=\\lambda\\,g_x,\\qquad f_y=\\lambda\\,g_y,\\qquad g(x,y)=c.$$</div>
@@ -2563,24 +2567,31 @@ function c7_lagrange(){
     ctx.fillStyle='rgba(122,184,255,0.10)';ctx.fillRect(px(0),py(y0),x0*S,y0*S);
     ctx.strokeStyle='#3a4c66';ctx.lineWidth=1;ctx.strokeRect(px(0),py(y0),x0*S,y0*S);
     ctx.strokeStyle='#7ab8ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(px(0),py(10));ctx.lineTo(px(10),py(0));ctx.stroke();
+    // objective contour tangent at the point: direction (x0,-y0)
+    const nf=Math.hypot(x0,y0),Tf=[x0/nf,-y0/nf];
+    ctx.strokeStyle='#aab6c6';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(px(x0-Tf[0]*1.6),py(y0-Tf[1]*1.6));ctx.lineTo(px(x0+Tf[0]*1.6),py(y0+Tf[1]*1.6));ctx.stroke();ctx.setLineDash([]);
+    // right-angle marks: ∇g ⊥ line, ∇f ⊥ Tf
+    const Ug=[1/Math.SQRT2,1/Math.SQRT2],Ln=[1/Math.SQRT2,-1/Math.SQRT2];
+    const Uf=[y0/nf,x0/nf];
+    function rang(u,v,col){const s=0.42;ctx.strokeStyle=col;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(px(x0+u[0]*s),py(y0+u[1]*s));ctx.lineTo(px(x0+(u[0]+v[0])*s),py(y0+(u[1]+v[1])*s));ctx.lineTo(px(x0+v[0]*s),py(y0+v[1]*s));ctx.stroke();}
+    rang(Ug,Ln,'#3fb98f');rang(Uf,Tf,'#aab6c6');
     arrow(px(x0),py(y0),px(x0)+y0*6,py(y0)-x0*6,'#e8b84b');
     arrow(px(x0),py(y0),px(x0)+22,py(y0)-22,'#3fb98f');
     ctx.fillStyle='#dbe6f4';ctx.beginPath();ctx.arc(px(x0),py(y0),5,0,7);ctx.fill();
     ctx.fillStyle='#7ab8ff';ctx.font='12px sans-serif';ctx.fillText('constraint g = x+y = 10',px(4.1),py(2.1));
     ctx.fillStyle='#e8b84b';ctx.fillText('∇f',px(x0)+y0*6+4,py(y0)-x0*6);ctx.fillStyle='#3fb98f';ctx.fillText('∇g',px(x0)+26,py(y0)-24);
-    const tang=Math.abs(x0-y0)<0.25;
-    if(tang){ctx.fillStyle='#3fb98f';ctx.font='600 13px sans-serif';ctx.fillText('tangent — best split',px(5.1),py(6.7));}
+    const cosA=Math.max(-1,Math.min(1,(x0+y0)/(nf*Math.SQRT2)));const ang=Math.acos(cosA)*180/Math.PI;const tang=Math.abs(x0-y0)<0.25;
     document.getElementById('pv').textContent='('+x0.toFixed(1)+', '+y0.toFixed(1)+')';
     document.getElementById('fv').textContent=(x0*y0).toFixed(2);
-    document.getElementById('gv').textContent=(x0+y0).toFixed(1)+' (fixed)';
-    const ob=document.getElementById('obs');if(ob)ob.textContent=tang?'The area-curve is tangent to the line — sliding either way lowers the area. This is the maximum.':'The gold area-curve crosses the line — a higher area-curve lies just to one side, so you can still do better.';}
+    document.getElementById('agv').textContent=ang.toFixed(0)+'°';
+    const ob=document.getElementById('obs');if(ob)ob.textContent=tang?'∇f and ∇g are parallel (0° apart) — the grey tangent lies along the line, the curves are tangent. This is the maximum.':'∇f and ∇g are '+ang.toFixed(0)+'° apart — not parallel yet, and the area-curve still crosses the line.';}
   cv.style.touchAction='none';let drg=false;
   function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));x0=Math.max(0.5,Math.min(9.5,(X-ox)/S));draw();}
   cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),25,()=>{addReveal(`<div class="rh">✓ 25</div><p>At $x=y=5$ the area is $25$. That's exactly where the gold area-curve $xy=25$ stops crossing and just kisses the constraint line — tangent — and where $\\nabla f=(y,x)=(5,5)$ and $\\nabla g=(1,1)$ point the same way, so $\\nabla f=5\\,\\nabla g$ (that's $\\lambda=5$). Slide off the square and the area-curve cuts the line again and the area falls.</p>`);});
+  numChk(stage.querySelector('.card'),25,()=>{addReveal(`<div class="rh">✓ 25</div><p>At $x=y=5$ the area is $25$. That's exactly where the gold area-curve $xy=25$ stops crossing and just kisses the constraint line — tangent — and where $\\nabla f=(y,x)=(5,5)$ and $\\nabla g=(1,1)$ point the same way, so $\\nabla f=5\\,\\nabla g$ (that's $\\lambda=5$). Slide off the square and the two gradients fan apart again and the area falls.</p>`);});
   setHints([`At the optimum ∇f=λ∇g forces x=y. Put x=y into the constraint x+y=10.`,`x=y=5, so the maximum area is 5·5=25.`]);
 }
 
