@@ -2230,33 +2230,38 @@ function c7_chainrule(){
 }
 
 function c7_taylor(){
-  stage.innerHTML=`<div class="card"><h2>Taylor in 2-D: the local linear + quadratic model</h2>
-    <p>Near a point, a surface is captured by two pieces: a <em>linear</em> part (the tangent plane, built from $\\nabla f$) and a <em>quadratic</em> part (the curvature, built from the second partials). To see it cleanly, we slice: pick a point $P=(1,0)$ on $f=x^2+xy+y^2$ and walk in a direction $\\mathbf p=(\\cos\\theta,\\sin\\theta)$. The <span class="cy">blue curve</span> is the true height $g(s)=f(P+s\\mathbf p)$; the <span style="color:#e8b84b">gold line</span> is the tangent (linear) approximation. The gap between them is the quadratic term. Drag to swing the direction.</p>
+  stage.innerHTML=`<div class="card"><h2>The quadratic model: curvature the plane can't see</h2>
+    <p>The tangent plane gave us a flat stand-in for the surface. But flat is exactly the problem: at a critical point the gradient is zero, so the tangent plane is perfectly level — and a level plane looks identical over a valley, a peak, or a saddle. What separates them is <b>curvature</b>, the <em>second</em>-order behavior. So we add one more term to the approximation.</p>
+    <p>Below we slice $f=x^2+xy+y^2$ at $P=(1,0)$ along a direction you can spin. The <span class="cy">blue curve</span> is the true slice; the <span style="color:#e8b84b">gold dashed line</span> is the flat tangent line. The <em>bend</em> between them — how far the surface pulls away from flat — is the curvature term. <b>Drag to rotate the direction</b> and watch the bend change.</p>
     <canvas id="cv" width="640" height="380"></canvas>
-    <div class="readout"><div class="rdc"><div class="k">direction θ</div><div class="v" id="thv">—</div></div><div class="rdc"><div class="k">slope g′(0)=∇f·p</div><div class="v" id="g1">—</div></div><div class="rdc"><div class="k">curvature g″(0)=pᵀHp</div><div class="v" id="g2">—</div></div></div>
-    <div class="task"><b>Curvature in a direction</b>Point the direction along the $x$-axis, $\\mathbf p=(1,0)$. The Hessian of $f=x^2+xy+y^2$ is $H=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}$. Compute the directional curvature $g''(0)=\\mathbf p^{\\mathsf T}H\\mathbf p$.</div>
+    <div class="readout"><div class="rdc"><div class="k">direction θ</div><div class="v" id="th">—</div></div><div class="rdc"><div class="k">slope ∇f·p (linear)</div><div class="v" id="g1">—</div></div><div class="rdc"><div class="k">curvature pᵀHp (quadratic)</div><div class="v" id="g2">—</div></div></div>
+    <div class="task"><b>Read the curvature along x</b>Point the direction along the $x$-axis, $\\mathbf p=(1,0)$. For $f=x^2+xy+y^2$ the Hessian is $H=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}$. Compute the directional curvature $\\mathbf p^{\\mathsf T}H\\mathbf p$.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
 
-    <p style="margin-top:16px"><b>Reduce the surface to a single-variable function.</b> Walking in a fixed direction turns $f$ into an ordinary 1-D function of how far you've gone, $g(s)=f(P+s\\mathbf p)$. Now just use the 1-D Taylor expansion from Module 6:</p>
-    <div class="eqbox">$g(1)\\approx g(0)+g'(0)+\\tfrac12 g''(0).$</div>
-    <p><b>Differentiate $g$ with the chain rule.</b> By the multivariable chain rule, moving at "velocity" $\\mathbf p$,</p>
-    <div class="eqbox">$g'(s)=\\nabla f(P+s\\mathbf p)\\cdot\\mathbf p\\;\\Rightarrow\\; g'(0)=\\nabla f(P)\\cdot\\mathbf p.$</div>
-    <p>Differentiate once more: each component $\\partial f/\\partial x_i$ changes at rate $\\sum_j f_{ij}p_j$ (chain rule again), and dotting with $\\mathbf p$ collects the double sum into $\\mathbf p^{\\mathsf T}H\\mathbf p$, where $H$ is the matrix of second partials — the <b>Hessian</b>:</p>
-    <div class="eqbox">$g''(0)=\\mathbf p^{\\mathsf T}H\\,\\mathbf p,\\qquad H=\\begin{pmatrix}f_{xx}&f_{xy}\\\\ f_{xy}&f_{yy}\\end{pmatrix}.$</div>
-    <p>Put the pieces back (write $\\mathbf p$ as the step vector, so $s\\mathbf p\\to\\mathbf p$) and you have the <b>two-variable Taylor expansion</b>:</p>
-    <div class="eqbox">$f(P+\\mathbf p)\\approx f(P)+\\underbrace{\\nabla f(P)\\cdot\\mathbf p}_{\\text{tangent plane}}+\\underbrace{\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\,\\mathbf p}_{\\text{curvature}}.$</div>
-    <p>The gradient gives the best flat approximation; the Hessian corrects it with the bowl-or-saddle curvature. This one model is the workhorse ahead: the next beat classifies critical points by the sign of $\\mathbf p^{\\mathsf T}H\\mathbf p$, and Newton's method jumps straight to this quadratic's minimum. It's also the exact language ML papers use for a loss surface — "curvature," "sharp vs. flat minima" — all live in $H$.</p></div>`;
-  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-2.5,xmax:2.5,ymin:-2,ymax:14});
-  const f=(x,y)=>x*x+x*y+y*y;
-  let th=0;
-  function draw(){pl.grid();const c=Math.cos(th),s=Math.sin(th);
-    const g=u=>f(1+u*c, 0+u*s);
-    const g1=2*c+1*s, g2=2+Math.sin(2*th);
-    pl.curve(g,'#7ab8ff');
-    pl.curve(u=>f(1,0)+g1*u,'#e8b84b',2);
-    pl.point(0,f(1,0),'#dbe6f4',5);
-    pl.vline(0,'#2b3a4f',true);
-    document.getElementById('thv').textContent=(th*180/Math.PI).toFixed(0)+'°';
+    <p style="margin-top:16px"><b>The second-order model.</b> Take the tangent-plane (linear) approximation and tack on a quadratic term in the steps $\\Delta x,\\Delta y$. Written out in full:</p>
+    <div class="eqbox">$$f(P+\\Delta)\\approx \\underbrace{f(P)}_{\\text{height}}+\\underbrace{f_x\\,\\Delta x+f_y\\,\\Delta y}_{\\text{tangent plane}}+\\underbrace{\\tfrac12\\big(f_{xx}\\,\\Delta x^2+2f_{xy}\\,\\Delta x\\,\\Delta y+f_{yy}\\,\\Delta y^2\\big)}_{\\text{curvature}}.$$</div>
+    <p>The three second partials in that last bracket pack into a little $2\\times2$ table — the <b>Hessian</b> $H$ — and the whole curvature term is written compactly as $\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\,\\mathbf p$, which is just shorthand for that same expansion:</p>
+    <div class="eqbox">$$H=\\begin{pmatrix}f_{xx}&f_{xy}\\\\ f_{xy}&f_{yy}\\end{pmatrix},\\qquad \\tfrac12\\,\\mathbf p^{\\mathsf T}H\\,\\mathbf p=\\tfrac12\\big(f_{xx}\\,\\Delta x^2+2f_{xy}\\,\\Delta x\\,\\Delta y+f_{yy}\\,\\Delta y^2\\big).$$</div>
+    <p>(The off-diagonal entries are both $f_{xy}$ because the mixed partials agree, $f_{xy}=f_{yx}$, for any smooth surface — that's why the $\\Delta x\\Delta y$ term carries the factor $2$.)</p>
+    <p><b>Where it comes from.</b> Walk a straight line out of $P$, $g(s)=f(P+s\\mathbf p)$ — an ordinary 1-D function of distance $s$. Its 1-D Taylor expansion is $g(s)\\approx g(0)+g'(0)\\,s+\\tfrac12 g''(0)\\,s^2$, and the multivariable chain rule (last module) evaluates the two derivatives:</p>
+    <div class="eqbox">$$g'(0)=\\nabla f\\cdot\\mathbf p,\\qquad g''(0)=\\mathbf p^{\\mathsf T}H\\,\\mathbf p.$$</div>
+    <p>So the slope of the slice is the gradient's component along $\\mathbf p$, and <em>the curvature of the slice is $\\mathbf p^{\\mathsf T}H\\mathbf p$</em> — that's the bend you see on the canvas. Spin the direction and the curvature readout traces $2+\\sin2\\theta$: the Hessian gives a possibly different curvature every way you turn. Here it stays positive (always a bowl), but for a saddle it would go positive one way and negative another. That single object — curvature in every direction, bundled into $H$ — is what the next beat reads to classify a critical point, what convexity checks, and what Newton's method uses to size its jump.</p></div>`;
+  const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-2.5,xmax:2.5,ymin:-4,ymax:13});
+  const f=(x,y)=>x*x+x*y+y*y;let th=0;
+  function draw(){const cz=Math.cos(th),sz=Math.sin(th);
+    const g=u=>f(1+u*cz, u*sz);const g1=2*cz+sz, g2=2+Math.sin(2*th);
+    pl.grid();
+    pl.curve(g,'#7ab8ff',2.6);
+    // flat tangent line (dashed)
+    const {ctx,px,py}=pl;ctx.strokeStyle='#e8b84b';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(px(-2.5),py(f(1,0)+g1*(-2.5)));ctx.lineTo(px(2.5),py(f(1,0)+g1*2.5));ctx.stroke();ctx.setLineDash([]);
+    // curvature gap at s0
+    const s0=1.4,yl=f(1,0)+g1*s0,yc=g(s0);
+    ctx.strokeStyle='#3fb98f';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(px(s0),py(yl));ctx.lineTo(px(s0),py(yc));ctx.stroke();
+    ctx.fillStyle='#3fb98f';ctx.font='11px sans-serif';ctx.fillText('½ pᵀHp·s²',px(s0)+6,py((yl+yc)/2));
+    pl.point(0,f(1,0),'#dbe6f4',5);pl.vline(0,'#2b3a4f',true);
+    ctx.fillStyle='#7ab8ff';ctx.fillText('the slice (a parabola)',px(-2.4),py(12.2));
+    ctx.fillStyle='#e8b84b';ctx.fillText('flat tangent line',px(-2.4),py(11.0));
+    document.getElementById('th').textContent=(th*180/Math.PI).toFixed(0)+'°';
     document.getElementById('g1').textContent=g1.toFixed(2);
     document.getElementById('g2').textContent=g2.toFixed(2);}
   cv.style.touchAction='none';let drg=false;
@@ -2265,8 +2270,8 @@ function c7_taylor(){
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ p&#7488;Hp = 2</div><p>With $\\mathbf p=(1,0)$: $\\mathbf p^{\\mathsf T}H\\mathbf p = H_{xx}=f_{xx}=2$. So along $x$ the quadratic term is $\\tfrac12(2)s^2=s^2$ — the gold tangent line undershoots the blue curve by exactly $s^2$. Swing the direction and the curvature readout traces $2+\\sin2\\theta$: the Hessian gives a different curvature every way you turn.</p>`);});
-  setHints([`pᵀHp with p=(1,0) just picks out the top-left Hessian entry, f_xx.`,`f_xx = 2.`]);
+  numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ pᵀHp = 2</div><p>With $\\mathbf p=(1,0)$, $\\mathbf p^{\\mathsf T}H\\mathbf p$ just picks out the top-left Hessian entry, $f_{xx}=2$. So along $x$ the quadratic term is $\\tfrac12(2)s^2=s^2$: the blue slice sits exactly $s^2$ above the flat gold line. Spin the direction and the curvature readout runs $2+\\sin2\\theta$ — same surface, different bend every way you face.</p>`);});
+  setHints([`pᵀHp with p=(1,0) picks out the top-left Hessian entry f_xx.`,`That entry is 2.`]);
 }
 
 function c7_convexity(){
