@@ -2324,33 +2324,42 @@ function c7_convexity(){
 
 function c7_newton(){
   stage.innerHTML=`<div class="card"><h2>Newton's method: jump to the model's minimum</h2>
-    <p>Gradient descent creeps downhill one cautious step at a time. Newton's method is bolder: it builds the local <em>quadratic</em> model from the Taylor beat and jumps straight to <em>its</em> minimum. Below is $f(x)=\\tfrac18 x^4$ (<span class="cy">blue</span>); at your current point it fits the matching parabola (<span style="color:#e8b84b">gold</span>) and marks that parabola's vertex — the next Newton point. Drag the point and watch the model and its vertex track along.</p>
+    <p>Gradient descent creeps downhill with a step size $\\alpha$ you have to guess. Newton's method uses the extra information we now have — the <em>curvature</em>, i.e. the Hessian — to do something bolder: build the local quadratic model and jump straight to <em>its</em> minimum in one shot.</p>
+    <p>Below is $f(x)=\\tfrac18x^4$ in <span class="cy">blue</span>. At your current point it fits the matching parabola (the quadratic model) in <span style="color:#e8b84b">gold</span> and marks that parabola's lowest point in <span class="grn">green</span> — the next Newton point. <b>Drag the point</b> and watch the model and its vertex track along; the faint dots show where the next steps land.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">x</div><div class="v" id="xv">—</div></div><div class="rdc"><div class="k">step f′/f″</div><div class="v" id="sv">—</div></div><div class="rdc"><div class="k">next x = x − f′/f″</div><div class="v" id="nx">—</div></div></div>
-    <div class="task"><b>One Newton step</b>For $f=\\tfrac18x^4$: $f'=\\tfrac12x^3$ and $f''=\\tfrac32x^2$. Starting at $x=3$, where does one step $x-\\dfrac{f'}{f''}$ land?</div>
+    <div class="task"><b>One Newton step by hand</b>For $f=\\tfrac18x^4$: $f'=\\tfrac12x^3$ and $f''=\\tfrac32x^2$. Starting at $x=3$, apply $x-\\dfrac{f'}{f''}$. Where does one step land?</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
 
-    <p style="margin-top:16px"><b>Derive the step.</b> The quadratic model around $\\mathbf x$ (from Taylor) is $m(\\mathbf p)=f+\\nabla f\\cdot\\mathbf p+\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\mathbf p$. Minimize it: set its gradient in $\\mathbf p$ to zero,</p>
-    <div class="eqbox">$\\nabla_{\\mathbf p}\\,m=\\nabla f+H\\mathbf p=\\mathbf 0\\;\\Rightarrow\\; \\mathbf p=-H^{-1}\\nabla f,$</div>
-    <p>so the update is $\\;\\mathbf x_{\\text{next}}=\\mathbf x-H^{-1}\\nabla f$. In one dimension $H$ is just $f''$ and $\\nabla f$ is $f'$:</p>
-    <div class="eqbox">$x_{\\text{next}}=x-\\frac{f'(x)}{f''(x)}.$</div>
-    <p><b>Read what the curvature does.</b> Compare gradient descent, $x-\\alpha f'$, with a <em>guessed</em> step size $\\alpha$. Newton replaces $\\alpha$ with $1/f''$ — the reciprocal curvature. Steep, sharply-curved directions get small careful steps; flat, gently-curved ones get big strides. The matrix version $H^{-1}$ does this independently in every direction at once. For an exactly quadratic $f$ the model is perfect, so Newton lands on the true minimum in a single step; for general $f$ it iterates and converges extremely fast near the bottom.</p>
-    <p><b>The catch — and the ML connection.</b> Newton needs the Hessian and its inverse: for $n$ parameters that's $n^2$ numbers to store and about $n^3$ work to invert. At a million-plus parameters that's hopeless, which is exactly why deep learning runs on first-order gradient descent instead — and why so much research is cheap <em>approximations</em> of $H^{-1}$: L-BFGS, K-FAC, natural gradient, and Adam's per-coordinate curvature estimate all chase Newton's rescaling without paying for the full inverse.</p></div>`;
+    <p style="margin-top:16px"><b>Build the model, then minimize it.</b> The quadratic model of $f$ around the current point, as a function of the step $\\mathbf p$, is (from the Taylor beat):</p>
+    <div class="eqbox">$$m(\\mathbf p)=f+\\nabla f\\cdot\\mathbf p+\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\,\\mathbf p.$$</div>
+    <p>This is itself a quadratic (a paraboloid) in $\\mathbf p$, so its minimum is wherever <em>its own</em> gradient vanishes: $\\nabla_{\\mathbf p}\\,m=\\mathbf 0$.</p>
+    <p><b>The one-dimensional case first.</b> With a single variable the model is $m(p)=f+f'p+\\tfrac12 f''p^2$. Differentiate in $p$ and set to zero:</p>
+    <div class="eqbox">$$m'(p)=f'+f''p=0\\quad\\Longrightarrow\\quad p=-\\frac{f'}{f''}\\quad\\Longrightarrow\\quad x_{\\text{next}}=x-\\frac{f'}{f''}.$$</div>
+    <p><b>Now the multivariable gradient of the model.</b> Differentiate $m(\\mathbf p)$ with respect to the step. The two pieces:</p>
+    <div class="eqbox">$$\\nabla_{\\mathbf p}\\big(\\nabla f\\cdot\\mathbf p\\big)=\\nabla f,\\qquad \\nabla_{\\mathbf p}\\big(\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\mathbf p\\big)=H\\mathbf p.$$</div>
+    <p>The first holds because $\\nabla f\\cdot\\mathbf p=\\sum_i f_i\\,p_i$, so $\\partial/\\partial p_j=f_j$ — the components reassemble into $\\nabla f$. The second: $\\tfrac12\\mathbf p^{\\mathsf T}H\\mathbf p=\\tfrac12\\sum_{i,j}H_{ij}p_ip_j$, and differentiating in $p_k$ hits the $p_i$ and the $p_j$ slots, giving $\\tfrac12\\big(\\sum_j H_{kj}p_j+\\sum_i H_{ik}p_i\\big)=\\sum_j H_{kj}p_j=(H\\mathbf p)_k$ — the two sums merge because $H$ is symmetric. Setting the whole gradient to zero:</p>
+    <div class="eqbox">$$\\nabla_{\\mathbf p}\\,m=\\nabla f+H\\mathbf p=\\mathbf 0\\quad\\Longrightarrow\\quad H\\mathbf p=-\\nabla f\\quad\\Longrightarrow\\quad \\mathbf p=-H^{-1}\\nabla f.$$</div>
+    <p>So the update is $\\ \\mathbf x_{\\text{next}}=\\mathbf x-H^{-1}\\nabla f$ — the multivariable twin of $x-f'/f''$, with "divide by the curvature" now meaning "multiply by the inverse Hessian."</p>
+    <p><b>What the curvature does.</b> Compare gradient descent's $\\mathbf x-\\alpha\\nabla f$: Newton replaces the guessed scalar $\\alpha$ with $H^{-1}$, which rescales the step <em>per direction</em> by its curvature — a small, careful step where the surface bends sharply, a big stride where it's nearly flat. In 1-D that's literally slope $\\div$ curvature, $f'/f''$. And because the model <em>is</em> the function when $f$ is quadratic, Newton lands on the exact minimum in a single step; for general $f$ it iterates and converges extremely fast near the bottom.</p>
+    <p><b>The catch — and the ML connection.</b> Newton needs the Hessian and its inverse. For $n$ variables that's $n^2$ numbers to store and about $n^3$ work to invert — hopeless at a model's millions of parameters. That's exactly why deep learning runs on first-order gradient descent instead, and why a whole family of methods — L-BFGS, K-FAC, natural gradient, Adam's per-coordinate curvature estimate — chase Newton's curvature-rescaling <em>without</em> ever forming $H^{-1}$.</p></div>`;
   const cv=document.getElementById('cv');const pl=plot(cv,{xmin:-0.8,xmax:3.6,ymin:-2,ymax:16});
   const f=x=>x*x*x*x/8, fp=x=>x*x*x/2, fpp=x=>1.5*x*x;
   let x0=3;
   function draw(){pl.grid();pl.curve(f,'#7ab8ff');
     const nx=x0-fp(x0)/fpp(x0);
     pl.curve(u=>f(x0)+fp(x0)*(u-x0)+0.5*fpp(x0)*(u-x0)*(u-x0),'#e8b84b',2);
-    pl.point(x0,f(x0),'#dbe6f4',5);
+    // faint future iterates
+    let xk=nx;for(let i=0;i<4;i++){if(xk<pl.xmin||xk>pl.xmax)break;pl.point(xk,f(xk),'rgba(63,185,143,'+(0.5-i*0.1)+')',3);xk=xk-fp(xk)/fpp(xk);}
     pl.vline(nx,'#3fb98f',true);
     pl.point(nx,f(x0)-0.5*fp(x0)*fp(x0)/fpp(x0),'#3fb98f',5,true);
+    pl.point(x0,f(x0),'#fff',5);
     document.getElementById('xv').textContent=x0.toFixed(2);
     document.getElementById('sv').textContent=(fp(x0)/fpp(x0)).toFixed(2);
     document.getElementById('nx').textContent=nx.toFixed(2);}
   xdrag(cv,pl,x=>{x0=Math.max(0.3,Math.min(3.4,x));draw();});
   draw();
-  numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ 2</div><p>$x-\\dfrac{f'}{f''}=3-\\dfrac{\\frac12(27)}{\\frac32(9)}=3-\\dfrac{13.5}{13.5}=3-1=2$. The gold parabola's vertex sits right above $x=2$. Keep stepping and it runs $3\\to2\\to\\tfrac43\\to\\cdots\\to0$, homing in on the minimum far faster than fixed-size gradient steps would — each step divides the distance, because the curvature in the denominator sizes the jump for you.</p>`);});
+  numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ x = 2</div><p>$x-\\dfrac{f'}{f''}=3-\\dfrac{\\frac12(27)}{\\frac32(9)}=3-\\dfrac{13.5}{13.5}=3-1=2$. The gold parabola's lowest point sits right above $x=2$. Keep stepping and it runs $3\\to2\\to\\tfrac43\\to\\cdots\\to0$, homing in far faster than fixed-size gradient steps — each step's size is set for you by the curvature in the denominator.</p>`);});
   setHints([`f′(3)=½·27=13.5, f″(3)=1.5·9=13.5, so f′/f″=1.`,`3 − 1 = 2.`]);
 }
 
