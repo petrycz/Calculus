@@ -2177,43 +2177,56 @@ function c7_directional(){
 }
 
 function c7_chainrule(){
-  stage.innerHTML=`<div class="card"><h2>The multivariable chain rule: rates through a path</h2>
-    <p>A quantity often depends on variables that are themselves moving. A hiker's altitude depends on position $(x,y)$; the position depends on time $t$ as they walk. So how fast does altitude change? Below, a point walks the straight path $(x,y)=(t,\\tfrac12 t)$ across the bowl $f=x^2+y^2$ (drawn as contour rings). The <span class="grn">green arrow</span> is the gradient $\\nabla f$; the <span class="cy">blue arrow</span> is the walking velocity $(x',y')=(1,\\tfrac12)$. Drag to move along the path.</p>
+  stage.innerHTML=`<div class="card"><h2>The multivariable chain rule: rates through a graph</h2>
+    <p>One last question closes out this module, and it's the one machine learning is built on. Suppose a single knob $t$ controls two intermediate quantities $x$ and $y$, and those together produce an output $z$. Turn $t$ — how fast does $z$ respond? The wrinkle is that $t$ reaches $z$ by <em>two routes</em> (through $x$, and through $y$), and we'll have to account for both.</p>
+    <p>Here's the setup as a <b>computation graph</b>: $z=xy$, with $x=t^2$ and $y=t$. Each wire is labelled by its own little derivative — how much the top end moves per unit of the bottom end. <b>Drag $t$</b> and watch every value and every wire update, with $dz/dt$ assembled live on the right.</p>
     <canvas id="cv" width="640" height="380"></canvas>
-    <div class="readout"><div class="rdc"><div class="k">t</div><div class="v" id="tv">—</div></div><div class="rdc"><div class="k">(x, y)</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">dz/dt = ∇f·(x′,y′)</div><div class="v" id="zv">—</div></div></div>
-    <div class="task"><b>Rate along the path</b>At $t=1$ the point is $(1,\\tfrac12)$, so $f_x=2x=2$ and $f_y=2y=1$; the velocity is $(x',y')=(1,\\tfrac12)$. Compute $\\dfrac{dz}{dt}=f_x\\,x'+f_y\\,y'$.</div>
-    <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <div class="readout"><div class="rdc"><div class="k">t</div><div class="v" id="tv">—</div></div><div class="rdc"><div class="k">dz/dt (sum of both routes)</div><div class="v" id="dv">—</div></div><div class="rdc"><div class="k">direct check: 3t²</div><div class="v" id="ck">—</div></div></div>
+    <div class="task"><b>Add up the routes</b>At $t=2$: route through $x$ contributes $\\frac{dx}{dt}\\cdot\\frac{\\partial z}{\\partial x}=(2t)(y)=8$; route through $y$ contributes $\\frac{dy}{dt}\\cdot\\frac{\\partial z}{\\partial y}=(1)(x)=4$. What is $dz/dt$?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
 
-    <p style="margin-top:16px"><b>Why the rates add.</b> Take a small time step $dt$. The walker moves $dx=x'\\,dt$ in $x$ and $dy=y'\\,dt$ in $y$. Because near the point the surface is well-approximated by its tangent plane (the same fact behind directional derivatives), the height change is just the two contributions summed — this is the <em>total differential</em>:</p>
-    <div class="eqbox">$dz=f_x\\,dx+f_y\\,dy.$</div>
-    <p>Substitute $dx=x'\\,dt$ and $dy=y'\\,dt$, then divide by $dt$:</p>
-    <div class="eqbox">$\\frac{dz}{dt}=f_x\\,x'+f_y\\,y'=\\nabla f\\cdot(x',y').$</div>
-    <p>Each input feeds its own rate in, weighted by how sensitive $f$ is to it. With $n$ intermediate variables it reads the same way — one product per variable, summed:</p>
-    <div class="eqbox">$\\frac{\\partial z}{\\partial s}=\\sum_{i=1}^{n}\\frac{\\partial z}{\\partial x_i}\\,\\frac{\\partial x_i}{\\partial s}.$</div>
-    <p><b>This is backpropagation.</b> Read it as a graph: to get the rate of $z$ with respect to $s$, walk every path from $s$ to $z$, multiply the derivatives along each path, and add the paths. A neural network is a deep composition $z=f(\\cdots g(\\cdots h(w)))$, and training needs $\\partial(\\text{loss})/\\partial(\\text{each weight})$. The chain rule multiplies each layer's local derivative onto the gradient flowing back from the layer above — reusing the shared pieces instead of recomputing them. The entire training loop is this one rule, run backwards through the graph.</p></div>`;
-  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=78,cx=W/2,cy=H/2;
-  const px=x=>cx+x*S,py=y=>cy-y*S;
-  let t=0.6;
-  function arrow(X0,Y0,X1,Y1,col){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();const a=Math.atan2(Y1-Y0,X1-X0);ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-10*Math.cos(a-0.4),Y1-10*Math.sin(a-0.4));ctx.lineTo(X1-10*Math.cos(a+0.4),Y1-10*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
+    <p style="margin-top:16px"><b>Why you add the routes.</b> Start from the single-variable chain rule: if $z=g(u)$ and $u=h(t)$, then $\\frac{dz}{dt}=\\frac{dz}{du}\\frac{du}{dt}$ — multiply the rates along the one chain. Now the chain <em>forks</em>. Nudge $t$ by a tiny $dt$. It pushes $x$ by $\\frac{dx}{dt}dt$ and, separately, pushes $y$ by $\\frac{dy}{dt}dt$. Each push travels up to $z$:</p>
+    <p>&bull; the $x$-push changes $z$ by $\\frac{\\partial z}{\\partial x}\\cdot\\big(\\frac{dx}{dt}dt\\big)$,</p>
+    <p>&bull; the $y$-push changes $z$ by $\\frac{\\partial z}{\\partial y}\\cdot\\big(\\frac{dy}{dt}dt\\big)$.</p>
+    <p>$z$ feels <em>both</em> at once, and (exactly the tangent-plane additivity from before) the total change is their sum. Divide by $dt$:</p>
+    <div class="eqbox">$$\\frac{dz}{dt}=\\frac{\\partial z}{\\partial x}\\frac{dx}{dt}+\\frac{\\partial z}{\\partial y}\\frac{dy}{dt}.$$</div>
+    <p>Read that off the graph as a recipe: <b>multiply the little derivatives along each route from $t$ to $z$, then add the routes.</b> With $n$ intermediates it's the same, one product per route:</p>
+    <div class="eqbox">$$\\frac{dz}{dt}=\\sum_{i=1}^{n}\\frac{\\partial z}{\\partial x_i}\\frac{dx_i}{dt}.$$</div>
+    <p>Our numbers: route through $x$ gives $(2t)(y)=2t\\cdot t=2t^2$; route through $y$ gives $(1)(x)=t^2$; together $3t^2$, which at $t=2$ is $12$ — and the direct check $z=t^3\\Rightarrow dz/dt=3t^2$ agrees exactly.</p>
+    <p><b>Two things to carry away.</b> First, a tie to the last beat: when $x,y$ are coordinates you're walking, $\\big(\\frac{dx}{dt},\\frac{dy}{dt}\\big)$ is your velocity and $\\big(\\frac{\\partial z}{\\partial x},\\frac{\\partial z}{\\partial y}\\big)=\\nabla z$, so $\\frac{dz}{dt}=\\nabla z\\cdot\\text{velocity}$ — the same dot product, now along a moving path. Second, <b>this is backpropagation.</b> A neural network is one enormous computation graph; the loss depends on each weight through a thicket of routes, and its gradient is found by multiplying local derivatives along routes and summing — swept <em>backward</em> through the graph so a single pass delivers every weight's derivative at once. The whole training loop is this one rule.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
+  let t=2;
+  const NZ=[258,64],NX=[150,196],NY=[366,196],NT=[258,328];
+  function edge(A,B,col){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=2.4;const a=Math.atan2(B[1]-A[1],B[0]-A[0]);const sx=A[0]+28*Math.cos(a),sy=A[1]+28*Math.sin(a),ex=B[0]-28*Math.cos(a),ey=B[1]-28*Math.sin(a);ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(ex,ey);ctx.stroke();ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(ex-10*Math.cos(a-0.4),ey-10*Math.sin(a-0.4));ctx.lineTo(ex-10*Math.cos(a+0.4),ey-10*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
+  function node(P,name,val,col){if(!ctx)return;ctx.fillStyle='#0d1726';ctx.strokeStyle=col||'#3a4c66';ctx.lineWidth=2;ctx.beginPath();ctx.arc(P[0],P[1],28,0,7);ctx.fill();ctx.stroke();ctx.fillStyle='#dbe6f4';ctx.font='600 15px sans-serif';ctx.textAlign='center';ctx.fillText(name,P[0],P[1]-3);ctx.fillStyle='#9fb0c4';ctx.font='12px sans-serif';ctx.fillText(val,P[0],P[1]+14);ctx.textAlign='left';}
+  function lab(x,y,s,col){ctx.fillStyle=col;ctx.font='12px sans-serif';ctx.fillText(s,x,y);}
   function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
-    ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,py(0));ctx.lineTo(W,py(0));ctx.moveTo(px(0),0);ctx.lineTo(px(0),H);ctx.stroke();
-    for(const r of [0.5,1,1.5,2,2.4]){ctx.strokeStyle='#3a4c66';ctx.lineWidth=1.1;ctx.beginPath();for(let i=0;i<=64;i++){const th=i/64*2*Math.PI;const X=px(r*Math.cos(th)),Y=py(r*Math.sin(th));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();}
-    ctx.strokeStyle='#5d7186';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(px(-2),py(-1));ctx.lineTo(px(2),py(1));ctx.stroke();ctx.setLineDash([]);
-    const x=t,y=0.5*t;
-    arrow(px(x),py(y),px(x+2*x*0.18),py(y+2*y*0.18),'#3fb98f');
-    arrow(px(x),py(y),px(x+1*0.5),py(y+0.5*0.5),'#7ab8ff');
-    ctx.fillStyle='#e8b84b';ctx.beginPath();ctx.arc(px(x),py(y),5,0,7);ctx.fill();
-    document.getElementById('tv').textContent=t.toFixed(2);
-    document.getElementById('pv').textContent='('+x.toFixed(2)+', '+y.toFixed(2)+')';
-    document.getElementById('zv').textContent=(2.5*t).toFixed(2);}
+    const x=t*t,y=t,z=x*y,dxdt=2*t,dydt=1,dzdx=y,dzdy=x,pX=dxdt*dzdx,pY=dydt*dzdy,sum=pX+pY,direct=3*t*t;
+    const BL='#7ab8ff',GD='#e8b84b';
+    edge(NT,NX,BL);edge(NX,NZ,BL);   // route via x
+    edge(NT,NY,GD);edge(NY,NZ,GD);   // route via y
+    node(NZ,'z',z.toFixed(0),'#5d7186');node(NX,'x',x.toFixed(0),BL);node(NY,'y',y.toFixed(0),GD);node(NT,'t',t.toFixed(0),'#5d7186');
+    lab(150,268,'dx/dt = '+dxdt.toFixed(0),BL);lab(150,120,'∂z/∂x = '+dzdx.toFixed(0),BL);
+    lab(312,268,'dy/dt = '+dydt.toFixed(0),GD);lab(312,120,'∂z/∂y = '+dzdy.toFixed(0),GD);
+    // right panel assembly
+    ctx.strokeStyle='#1c2838';ctx.beginPath();ctx.moveTo(444,20);ctx.lineTo(444,360);ctx.stroke();
+    lab(456,70,'route via x:',BL);lab(470,92,'(2t)(y) = '+pX.toFixed(0),BL);
+    lab(456,140,'route via y:',GD);lab(470,162,'(1)(x) = '+pY.toFixed(0),GD);
+    ctx.strokeStyle='#2b3a4f';ctx.beginPath();ctx.moveTo(456,186);ctx.lineTo(620,186);ctx.stroke();
+    ctx.fillStyle='#dbe6f4';ctx.font='600 15px sans-serif';ctx.fillText('dz/dt = '+pX.toFixed(0)+' + '+pY.toFixed(0)+' = '+sum.toFixed(0),456,214);
+    ctx.fillStyle=(Math.abs(sum-direct)<1e-9?'#3fb98f':'#c25'); ctx.font='12px sans-serif';ctx.fillText('direct 3t² = '+direct.toFixed(0)+(Math.abs(sum-direct)<1e-9?'  ✓':''),456,238);
+    document.getElementById('tv').textContent=t.toFixed(0);
+    document.getElementById('dv').textContent=sum.toFixed(0);
+    document.getElementById('ck').textContent=direct.toFixed(0);}
   cv.style.touchAction='none';let drg=false;
-  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));t=Math.max(-2,Math.min(2,(X/W*4-2)));draw();}
+  const snap=v=>{const q=Math.round(v);return Math.abs(v-q)<0.18?q:v;};
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));t=Math.max(0,Math.min(3,snap(X/W*3)));draw();}
   cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),2.5,()=>{addReveal(`<div class="rh">✓ 2.5</div><p>$\\frac{dz}{dt}=f_x x'+f_y y'=2\\cdot1+1\\cdot\\tfrac12=2.5$. Equivalently $\\nabla f\\cdot(x',y')=(2,1)\\cdot(1,\\tfrac12)$ — the gradient dotted with the velocity. Drag along the path and the rate scales as $2.5\\,t$; it's zero only at the center, where $\\nabla f=\\mathbf 0$. Stack this rule through many layers and you have backprop.</p>`);});
-  setHints([`dz/dt = f_x·x′ + f_y·y′ with f_x=2, f_y=1, x′=1, y′=½.`,`2·1 + 1·½ = 2 + 0.5 = 2.5.`]);
+  numChk(stage.querySelector('.card'),12,()=>{addReveal(`<div class="rh">✓ dz/dt = 12</div><p>$8+4=12$. You multiplied the little derivatives along each route — $(2t)(y)=8$ through $x$, $(1)(x)=4$ through $y$ — and added them. The direct route $z=t^3\\Rightarrow 3t^2$ gives $12$ too, confirming the rule. Drag $t$ and the two coloured routes keep summing to $3t^2$. Scale this picture up to millions of nodes and you have backprop.</p>`);});
+  setHints([`Multiply along each route, then ADD the routes: 8 (via x) + 4 (via y).`,`8 + 4 = 12.`]);
 }
 
 function c7_taylor(){
@@ -2265,7 +2278,7 @@ function c7_convexity(){
     <div class="entry"><input id="ni" inputmode="text" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
 
     <p style="margin-top:16px"><b>Why the Hessian decides convexity.</b> From the Taylor beat, the curvature along any direction $\\mathbf p$ is $g''(0)=\\mathbf p^{\\mathsf T}H\\mathbf p$. A 1-D function is convex exactly when $g''\\ge0$ (Module 3: non-negative second derivative). A surface is convex when it's convex along <em>every</em> line through it — that is, when</p>
-    <div class="eqbox">$$\\mathbf p^{\\mathsf T}H\\,\\mathbf p\\ge 0\\quad\\text{for every direction }\\mathbf p$$</div>
+    <div class="eqbox">$\\mathbf p^{\\mathsf T}H\\,\\mathbf p\\ge 0\\quad\\text{for every direction }\\mathbf p$</div>
     <p style="text-align:center;margin-top:-6px;color:#9fb0c4">(a <b>positive-semidefinite</b> Hessian)</p>
     <p>For our family this minimum curvature is $2-|c|$, so $f$ is convex until $|c|=2$ and <b>indefinite</b> — a saddle — past it. (That minimum is the smaller eigenvalue of $H$; the full eigenvalue machinery is a linear-algebra topic, but here it's just $2-c$.) Note this is the same $D=4-c^2$ flip as the second-derivative test, seen from the curvature side.</p>
     <p><b>Why saddles dominate in high dimensions.</b> A critical point is a minimum only if the curvature is positive in <em>all</em> $n$ directions — every one of the Hessian's $n$ eigenvalues positive. As $n$ climbs into the millions (a neural network's parameters), getting <em>all</em> of them to line up positive is vanishingly unlikely; generically some are positive and some negative, which is a <b>saddle</b>. So deep-learning loss surfaces are riddled with saddles far more than with bad local minima — and because a saddle still has downhill directions, gradient descent slides off them and keeps going. That realization is a big part of why first-order optimization works as well as it does.</p></div>`;
