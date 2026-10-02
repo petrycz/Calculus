@@ -2070,78 +2070,110 @@ function c7_tangentplane(){
 }
 
 function c7_gradient(){
-  stage.innerHTML=`<div class="card"><h2>The gradient: the direction straight uphill</h2>
-    <p>Stack the two partials into one vector — the <b>gradient</b> $\\nabla f=\\left(\\dfrac{\\partial f}{\\partial x},\\dfrac{\\partial f}{\\partial y}\\right)$. It is not just bookkeeping: the gradient <em>points in the direction of steepest ascent</em>, and its length is that steepest slope. Drag the point over the bowl $f=x^2+y^2$ and watch the gold arrow $\\nabla f=(2x,2y)$ — always aiming directly away from the low point, dead perpendicular to the ring it sits on.</p>
+  stage.innerHTML=`<div class="card"><h2>The gradient: assembling the slopes into an arrow</h2>
+    <p>You now have two separate slopes at every point — $f_x$ (steepness heading east) and $f_y$ (steepness heading north). Bundle them into a single vector and something remarkable falls out. That vector is the <b>gradient</b>:</p>
+    <div class="eqbox">$$\\nabla f=\\Big(\\frac{\\partial f}{\\partial x},\\ \\frac{\\partial f}{\\partial y}\\Big).$$</div>
+    <p>A crucial point up front: the gradient is an arrow drawn <b>on the flat map</b> — in the input plane, where you choose which way to walk — not an arrow on the 3-D surface. Below is the contour map of the bowl $f=x^2+y^2$ (dark = low, bright = high). <b>Drag the point</b> and watch its gradient arrow. Notice two things: it always points <em>straight across the rings toward higher ground</em>, and it's <em>longer where the rings bunch up</em>.</p>
     <canvas id="cv" width="640" height="380"></canvas>
-    <div class="readout"><div class="rdc"><div class="k">∇f = (2x, 2y)</div><div class="v" id="gv">—</div></div><div class="rdc"><div class="k">|∇f| (steepest slope)</div><div class="v" id="gm">—</div></div></div>
-    <div class="task"><b>Magnitude of the gradient</b>For $f=x^2+y^2$, compute $|\\nabla f|$ at the point $(3,4)$.</div>
+    <div class="readout"><div class="rdc"><div class="k">point (x, y)</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">∇f = (2x, 2y)</div><div class="v" id="gv">—</div></div><div class="rdc"><div class="k">steepest slope |∇f|</div><div class="v" id="mv">—</div></div></div>
+    <div class="task"><b>How steep is the steepest climb?</b>For $f=x^2+y^2$, $\\nabla f=(2x,2y)$. At the point $(3,4)$, compute the magnitude $|\\nabla f|=\\sqrt{f_x^{\\,2}+f_y^{\\,2}}$.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
-    <p style="margin-top:16px"><b>Two facts, and why.</b> First, $\\nabla f\\perp$ the level curve: moving <em>along</em> a level curve keeps $f$ constant (zero change), and the gradient is the direction of <em>maximum</em> change — the two are at right angles. Second, its length is the steepest slope. For our bowl:</p>
-    <div class="eqbox">$$\\nabla f=(2x,\\,2y)\\qquad\\Rightarrow\\qquad |\\nabla f|=\\sqrt{(2x)^2+(2y)^2}$$</div>
-    <p>At $(3,4)$: $\\nabla f=(6,8)$, so $|\\nabla f|=\\sqrt{6^2+8^2}=\\sqrt{36+64}=\\sqrt{100}=10$. That $10$ is the slope you'd feel climbing straight uphill from $(3,4)$ — steeper than in any other direction, which the next beat makes precise.</p></div>`;
-  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=30,cx=W/2,cy=H/2;
+
+    <p style="margin-top:16px"><b>Where the magic comes from.</b> Recall the one fact from the tangent-plane beat: a small step $(\\Delta x,\\Delta y)$ changes the height by $f_x\\,\\Delta x+f_y\\,\\Delta y$. That sum <em>is</em> a dot product with the gradient:</p>
+    <div class="eqbox">$$\\Delta f\\;\\approx\\;\\nabla f\\cdot(\\Delta x,\\Delta y).$$</div>
+    <p>Two consequences drop straight out of that one line:</p>
+    <p>&bull; <b>Perpendicular to the contours.</b> Walk <em>along</em> a contour and your height doesn't change, so $\\Delta f=0$, which means $\\nabla f\\cdot(\\text{step along the contour})=0$. A zero dot product means a right angle — so the gradient is perpendicular to the level curve it sits on.</p>
+    <p>&bull; <b>Steepest ascent, and how steep.</b> For a step of fixed length, the dot product $\\nabla f\\cdot(\\text{step})$ is largest when the step points the <em>same way</em> as $\\nabla f$. So the gradient's direction is the steepest-uphill direction, and its length $|\\nabla f|$ is exactly how steep that best climb is — which is why the arrow stretches where the rings crowd together (steep) and shrinks where they spread out (gentle).</p>
+    <p>For our bowl, $\\nabla f=(2x,2y)$ points radially outward, straight away from the low point — the fastest way up the wall. At $(3,4)$ it's $(6,8)$, with $|\\nabla f|=\\sqrt{36+64}=10$. Next we'll ask not just for the steepest direction but for the slope in <em>any</em> direction — and the gradient will answer that too.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=27,cx=W/2,cy=H/2;
+  const f=(x,y)=>x*x+y*y;
   const px=x=>cx+x*S,py=y=>cy-y*S,mx=X=>(X-cx)/S,my=Y=>(cy-Y)/S;
-  let x0=3,y0=4;
+  const LO=[18,30,48],HI=[232,184,75];
+  const col=z=>{const t=Math.max(0,Math.min(1,z/45));return 'rgb('+Math.round(LO[0]+(HI[0]-LO[0])*t)+','+Math.round(LO[1]+(HI[1]-LO[1])*t)+','+Math.round(LO[2]+(HI[2]-LO[2])*t)+')';};
+  let xp=3,yp=4;
+  function arrow(X0,Y0,X1,Y1,col){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();const a=Math.atan2(Y1-Y0,X1-X0);ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-12*Math.cos(a-0.4),Y1-12*Math.sin(a-0.4));ctx.lineTo(X1-12*Math.cos(a+0.4),Y1-12*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
   function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
-    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=-10;g<=10;g++){ctx.beginPath();ctx.moveTo(px(g),0);ctx.lineTo(px(g),H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,py(g));ctx.lineTo(W,py(g));ctx.stroke();}
-    ctx.strokeStyle='#2b3a4f';ctx.beginPath();ctx.moveTo(0,py(0));ctx.lineTo(W,py(0));ctx.moveTo(px(0),0);ctx.lineTo(px(0),H);ctx.stroke();
-    for(const r of [1,2,3,4,5,6]){ctx.strokeStyle='#3a4c66';ctx.lineWidth=1.2;ctx.beginPath();for(let i=0;i<=64;i++){const t=i/64*2*Math.PI;const X=px(r*Math.cos(t)),Y=py(r*Math.sin(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();}
-    const gx=2*x0,gy=2*y0,sc=0.35,X0=px(x0),Y0=py(y0),X1=px(x0+gx*sc),Y1=py(y0+gy*sc);
-    ctx.strokeStyle='#e8b84b';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();
-    const ang=Math.atan2(Y1-Y0,X1-X0);ctx.fillStyle='#e8b84b';ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-11*Math.cos(ang-0.4),Y1-11*Math.sin(ang-0.4));ctx.lineTo(X1-11*Math.cos(ang+0.4),Y1-11*Math.sin(ang+0.4));ctx.closePath();ctx.fill();
-    ctx.fillStyle='#7ab8ff';ctx.beginPath();ctx.arc(X0,Y0,5,0,7);ctx.fill();
+    for(let X=0;X<W;X+=9)for(let Y=0;Y<H;Y+=9){const x=mx(X+4),y=my(Y+4);ctx.fillStyle=col(f(x,y));ctx.fillRect(X,Y,9,9);}
+    for(const h of [4,9,16,25,36]){const r=Math.sqrt(h);ctx.strokeStyle='rgba(220,230,244,0.35)';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<=72;i++){const t=i/72*2*Math.PI;const X=px(r*Math.cos(t)),Y=py(r*Math.sin(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();}
+    // highlight the contour through the point
+    const rp=Math.sqrt(f(xp,yp));if(rp>0.05){ctx.strokeStyle='rgba(220,230,244,0.75)';ctx.lineWidth=1.6;ctx.beginPath();for(let i=0;i<=72;i++){const t=i/72*2*Math.PI;const X=px(rp*Math.cos(t)),Y=py(rp*Math.sin(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();}
+    const gx=2*xp,gy=2*yp,k=0.3;
+    arrow(px(xp),py(yp),px(xp+k*gx),py(yp+k*gy),'#3fb98f');
+    ctx.fillStyle='#fff';ctx.strokeStyle='#0a111b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(px(xp),py(yp),5,0,7);ctx.fill();ctx.stroke();
+    document.getElementById('pv').textContent='('+xp.toFixed(1)+', '+yp.toFixed(1)+')';
     document.getElementById('gv').textContent='('+gx.toFixed(1)+', '+gy.toFixed(1)+')';
-    document.getElementById('gm').textContent=Math.sqrt(gx*gx+gy*gy).toFixed(2);}
-  let drg=false;cv.style.touchAction='none';
-  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));x0=Math.max(-8,Math.min(8,mx(X)));y0=Math.max(-5.5,Math.min(5.5,my(Y)));draw();}
+    document.getElementById('mv').textContent=Math.sqrt(gx*gx+gy*gy).toFixed(2);}
+  cv.style.touchAction='none';let drg=false;
+  const snap=v=>{const q=Math.round(v);return Math.abs(v-q)<0.18?q:v;};
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));xp=Math.max(-10,Math.min(10,snap(mx(X))));yp=Math.max(-6,Math.min(6,snap(my(Y))));draw();}
   cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),10,()=>{addReveal(`<div class="rh">✓ 10</div><p>$\\nabla f(3,4)=(6,8)$ and $|\\nabla f|=\\sqrt{36+64}=10$. The arrow points radially outward — straight uphill on the bowl — and crosses every ring at a right angle. The gradient is the single most important object in this module: it's what optimization follows, and in machine learning, what training descends.</p>`);});
-  setHints([`∇f = (2x, 2y). At (3,4) that's (6,8). Its length is √(6²+8²).`,`√(36+64) = √100 = 10.`]);
+  numChk(stage.querySelector('.card'),10,()=>{addReveal(`<div class="rh">✓ |∇f| = 10</div><p>$\\nabla f=(2\\cdot3,\\,2\\cdot4)=(6,8)$, so $|\\nabla f|=\\sqrt{6^2+8^2}=\\sqrt{100}=10$ — a $3$-$4$-$5$ triangle scaled up. That arrow points straight out across the rings (perpendicular to the contour through $(3,4)$), and $10$ is the slope you'd feel climbing that steepest way. Drag toward the center and the arrow shrinks to nothing: at the flat valley floor there's no uphill at all.</p>`);});
+  setHints([`∇f = (2x, 2y) = (6, 8) at (3,4). Magnitude = √(6²+8²).`,`√(36+64) = √100 = 10.`]);
 }
 
 function c7_directional(){
-  stage.innerHTML=`<div class="card"><h2>Directional derivatives: slope in any direction</h2>
-    <p>Partials give the slope along the $x$- and $y$-axes, but you can walk in <em>any</em> direction $\\mathbf u=(\\cos\\theta,\\sin\\theta)$. The <b>directional derivative</b> $D_{\\mathbf u}f$ is the slope you feel heading that way. Fix the point $(3,4)$ on the bowl and drag to aim $\\mathbf u$; watch the slope swing from steepest to zero to downhill.</p>
+  stage.innerHTML=`<div class="card"><h2>Directional derivatives: the slope in <em>any</em> direction</h2>
+    <p>The gradient told you the <em>steepest</em> way up and how steep it is. But you don't always get to walk the steepest way — sometimes you're forced along a road, a ridge, a chosen heading. The <b>directional derivative</b> answers: if I step in direction $\\mathbf u$, how fast does the height change per step?</p>
+    <p>Below, the point sits at $(3,4)$ on $f=x^2+y^2$, with its <span class="grn">gradient</span> $(6,8)$ fixed. <b>Drag to swing the <span class="cy">blue direction arrow</span></b> $\\mathbf u$ around, and read the slope in that direction on the right. Watch it peak when $\\mathbf u$ lines up with the gradient, pass through zero when $\\mathbf u$ runs along the contour, and go negative when you head downhill.</p>
     <canvas id="cv" width="640" height="380"></canvas>
-    <div class="readout"><div class="rdc"><div class="k">direction angle</div><div class="v" id="av">—</div></div><div class="rdc"><div class="k">Dᵤf = ∇f · u</div><div class="v" id="dv">—</div></div></div>
-    <div class="task"><b>Slope along the x-axis</b>At $(3,4)$ with $\\nabla f=(6,8)$, what is $D_{\\mathbf u}f$ in the direction $\\mathbf u=(1,0)$ (straight along $+x$)?</div>
+    <div class="readout"><div class="rdc"><div class="k">direction</div><div class="v" id="th">—</div></div><div class="rdc"><div class="k">slope D&#7524;f = ∇f·u</div><div class="v" id="dv">—</div></div><div class="rdc"><div class="k">vs. steepest |∇f|</div><div class="v" id="mx">= 10</div></div></div>
+    <div class="task"><b>Slope heading due east</b>At $(3,4)$, $\\nabla f=(6,8)$. Step in the unit direction $\\mathbf u=(1,0)$ (straight along $+x$). Compute $D_{\\mathbf u}f=\\nabla f\\cdot\\mathbf u$.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
-    <p style="margin-top:16px"><b>Deriving the formula.</b> Moving in direction $\\mathbf u=(u_1,u_2)$ from the point $P=(x_0,y_0)$ means walking along the line $P+t\\mathbf u$ and watching $f$. So the directional derivative is just the ordinary derivative of the single-variable function $g(t)=f(x_0+tu_1,\\,y_0+tu_2)$ at $t=0$:</p>
-    <div class="eqbox">$$D_{\\mathbf u}f=g'(0),\\qquad g(t)=f(x_0+tu_1,\\;y_0+tu_2)$$</div>
-    <p>Over a tiny step $dt$, the inputs move by $dx=u_1\\,dt$ and $dy=u_2\\,dt$. Each partial is exactly the rate of change of $f$ per unit step in its own variable, so the two contributions to the change in $f$ add:</p>
-    <div class="eqbox">$$df=\\frac{\\partial f}{\\partial x}\\,dx+\\frac{\\partial f}{\\partial y}\\,dy=\\big(f_x\\,u_1+f_y\\,u_2\\big)\\,dt$$</div>
-    <p>(This is the multivariable chain rule, and it holds because near $P$ the surface is well-approximated by its tangent plane $f\\approx f(P)+f_x\\,dx+f_y\\,dy$ — the linear contributions from each direction simply sum.) Divide by $dt$ and recognize a dot product:</p>
-    <div class="eqbox">$$D_{\\mathbf u}f=f_x u_1+f_y u_2=\\nabla f\\cdot\\mathbf u=|\\nabla f|\\,|\\mathbf u|\\cos\\phi=|\\nabla f|\\cos\\phi$$</div>
-    <p>using $|\\mathbf u|=1$, where $\\phi$ is the angle between $\\mathbf u$ and $\\nabla f$. That $\\cos\\phi$ says it all: the slope is <b>largest</b> when $\\mathbf u$ points along $\\nabla f$ ($\\cos\\phi=1$, giving $|\\nabla f|$), <b>zero</b> when $\\mathbf u\\perp\\nabla f$ (along a level curve), and <b>most negative</b> straight opposite. So the gradient really is the steepest-ascent direction. For $\\mathbf u=(1,0)$: $D_{\\mathbf u}f=(6,8)\\cdot(1,0)=6$ — just $\\partial f/\\partial x$, as it must be.</p></div>`;
-  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=30,cx=W/2,cy=H/2;
-  const px=x=>cx+x*S,py=y=>cy-y*S,mx=X=>(X-cx)/S,my=Y=>(cy-Y)/S;
-  const x0=3,y0=4,gx=2*x0,gy=2*y0;let th=0.2;
+
+    <p style="margin-top:16px"><b>Deriving the rule.</b> Take a small step of length $t$ in the unit direction $\\mathbf u=(\\cos\\theta,\\sin\\theta)$, so $\\Delta x=t\\cos\\theta$ and $\\Delta y=t\\sin\\theta$. From the tangent plane, the height change is $\\Delta f\\approx f_x\\,\\Delta x+f_y\\,\\Delta y=t\\,(f_x\\cos\\theta+f_y\\sin\\theta)$. The rate <em>per unit distance</em> is $\\Delta f/t$:</p>
+    <div class="eqbox">$$D_{\\mathbf u}f=f_x\\cos\\theta+f_y\\sin\\theta=\\nabla f\\cdot\\mathbf u.$$</div>
+    <p>The slope in any direction is just the gradient dotted with that direction. One caution: $\\mathbf u$ must be a <b>unit</b> vector, so the answer is "per unit distance." If a direction is handed to you as a longer vector $\\mathbf v$, shrink it first — use $\\mathbf u=\\mathbf v/|\\mathbf v|$.</p>
+    <p><b>The cosine picture.</b> A dot product is $\\nabla f\\cdot\\mathbf u=|\\nabla f|\\,|\\mathbf u|\\cos\\varphi$, and $|\\mathbf u|=1$, so</p>
+    <div class="eqbox">$$D_{\\mathbf u}f=|\\nabla f|\\cos\\varphi,\\qquad \\varphi=\\text{angle between }\\mathbf u\\text{ and }\\nabla f.$$</div>
+    <p>That single formula contains the whole last beat plus more — it's the curve plotted on the right as you spin $\\mathbf u$:</p>
+    <p>&bull; $\\varphi=0^\\circ$ (along $\\nabla f$): $\\cos\\varphi=1$, rate $=|\\nabla f|=10$ — the steepest climb.</p>
+    <p>&bull; $\\varphi=90^\\circ$ (along the contour): $\\cos\\varphi=0$, rate $=0$ — no height change, which is exactly why $\\nabla f$ is perpendicular to the level curve.</p>
+    <p>&bull; $\\varphi=180^\\circ$ (opposite $\\nabla f$): $\\cos\\varphi=-1$, rate $=-|\\nabla f|=-10$ — the steepest <em>descent</em>, the direction $-\\nabla f$ that gradient descent will ride downhill.</p>
+    <p>For the task, due east $\\mathbf u=(1,0)$ gives $D_{\\mathbf u}f=(6,8)\\cdot(1,0)=6$ — less than the steepest $10$, because east isn't quite the uphill direction. This one dot product is the engine of the next beat: the chain rule threads exactly these rates through a path that is itself moving.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
+  const gx=6,gy=8,gmag=10,x0=3,y0=4;
+  const SL=17,cxL=158,cyL=196;const PLx=x=>cxL+x*SL,PLy=y=>cyL-y*SL;
+  const thg=Math.atan2(gy,gx);
+  let th=0;
+  function arrow(X0,Y0,X1,Y1,col,w){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=w||3;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();const a=Math.atan2(Y1-Y0,X1-X0);ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-11*Math.cos(a-0.4),Y1-11*Math.sin(a-0.4));ctx.lineTo(X1-11*Math.cos(a+0.4),Y1-11*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
   function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
-    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=-10;g<=10;g++){ctx.beginPath();ctx.moveTo(px(g),0);ctx.lineTo(px(g),H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,py(g));ctx.lineTo(W,py(g));ctx.stroke();}
-    ctx.strokeStyle='#2b3a4f';ctx.beginPath();ctx.moveTo(0,py(0));ctx.lineTo(W,py(0));ctx.moveTo(px(0),0);ctx.lineTo(px(0),H);ctx.stroke();
-    for(const r of [1,2,3,4,5,6]){ctx.strokeStyle='#3a4c66';ctx.lineWidth=1.2;ctx.beginPath();for(let i=0;i<=64;i++){const t=i/64*2*Math.PI;const X=px(r*Math.cos(t)),Y=py(r*Math.sin(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();}
-    const X0=px(x0),Y0=py(y0);
-    // faint gradient arrow
-    const gsc=0.32;ctx.strokeStyle='rgba(232,184,75,0.45)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(px(x0+gx*gsc),py(y0+gy*gsc));ctx.stroke();
-    // direction u arrow (length 2 units)
-    const ux=Math.cos(th),uy=Math.sin(th),L=2.2,X1=px(x0+ux*L),Y1=py(y0+uy*L);
-    ctx.strokeStyle='#3fb98f';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();
-    const ang=Math.atan2(Y1-Y0,X1-X0);ctx.fillStyle='#3fb98f';ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-11*Math.cos(ang-0.4),Y1-11*Math.sin(ang-0.4));ctx.lineTo(X1-11*Math.cos(ang+0.4),Y1-11*Math.sin(ang+0.4));ctx.closePath();ctx.fill();
-    ctx.fillStyle='#7ab8ff';ctx.beginPath();ctx.arc(X0,Y0,5,0,7);ctx.fill();
-    const Du=gx*ux+gy*uy;
-    document.getElementById('av').textContent=(th*180/Math.PI).toFixed(0)+'°';
-    document.getElementById('dv').textContent=Du.toFixed(2);}
-  let drg=false;cv.style.touchAction='none';
-  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));th=Math.atan2(my(Y)-y0,mx(X)-x0);draw();}
+    // left: contour circles
+    ctx.fillStyle='#7f93a8';ctx.font='12px sans-serif';ctx.fillText('the map at (3,4)',16,22);
+    for(const r of [2,3,4,5,6]){ctx.strokeStyle=r===5?'rgba(220,230,244,0.7)':'rgba(220,230,244,0.28)';ctx.lineWidth=r===5?1.6:1;ctx.beginPath();for(let i=0;i<=72;i++){const t=i/72*2*Math.PI;const X=PLx(r*Math.cos(t)),Y=PLy(r*Math.sin(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();}
+    const Px=PLx(x0),Py=PLy(y0);
+    arrow(Px,Py,PLx(x0+0.26*gx),PLy(y0+0.26*gy),'#3fb98f',3);
+    const ux=Math.cos(th),uy=Math.sin(th);
+    arrow(Px,Py,PLx(x0+2.2*ux),PLy(y0+2.2*uy),'#7ab8ff',3);
+    ctx.fillStyle='#fff';ctx.strokeStyle='#0a111b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(Px,Py,5,0,7);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#3fb98f';ctx.font='11px sans-serif';ctx.fillText('∇f',PLx(x0+0.26*gx)+4,PLy(y0+0.26*gy));
+    ctx.fillStyle='#7ab8ff';ctx.fillText('u',PLx(x0+2.2*ux)+4,PLy(y0+2.2*uy));
+    // divider
+    ctx.strokeStyle='#1c2838';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(314,10);ctx.lineTo(314,370);ctx.stroke();
+    // right: slope vs angle
+    ctx.fillStyle='#7f93a8';ctx.fillText('slope in direction u, as u turns',326,22);
+    const RX=t=>326+t/(2*Math.PI)*300, RD=dd=>200-dd/11*150;
+    ctx.strokeStyle='#243347';ctx.lineWidth=1;ctx.strokeRect(326,RD(11),300,RD(-11)-RD(11));
+    ctx.strokeStyle='#2b3a4f';ctx.beginPath();ctx.moveTo(326,RD(0));ctx.lineTo(626,RD(0));ctx.stroke();
+    const D=t=>gx*Math.cos(t)+gy*Math.sin(t);
+    ctx.strokeStyle='#e8b84b';ctx.lineWidth=2.4;ctx.beginPath();for(let i=0;i<=120;i++){const t=i/120*2*Math.PI;const X=RX(t),Y=RD(D(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();
+    ctx.fillStyle='#5d7186';ctx.font='10px sans-serif';ctx.fillText('+10',300,RD(10)+3);ctx.fillText('0',312,RD(0)+3);ctx.fillText('−10',298,RD(-10)+3);
+    const cx1=RX(th),cy1=RD(D(th));ctx.strokeStyle='rgba(122,184,255,0.5)';ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(cx1,RD(11));ctx.lineTo(cx1,RD(-11));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#7ab8ff';ctx.beginPath();ctx.arc(cx1,cy1,5,0,7);ctx.fill();
+    const dval=D(th),deg=((th*180/Math.PI)%360+360)%360;
+    document.getElementById('th').textContent=deg.toFixed(0)+'°';
+    document.getElementById('dv').textContent=dval.toFixed(2);}
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));
+    if(X<314){th=Math.atan2(PLy(y0)-Y,X-PLx(x0));}else{th=Math.max(0,Math.min(2*Math.PI,(X-326)/300*2*Math.PI));}draw();}
   cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),6,()=>{addReveal(`<div class="rh">✓ 6</div><p>$D_{\\mathbf u}f=(6,8)\\cdot(1,0)=6$ — the same as $\\partial f/\\partial x$, since $\\mathbf u=(1,0)$ is the $x$-direction. Swing $\\mathbf u$ around and the readout peaks at $|\\nabla f|=10$ (pointing along the gradient), passes through $0$ when $\\mathbf u$ runs along a ring, and bottoms at $-10$ pointing downhill. Steepest ascent is the gradient — full stop.</p>`);});
-  setHints([`Dᵤf = ∇f · u = (6,8)·(1,0) = 6·1 + 8·0.`,`= 6.`]);
+  numChk(stage.querySelector('.card'),6,()=>{addReveal(`<div class="rh">✓ D&#7524;f = 6</div><p>$\\nabla f\\cdot\\mathbf u=(6,8)\\cdot(1,0)=6$. East is a decent climb, but not the best — swing $\\mathbf u$ toward the gradient (about $53^\\circ$) and the slope rises to its max $10$; turn it along the contour and the slope hits $0$; point it toward the valley and you get $-10$, the steepest way down. The right-hand curve is $|\\nabla f|\\cos\\varphi$, tracing every direction at once.</p>`);});
+  setHints([`D_u f = ∇f·u = (6,8)·(1,0). A dot product multiplies matching components and adds.`,`6·1 + 8·0 = 6.`]);
 }
 
 function c7_chainrule(){
