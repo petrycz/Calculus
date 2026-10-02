@@ -148,7 +148,7 @@ const MODULES=[
   beats:[c7_recall,c7_intro,c7_partials,c7_tangentplane,c7_gradient,c7_directional,c7_chainrule,c7_problems,c7_recap]},
  {id:'c8',title:'Multivariable Optimization',sub:'Critical points and gradient descent, the local quadratic model and the Hessian, the second-derivative test, convexity, Newton’s method, and Lagrange multipliers.',ready:true,
   outro:`Optimization is calculus hunting for the best point: $\\nabla f=\\mathbf 0$ locates the flat spots, the Taylor quadratic model and its Hessian say whether each is a bowl, dome, or saddle, convexity guarantees a single global minimum, gradient descent and Newton’s method walk to it, and Lagrange multipliers handle a constraint. This is the mathematical core of training a model.`,
-  beats:[c7_critical,c7_taylor,c7_secondderiv,c7_convexity,c7_newton,c7_lagrange]},
+  beats:[c7_critical,c7_graddescent,c7_taylor,c7_secondderiv,c7_convexity,c7_newton,c7_lagrange]},
  {id:'c9',title:'Multiple Integrals',sub:'Double integrals as volume, iterated integrals and Fubini, polar coordinates, and change of variables via the Jacobian.',ready:true,
   outro:`A double integral accumulates a function over a 2-D region — volume under a surface — computed as iterated single integrals (Fubini). Polar coordinates and the general change of variables, with its Jacobian area factor, make round and warped regions tractable.`,
   beats:[c7_doubleint,c7_iterated,c7_polar,c7_jacobian]},
@@ -2376,6 +2376,58 @@ function c7_critical(){
   draw();
   numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ x = 1</div><p>$3x^2-3=0\\Rightarrow x^2=1\\Rightarrow x=\\pm1$, and $y=0$, so the critical points are $(1,0)$ and $(-1,0)$ — both answers matter (don't drop the negative root). On the map, $(1,0)$ sits in the dark basin (a minimum) while $(-1,0)$ is a saddle: slide away from it along $y$ and the ground falls, along $x$ and it climbs. Same zero gradient, completely different places — which is why we still need a test to tell them apart.</p>`);});
   setHints([`Both components of ∇f must be zero. Solve 3x²−3 = 0.`,`x² = 1, so the positive root is x = 1 (the other is −1).`]);
+}
+
+function c7_graddescent(){
+  stage.innerHTML=`<div class="card"><h2>Gradient descent: walking to the bottom</h2>
+    <p>Finding critical points by hand means solving $\\nabla f=\\mathbf 0$ — fine for a textbook, hopeless for a loss surface with a million variables. So instead of <em>solving</em>, we <em>walk</em>: stand somewhere, look for the downhill direction, take a step, repeat. The gradient hands us the direction for free.</p>
+    <p>From the directional-derivative beat, the steepest-<em>descent</em> direction is $-\\nabla f$ (the gradient points steepest uphill, so its negative points steepest down). Take a step that way, scaled by a number $\\alpha$ — the <b>learning rate</b> — and repeat:</p>
+    <div class="eqbox">$\\mathbf x_{\\text{next}}=\\mathbf x-\\alpha\\,\\nabla f(\\mathbf x).$</div>
+    <p>Below, descent runs on the bowl $f=x^2+y^2$ from the same start each time. <b>Drag left/right to change the learning rate $\\alpha$</b> and watch the whole path change character.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <div class="readout"><div class="rdc"><div class="k">learning rate α</div><div class="v" id="av">—</div></div><div class="rdc"><div class="k">step 1 lands at</div><div class="v" id="s1">—</div></div><div class="rdc"><div class="k">outcome</div><div class="v" id="st">—</div></div></div>
+    <div class="task"><b>Take one step by hand</b>From the start $(4,3)$ with $\\alpha=0.1$ and $\\nabla f=(2x,2y)$, apply $x_{\\text{next}}=x-\\alpha\\,f_x$. What is the new $x$-coordinate?</div>
+    <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>The one knob that matters.</b> The step size $\\alpha$ is the whole game, and the canvas shows why:</p>
+    <p>&bull; <b>Too small</b> (drag left): correct direction, but tiny steps — the path crawls and takes forever to arrive.</p>
+    <p>&bull; <b>Too large</b> (drag right): you leap clear past the bottom and land on the far wall, bouncing back and forth across the valley — and if $\\alpha$ is large enough the bounces <em>grow</em> and the path explodes to infinity.</p>
+    <p>&bull; <b>Just right</b> (the middle): a few brisk steps straight into the minimum. Tuning this number is the single most fiddled-with dial in all of machine learning.</p>
+    <p><b>Why it settles.</b> Near the bottom the gradient shrinks toward $\\mathbf 0$, so the steps $\\alpha\\nabla f$ automatically shrink too — the walk eases to a stop instead of rattling around (as long as $\\alpha$ isn't too big).</p>
+    <p><b>One honest caveat.</b> Descent only ever walks <em>downhill from where it started</em>, so it finds a <em>local</em> minimum — the valley you happen to be standing in. On a landscape with several valleys, a different starting point can land you in a different one. (On a <em>convex</em> bowl there's only one valley, so it's also the global best — which is the next topic but one.)</p>
+    <p><b>This is how models train.</b> A neural network's loss is a surface over millions of weights. Each training step: compute $\\nabla(\\text{loss})$ by backprop (last module's chain rule), then take one gradient-descent step. Repeat millions of times. Fancier optimizers — momentum, Adam — are just cleverer ways to choose each step, but the skeleton is this exact line.</p></div>`;
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=33,cx=320,cy=190;
+  const px=x=>cx+x*S,py=y=>cy-y*S;
+  let alpha=0.2;
+  function run(a){let x=4,y=3;const pts=[[x,y]];let steps=0,out='';
+    for(let i=0;i<70;i++){x-=a*2*x;y-=a*2*y;pts.push([x,y]);steps++;const d=Math.hypot(x,y);if(d<0.03){break;}if(d>90){break;}}
+    const r=Math.abs(1-2*a);const last=Math.hypot(pts[pts.length-1][0],pts[pts.length-1][1]);
+    if(a>1.0001&&last>5)out='diverging → ∞';
+    else if(r>0.999&&r<1.001)out='bouncing forever';
+    else if(last<0.05)out='converged in '+steps+' steps';
+    else out='converging (slowly)';
+    return {pts,out};}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    for(const rr of [1,2,3,4,5]){ctx.strokeStyle='rgba(122,150,190,0.22)';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<=72;i++){const t=i/72*2*Math.PI;const X=px(rr*Math.cos(t)),Y=py(rr*Math.sin(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();}
+    ctx.fillStyle='#3fb98f';ctx.beginPath();ctx.arc(px(0),py(0),4,0,7);ctx.fill();
+    ctx.fillStyle='#5d7186';ctx.font='11px sans-serif';ctx.fillText('min',px(0)+7,py(0)+4);
+    const {pts,out}=run(alpha);
+    ctx.strokeStyle='#e8b84b';ctx.lineWidth=1.6;ctx.beginPath();pts.forEach((p,i)=>{const X=px(p[0]),Y=py(p[1]);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);});ctx.stroke();
+    pts.forEach((p,i)=>{if(i===0)return;ctx.fillStyle='rgba(232,184,75,0.9)';ctx.beginPath();ctx.arc(px(p[0]),py(p[1]),2.6,0,7);ctx.fill();});
+    ctx.fillStyle='#fff';ctx.strokeStyle='#0a111b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(px(4),py(3),5,0,7);ctx.fill();ctx.stroke();
+    ctx.fillStyle='#9fb0c4';ctx.font='11px sans-serif';ctx.fillText('start (4,3)',px(4)+8,py(3)-6);
+    const nx=4-alpha*8,ny=3-alpha*6;
+    document.getElementById('av').textContent=alpha.toFixed(2);
+    document.getElementById('s1').textContent='('+nx.toFixed(2)+', '+ny.toFixed(2)+')';
+    document.getElementById('st').textContent=out;}
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));alpha=Math.max(0.05,Math.min(1.15,0.05+X/W*1.10));draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),3.2,()=>{addReveal(`<div class="rh">✓ x = 3.2</div><p>$x_{\\text{next}}=4-0.1\\cdot(2\\cdot4)=4-0.8=3.2$ (and $y$ goes $3-0.1\\cdot6=2.4$). One nudge straight toward the center; repeat and it homes in on $(0,0)$. On the canvas, small $\\alpha$ makes a long trail of tiny steps, a middling $\\alpha$ dives straight in, and pushing $\\alpha$ past $1$ sends the path bouncing outward to infinity — the learning rate, in one picture.</p>`);},s=>parseFloat(s));
+  setHints([`x_next = x − α·f_x = 4 − 0.1·(2·4).`,`4 − 0.1·8 = 4 − 0.8 = 3.2.`]);
 }
 
 function c7_secondderiv(){
