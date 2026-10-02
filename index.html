@@ -2454,23 +2454,36 @@ function c7_graddescent(){
 
 function c7_secondderiv(){
   stage.innerHTML=`<div class="card"><h2>The second-derivative test: min, max, or saddle</h2>
-    <p>We can find flat spots ($\\nabla f=\\mathbf 0$) and we can measure curvature (the Hessian). Put them together. From the quadratic model, at a critical point the gradient term drops out, so right around it the surface is pure curvature:</p>
-    <div class="eqbox">$$f(P+\\mathbf p)\\approx f(P)+\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\,\\mathbf p.$$</div>
-    <p>So the <em>type</em> of the critical point is decided entirely by the curvature form $Q(\\mathbf p)=\\mathbf p^{\\mathsf T}H\\mathbf p$: if it's positive for <em>every</em> direction $\\mathbf p$, the surface rises whichever way you leave $P$ — a <b>minimum</b>; negative every way — a <b>maximum</b>; positive some ways and negative others — a <b>saddle</b>. Below is $f=x^2+c\\,xy+y^2$; <span class="cy">blue</span> marks where it rises above the flat tangent plane, <span style="color:#e8b84b">gold</span> where it dips below. <b>Drag $c$</b> and watch an all-blue bowl tip over into a two-toned saddle.</p>
+    <p>We can find flat spots ($\\nabla f=\\mathbf 0$) and we can measure curvature (the Hessian). Put them together. The quadratic model says that near any point $P$,</p>
+    <div class="eqbox">$$f(P+\\mathbf p)\\approx f(P)+\\nabla f\\cdot\\mathbf p+\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\,\\mathbf p.$$</div>
+    <p>At a <em>critical</em> point the gradient is zero, $\\nabla f=\\mathbf 0$, so the entire linear term disappears — $\\nabla f\\cdot\\mathbf p=\\mathbf 0\\cdot\\mathbf p=0$ — and the surface, measured from $P$, is pure curvature:</p>
+    <div class="eqbox">$$f(P+\\mathbf p)-f(P)\\approx \\tfrac12\\,\\mathbf p^{\\mathsf T}H\\,\\mathbf p.$$</div>
+    <p>So whether you end up <em>higher</em> or <em>lower</em> than $P$ after a small step $\\mathbf p$ is decided entirely by the sign of the quadratic form $Q(\\mathbf p)=\\mathbf p^{\\mathsf T}H\\mathbf p$: positive for every direction $\\Rightarrow$ you rise whichever way you go $\\Rightarrow$ a <b>minimum</b>; negative every way $\\Rightarrow$ a <b>maximum</b>; positive some ways and negative others $\\Rightarrow$ a <b>saddle</b>. Below is $f=x^2+c\\,xy+y^2$; <span class="cy">blue</span> marks where it rises above the flat tangent plane, <span style="color:#e8b84b">gold</span> where it dips below. <b>Drag $c$</b> and watch the all-blue bowl tip into a two-toned saddle.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <p class="small" id="obs" style="margin-top:8px;color:#9fb0c4"></p>
-    <div class="readout"><div class="rdc"><div class="k">c</div><div class="v" id="cv0">—</div></div><div class="rdc"><div class="k">D = f&#8339;&#8339;·f&#7527;&#7527; − f&#8339;&#7527;²</div><div class="v" id="dv">—</div></div><div class="rdc"><div class="k">verdict</div><div class="v" id="vd">—</div></div></div>
-    <div class="task"><b>Compute the deciding number</b>For $f=x^2+xy+y^2$ ($c=1$): $f_{xx}=2$, $f_{yy}=2$, $f_{xy}=1$. Evaluate the discriminant $D=f_{xx}f_{yy}-f_{xy}^{\\,2}$.</div>
+    <div class="readout"><div class="rdc"><div class="k">c</div><div class="v" id="cv0">—</div></div><div class="rdc"><div class="k">D = det H</div><div class="v" id="dv">—</div></div><div class="rdc"><div class="k">verdict</div><div class="v" id="vd">—</div></div></div>
+    <div class="task"><b>Compute the deciding number</b>For $f=x^2+xy+y^2$ ($c=1$): $f_{xx}=2$, $f_{yy}=2$, $f_{xy}=1$. Evaluate $D=f_{xx}f_{yy}-f_{xy}^{\\,2}$.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
 
-    <p style="margin-top:16px"><b>Why checking $f_{xx}$ and $f_{yy}$ isn't enough.</b> The tempting shortcut is to look at the two straight-ahead curvatures $f_{xx}$ and $f_{yy}$. But on the surface above, $f_{xx}=f_{yy}=2&gt;0$ for <em>every</em> $c$ — yet past $c=2$ it's clearly a saddle. The cross term $2f_{xy}\\,xy$ can drag the curvature negative along a <em>diagonal</em> even while both axis-curvatures stay positive. All three second partials have to be weighed together.</p>
-    <p><b>Completing the square.</b> Write $A=f_{xx}$, $B=f_{xy}$, $C=f_{yy}$ (take $A\\neq0$), so $Q=A\\,\\Delta x^2+2B\\,\\Delta x\\Delta y+C\\,\\Delta y^2$. Pull $A$ out of the $\\Delta x$ terms and complete the square:</p>
-    <div class="eqbox">$$Q=A\\Big(\\Delta x+\\tfrac{B}{A}\\Delta y\\Big)^2+\\Big(C-\\tfrac{B^2}{A}\\Big)\\Delta y^2=A\\Big(\\Delta x+\\tfrac{B}{A}\\Delta y\\Big)^2+\\frac{AC-B^2}{A}\\,\\Delta y^2.$$</div>
-    <p>Now $Q$ is a sum of two <em>squares</em>, weighted by $A$ and by $\\dfrac{AC-B^2}{A}$. Everything hinges on the number $D=AC-B^2=f_{xx}f_{yy}-f_{xy}^{\\,2}$:</p>
-    <p>&bull; <b>$D&gt;0$:</b> the second weight shares $A$'s sign, so both squares carry that sign and $Q$ is one-signed. If $f_{xx}&gt;0$ it's a <b>minimum</b>; if $f_{xx}&lt;0$, a <b>maximum</b>.</p>
-    <p>&bull; <b>$D&lt;0$:</b> the two weights have opposite signs, so $Q$ is positive one way and negative another — a <b>saddle</b>.</p>
-    <p>&bull; <b>$D=0$:</b> a weight vanishes; $Q$ is flat along a whole direction and the test is <b>inconclusive</b> (higher-order terms decide).</p>
-    <p>For our family $A=C=2,\\ B=c$, so $D=4-c^2$ — positive (bowl) until $c=2$, negative (saddle) after, exactly the tip-over you dragged through. Two footnotes that pay off soon: $D$ is the <em>determinant</em> of $H$, and it equals the product of $H$'s two eigenvalues — the curvatures along its special perpendicular directions — so $D&gt;0$ means they share a sign (both up, or both down) and $D&lt;0$ means they disagree. And "$D&gt;0$ with $f_{xx}&gt;0$" is exactly the Hessian being <b>positive-definite</b> — the clean local bowl that makes gradient descent behave.</p></div>`;
+    <p style="margin-top:16px"><b>Why $f_{xx}$ and $f_{yy}$ alone aren't enough.</b> The tempting shortcut is to read off the two straight-ahead curvatures $f_{xx}$ (along $x$) and $f_{yy}$ (along $y$). But on the surface above, $f_{xx}=f_{yy}=2&gt;0$ for <em>every</em> $c$ — yet past $c=2$ it's clearly a saddle. The cross term $2f_{xy}\\,\\Delta x\\Delta y$ can drag the curvature negative along a <em>diagonal</em> even while both axis-curvatures stay positive, so all three second partials must be weighed together.</p>
+
+    <p><b>Completing the square, step by step.</b> Write $A=f_{xx}$, $B=f_{xy}$, $C=f_{yy}$, and expand the quadratic form:</p>
+    <div class="eqbox">$$Q=A\\,\\Delta x^2+2B\\,\\Delta x\\Delta y+C\\,\\Delta y^2.$$</div>
+    <p>The goal is to rewrite this as a <b>sum of squares</b>, because the sign of a square is obvious. Factor $A$ out of the two terms that contain $\\Delta x$:</p>
+    <div class="eqbox">$$Q=A\\Big(\\Delta x^2+\\tfrac{2B}{A}\\Delta x\\Delta y\\Big)+C\\,\\Delta y^2.$$</div>
+    <p>Inside the bracket, add and subtract $\\big(\\tfrac{B}{A}\\Delta y\\big)^2$ to complete the square — $\\Delta x^2+\\tfrac{2B}{A}\\Delta x\\Delta y=\\big(\\Delta x+\\tfrac{B}{A}\\Delta y\\big)^2-\\tfrac{B^2}{A^2}\\Delta y^2$:</p>
+    <div class="eqbox">$$Q=A\\Big(\\Delta x+\\tfrac{B}{A}\\Delta y\\Big)^2-\\tfrac{B^2}{A}\\Delta y^2+C\\,\\Delta y^2.$$</div>
+    <p>Collect the two $\\Delta y^2$ terms over a common denominator, $C-\\tfrac{B^2}{A}=\\tfrac{AC-B^2}{A}$:</p>
+    <div class="eqbox">$$Q=\\underbrace{A}_{\\text{weight 1}}\\Big(\\Delta x+\\tfrac{B}{A}\\Delta y\\Big)^2+\\underbrace{\\frac{AC-B^2}{A}}_{\\text{weight 2}}\\,\\Delta y^2.$$</div>
+    <p>Now $Q$ is a sum of two <em>squares</em> (each $(\\cdots)^2\\ge0$), scaled by two weights. The intuition: a weighted sum of squares is positive for all nonzero steps exactly when <b>both weights are positive</b>, negative for all when both are negative, and takes <b>both signs</b> when the weights disagree. So the whole classification comes down to the signs of $A$ and $\\tfrac{AC-B^2}{A}$.</p>
+
+    <p><b>One number controls both weights — and it's the determinant of the Hessian.</b> Define</p>
+    <div class="eqbox">$$D=\\det H=\\det\\begin{pmatrix}f_{xx}&f_{xy}\\\\ f_{xy}&f_{yy}\\end{pmatrix}=f_{xx}f_{yy}-f_{xy}^{\\,2}=AC-B^2.$$</div>
+    <p>Weight 1 is $A=f_{xx}$; weight 2 is $\\tfrac{D}{A}$. Reading the signs:</p>
+    <p>&bull; <b>$D&gt;0$:</b> weight 2 $=\\tfrac{D}{A}$ shares $A$'s sign, so both weights match — $Q$ is one-signed. If $f_{xx}&gt;0$ it's a <b>minimum</b>; if $f_{xx}&lt;0$, a <b>maximum</b>.</p>
+    <p>&bull; <b>$D&lt;0$:</b> weight 2 has the opposite sign to weight 1, so $Q$ is positive one way and negative another — a <b>saddle</b>.</p>
+    <p>&bull; <b>$D=0$:</b> weight 2 vanishes; $Q$ is flat along a whole direction and the test is <b>inconclusive</b> (higher-order terms decide).</p>
+    <p>For our family $A=C=2,\\ B=c$, so $D=4-c^2$ — positive (bowl) until $c=2$, negative (saddle) after, exactly the tip-over you dragged. And since $D=\\det H$ equals the <em>product</em> of $H$'s two eigenvalues (the curvatures along its principal perpendicular directions), $D&gt;0$ means they share a sign and $D&lt;0$ means they disagree. "$D&gt;0$ with $f_{xx}&gt;0$" is precisely the Hessian being <b>positive-definite</b> — the clean local bowl that makes gradient descent behave.</p></div>`;
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
   const cx0=W/2,cy0=225,sx=38,sy=14,sz=5.5;
   const P=(x,y,z)=>[cx0+(x-y)*sx, cy0+(x+y)*sy - z*sz];
@@ -2496,8 +2509,8 @@ function c7_secondderiv(){
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),3,()=>{addReveal(`<div class="rh">✓ D = 3</div><p>$D=(2)(2)-1^2=4-1=3&gt;0$, and $f_{xx}=2&gt;0$, so the origin is a <b>minimum</b> — the gently tilted all-blue bowl at $c=1$. Push $c$ past $2$ and $D=4-c^2$ turns negative: gold appears and the bowl has become a saddle, dropping below its own tangent plane along one diagonal while rising along the other.</p>`);});
-  setHints([`D = f_xx·f_yy − f_xy². Here f_xx=2, f_yy=2, f_xy=1.`,`2·2 − 1·1 = 4 − 1 = 3. Positive, and f_xx>0, so: minimum.`]);
+  numChk(stage.querySelector('.card'),3,()=>{addReveal(`<div class="rh">✓ D = 3</div><p>$D=\\det H=(2)(2)-1^2=3&gt;0$, and $f_{xx}=2&gt;0$, so the origin is a <b>minimum</b> — the all-blue bowl at $c=1$. Push $c$ past $2$ and $D=4-c^2$ turns negative: gold appears and the bowl has become a saddle, dropping below its own tangent plane along one diagonal while rising along the other.</p>`);});
+  setHints([`D = det H = f_xx·f_yy − f_xy². Here f_xx=2, f_yy=2, f_xy=1.`,`2·2 − 1·1 = 4 − 1 = 3. Positive, and f_xx>0, so: minimum.`]);
 }
 
 function c7_lagrange(){
