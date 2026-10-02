@@ -2286,33 +2286,39 @@ function c7_taylor(){
 }
 
 function c7_convexity(){
-  stage.innerHTML=`<div class="card"><h2>Convexity and saddles: when is a bowl really a bowl?</h2>
-    <p>A function is <b>convex</b> if it curves upward in <em>every</em> direction — a true bowl with no hidden dips. That's the dream for optimization: a convex function has exactly one valley, so "roll downhill" always finds the global minimum. The test lives in the Hessian. Below is the <b>directional curvature</b> $\\mathbf p^{\\mathsf T}H\\mathbf p$ of $f=x^2+c\\,xy+y^2$ plotted against direction angle, where $H=\\begin{pmatrix}2&c\\\\c&2\\end{pmatrix}$; it works out to $2+c\\sin2\\theta$. Drag $c$ and watch whether the curve ever dips below zero.</p>
+  stage.innerHTML=`<div class="card"><h2>Convexity and saddles: when a bowl has no hidden dips</h2>
+    <p>A function is <b>convex</b> if it curves upward in <em>every</em> direction everywhere — a true bowl with no secret dips. That is the dream for optimization: a convex function has exactly one valley, so any flat spot you find is <em>the</em> global minimum, and "roll downhill" is guaranteed to reach it. (Contrast the last caveat: a non-convex surface has many valleys, and gradient descent only finds whichever one you started above.)</p>
+    <p>The test lives in the curvature from the Taylor beat. In direction $\\mathbf p$ the curvature is $\\mathbf p^{\\mathsf T}H\\mathbf p$; the surface curves up that way exactly when that's $\\ge 0$. Below, the curvature of $f=x^2+c\\,xy+y^2$ is plotted as the direction turns through a full circle — it works out to $2+c\\sin2\\theta$. <b>Drag $c$</b> and watch for the moment the curve dips below zero.</p>
     <canvas id="cv" width="640" height="380"></canvas>
-    <div class="readout"><div class="rdc"><div class="k">c</div><div class="v" id="cv0">—</div></div><div class="rdc"><div class="k">min curvature = 2 − |c|</div><div class="v" id="mn">—</div></div><div class="rdc"><div class="k">convex here?</div><div class="v" id="cx">—</div></div></div>
-    <div class="task"><b>The knife-edge</b>Drag to $c=3$. The minimum directional curvature is $2-|c|$ (the smaller Hessian eigenvalue). What is it at $c=3$?</div>
+    <div class="readout"><div class="rdc"><div class="k">c</div><div class="v" id="cv0">—</div></div><div class="rdc"><div class="k">smallest curvature (2 − |c|)</div><div class="v" id="mn">—</div></div><div class="rdc"><div class="k">verdict</div><div class="v" id="vd">—</div></div></div>
+    <div class="task"><b>The knife-edge</b>Drag to $c=3$. The smallest curvature over all directions is $2-|c|$ (the smaller Hessian eigenvalue). What is it at $c=3$?</div>
     <div class="entry"><input id="ni" inputmode="text" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
 
-    <p style="margin-top:16px"><b>Why the Hessian decides convexity.</b> From the Taylor beat, the curvature along any direction $\\mathbf p$ is $g''(0)=\\mathbf p^{\\mathsf T}H\\mathbf p$. A 1-D function is convex exactly when $g''\\ge0$ (Module 3: non-negative second derivative). A surface is convex when it's convex along <em>every</em> line through it — that is, when</p>
-    <div class="eqbox">$\\mathbf p^{\\mathsf T}H\\,\\mathbf p\\ge 0\\quad\\text{for every direction }\\mathbf p$</div>
-    <p style="text-align:center;margin-top:-6px;color:#9fb0c4">(a <b>positive-semidefinite</b> Hessian)</p>
-    <p>For our family this minimum curvature is $2-|c|$, so $f$ is convex until $|c|=2$ and <b>indefinite</b> — a saddle — past it. (That minimum is the smaller eigenvalue of $H$; the full eigenvalue machinery is a linear-algebra topic, but here it's just $2-c$.) Note this is the same $D=4-c^2$ flip as the second-derivative test, seen from the curvature side.</p>
-    <p><b>Why saddles dominate in high dimensions.</b> A critical point is a minimum only if the curvature is positive in <em>all</em> $n$ directions — every one of the Hessian's $n$ eigenvalues positive. As $n$ climbs into the millions (a neural network's parameters), getting <em>all</em> of them to line up positive is vanishingly unlikely; generically some are positive and some negative, which is a <b>saddle</b>. So deep-learning loss surfaces are riddled with saddles far more than with bad local minima — and because a saddle still has downhill directions, gradient descent slides off them and keeps going. That realization is a big part of why first-order optimization works as well as it does.</p></div>`;
+    <p style="margin-top:16px"><b>The convexity test.</b> In one variable, convex meant $f''\\ge0$ — curving up (Module 3). The surface version is the same statement in every direction at once: $f$ is convex exactly when its curvature is non-negative no matter which way you face,</p>
+    <div class="eqbox">$$\\mathbf p^{\\mathsf T}H\\,\\mathbf p\\ \\ge\\ 0\\quad\\text{for every direction }\\mathbf p.$$</div>
+    <p style="text-align:center;margin-top:-6px;color:#9fb0c4">(a Hessian with this property is called <b>positive-semidefinite</b>)</p>
+    <p>For our family the smallest this curvature ever gets is $2-|c|$, so $f$ is convex while $|c|\\le2$ and turns into a <b>saddle</b> once $|c|&gt;2$ — the instant the gold curve pokes below zero. That smallest curvature is the smaller of the Hessian's two <em>eigenvalues</em>, and it ties straight back to the last beat's discriminant: $D=4-c^2\\ge0$ is the very same condition as $2-|c|\\ge0$. Convex $\\iff$ every directional curvature $\\ge0$ $\\iff$ (here) $D\\ge0$ with $f_{xx}\\ge0$.</p>
+    <p><b>Why saddles take over in high dimensions.</b> A critical point is a minimum only if the curvature is positive in <em>all</em> directions — every one of the Hessian's eigenvalues positive. With two variables that's two sign-conditions to satisfy; with a neural network's <em>millions</em> of variables it's millions of them, all needed at once. If the signs were anything like independent, getting every single one positive is as unlikely as flipping a million coins and seeing all heads — so almost every critical point has <em>some</em> negative-curvature direction and is a <b>saddle</b>, not a minimum.</p>
+    <p>This flips the intuition people carry from low dimensions. Deep-learning loss surfaces aren't riddled with bad local minima to get trapped in; they're riddled with <em>saddles</em> — and a saddle always has a downhill escape direction, so gradient descent slides off and keeps going. It's a big part of why plain first-order optimization works as well as it does. (Convex problems — linear and logistic regression, SVMs — have none of this trouble: one valley, found reliably. The non-convex mess is what makes deep nets hard, and interesting.)</p></div>`;
   const cv=document.getElementById('cv');const pl=plot(cv,{xmin:0,xmax:6.2832,ymin:-2,ymax:5});
   let c=1;
-  function draw(){pl.grid();pl.hline(0,'#2b3a4f',true);
-    pl.curve(th=>2+c*Math.sin(2*th), (2-Math.abs(c))>=0?'#7ab8ff':'#e8b84b');
-    const thmin=c>=0?3*Math.PI/4:Math.PI/4;pl.point(thmin,2-Math.abs(c),(2-Math.abs(c))>=0?'#7ab8ff':'#e8b84b',5);
+  function draw(){const K=th=>2+c*Math.sin(2*th);pl.grid();pl.hline(0,'#2b3a4f',true);
+    const {ctx,px,py}=pl;
+    // negative region in gold
+    ctx.strokeStyle='rgba(232,184,75,0.5)';ctx.lineWidth=1;for(let i=0;i<=240;i++){const th=i/240*2*Math.PI;const k=K(th);if(k<0){ctx.beginPath();ctx.moveTo(px(th),py(0));ctx.lineTo(px(th),py(k));ctx.stroke();}}
+    pl.curve(K,(2-Math.abs(c))>=0?'#7ab8ff':'#e8b84b',2.6);
+    const thmin=3*Math.PI/4;pl.point(thmin,2-Math.abs(c),(2-Math.abs(c))>=0?'#7ab8ff':'#e8b84b',5);
+    ctx.fillStyle='#5d7186';ctx.font='11px sans-serif';ctx.fillText('curvature',px(0.1),py(4.4));ctx.fillText('direction θ (0 … 2π)',px(4.3),py(-1.4));
     document.getElementById('cv0').textContent=c.toFixed(2);
     document.getElementById('mn').textContent=(2-Math.abs(c)).toFixed(2);
-    document.getElementById('cx').textContent=(2-Math.abs(c))>=-1e-9?'yes — convex':'no — saddle';}
+    document.getElementById('vd').textContent=(2-Math.abs(c))>=-1e-9?'convex — one global min':'not convex — a saddle';}
   cv.style.touchAction='none';let drg=false;
   function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(cv.width/Math.max(1,r.width));c=Math.max(0,Math.min(3,X/cv.width*3));draw();}
   cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),-1,()=>{addReveal(`<div class="rh">✓ −1</div><p>$2-|3|=-1$. A negative minimum curvature means there's a direction where the surface bends <em>down</em> — so it's not convex; it's a saddle. On the plot, $2+3\\sin2\\theta$ dips to $-1$. Pull $c$ back under $2$ and the whole curve lifts above zero: convex again, and gradient descent is guaranteed its one true minimum.</p>`);},s=>parseFloat(s));
+  numChk(stage.querySelector('.card'),-1,()=>{addReveal(`<div class="rh">✓ −1</div><p>$2-|3|=-1$. A negative smallest-curvature means there's a direction where the surface bends <em>down</em>, so it is not convex — it's a saddle. On the plot, $2+3\\sin2\\theta$ dips to $-1$. Pull $c$ back under $2$ and the whole curve lifts above zero: convex again, and now gradient descent is guaranteed its one true minimum.</p>`);},s=>parseFloat(s));
   setHints([`Just evaluate 2 − |c| at c = 3.`,`2 − 3 = −1 (type a negative sign).`]);
 }
 
