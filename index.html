@@ -2277,10 +2277,9 @@ function c7_chainrule(){
 
 function c7_taylor(){
   stage.innerHTML=`<div class="card"><h2>The quadratic model: curvature the plane can't see</h2>
-    <p>The tangent plane gave us a flat stand-in for the surface. But flat is exactly the problem: at a critical point the gradient is zero, so the tangent plane is perfectly level — and a level plane looks identical over a valley, a peak, or a saddle. What separates them is <b>curvature</b>, the <em>second</em>-order behavior. So we add one more term to the approximation.</p>
+    <p>The tangent plane gave us a flat stand-in for the surface. But flat is exactly the problem: at a critical point the gradient is zero, so the tangent plane is perfectly level — and a level plane looks identical over a valley, a peak, or a saddle. What tells them apart is <b>curvature</b>, the <em>second</em>-order behavior. And here is the question one variable never forced on us: curvature <em>in which direction</em>? Let's look before we compute.</p>
 
-    <p><b>What you're looking at — read this first.</b> There is <em>one</em> fixed surface here, the bowl $z=f(x,y)=x^2+xy+y^2$; it never changes. From the base point $P=(1,0)$ you pick a <b>heading</b> $\\theta$ — a compass direction in the flat $x$-$y$ input plane, the way you'd walk away from $P$. Drop a vertical knife straight down along that heading and it exposes a <b>cross-section</b> of the bowl: a single curve of height-versus-distance. That curve is the <span class="cy">blue slice</span>. Swinging $\\theta$ doesn't touch the bowl — it just points the knife a different way, so you expose a <em>different</em> cross-section. That's why the blue curve changes as you drag: same hill, cut at a new angle.</p>
-    <p>The top picture is the knife in the bowl; the bottom picture is that same cut <b>straightened out</b> — height on the vertical axis, distance $s$ along the heading on the horizontal. <b>Drag either picture left–right to swing the heading.</b></p>
+    <p><b>What you're looking at.</b> There is one fixed surface, the bowl $z=f(x,y)=x^2+xy+y^2$; it never changes. From the base point $P=(1,0)$ you pick a <b>heading</b> $\\theta$ — a compass direction in the flat $x$-$y$ input plane, the way you'd walk away from $P$. Drop a vertical knife straight down along that heading and it exposes a <b>cross-section</b> of the bowl: a single curve of height-versus-distance, the <span class="cy">blue slice</span>. Swinging $\\theta$ doesn't touch the bowl — it points the knife a different way, exposing a different cross-section. That is why the blue curve changes as you drag: same hill, cut at a new angle. The top picture is the knife in the bowl; the bottom is that same cut <b>straightened out</b>, with distance $s$ along the heading on the horizontal axis. <b>Drag either picture left–right to swing the heading.</b></p>
     <canvas id="cv3d" width="640" height="300"></canvas>
     <canvas id="cv" width="640" height="380"></canvas>
     <p class="small" id="obs3" style="margin-top:6px;color:#9fb0c4"></p>
@@ -2290,35 +2289,41 @@ function c7_taylor(){
 
     <p style="margin-top:16px"><b>The second-order model.</b> Take the tangent-plane (linear) approximation and tack on a quadratic term in the steps $\\Delta x,\\Delta y$. Written out in full:</p>
     <div class="eqbox">$$f(P+\\Delta)\\approx \\underbrace{f(P)}_{\\text{height}}+\\underbrace{f_x\\,\\Delta x+f_y\\,\\Delta y}_{\\text{tangent plane}}+\\underbrace{\\tfrac12\\big(f_{xx}\\,\\Delta x^2+2f_{xy}\\,\\Delta x\\,\\Delta y+f_{yy}\\,\\Delta y^2\\big)}_{\\text{curvature}}.$$</div>
-    <p>That last bracket is a <b>quadratic form</b> — a sum of squared terms and a cross-term in $\\Delta x,\\Delta y$. Every quadratic form is carried by a symmetric matrix, and here that matrix is the <b>Hessian</b> $H$, the little table of second partials. It's symmetric because the mixed partials agree, $f_{xy}=f_{yx}$ (true for any smooth surface), which is also why the cross-term carries the factor $2$:</p>
+    <p>That last bracket is a <b>quadratic form</b> — squared terms and a cross-term in $\\Delta x,\\Delta y$. Every quadratic form is carried by a symmetric matrix, and here that matrix is the <b>Hessian</b> $H$, the table of second partials. It's symmetric because the mixed partials agree, $f_{xy}=f_{yx}$ (true for any smooth surface), which is also why the cross-term carries the factor $2$:</p>
     <div class="eqbox">$$H=\\begin{pmatrix}f_{xx}&f_{xy}\\\\ f_{xy}&f_{yy}\\end{pmatrix},\\qquad \\tfrac12\\,\\mathbf p^{\\mathsf T}H\\,\\mathbf p=\\tfrac12\\big(f_{xx}\\,\\Delta x^2+2f_{xy}\\,\\Delta x\\,\\Delta y+f_{yy}\\,\\Delta y^2\\big).$$</div>
 
     <div class="eqbox">single variable: one axis, one bend&nbsp; $f''(x)$ &nbsp;$\\longrightarrow$&nbsp; two variables: a bend for every heading&nbsp; $\\mathbf p^{\\mathsf T}H\\mathbf p$</div>
-    <p><b>From one bend to a bend per direction — build it on what you already know.</b> In one variable you can only step along the $x$-axis, left or right, so a point's curvature is a single number $f''(x)$: one bend, full stop. With two inputs you can step out of $P$ in <em>any</em> heading, so "the second derivative" is no longer one number — it's one bend <em>per direction</em>, the map $\\mathbf p\\mapsto\\mathbf p^{\\mathsf T}H\\mathbf p$. The Hessian $H$ is the single object that stores them all: hand it a heading $\\mathbf p$ and it returns that heading's curvature. Point along $x$ with $\\mathbf p=(1,0)$ and it hands back $f_{xx}$ — the plain old 1-D bend along $x$, your anchor. The genuinely new ingredient is the cross-term $f_{xy}$: it lets the two axes interact, a partnership a lone $x$ never had.</p>
+    <p><b>From one bend to a bend per direction.</b> In one variable you can only step along the $x$-axis, left or right, so a point's curvature is a single number $f''(x)$. With two inputs you can step out of $P$ in <em>any</em> heading, so "the second derivative" is no longer one number — it's one bend <em>per direction</em>, the map $\\mathbf p\\mapsto\\mathbf p^{\\mathsf T}H\\mathbf p$. The Hessian $H$ stores them all at once: hand it a heading $\\mathbf p$ and it returns that heading's curvature. Point along $x$ with $\\mathbf p=(1,0)$ and it returns $f_{xx}$, the ordinary 1-D bend along $x$. The new ingredient is the cross-term $f_{xy}$: it lets the two axes interact, which a lone $x$ could never do.</p>
 
-    <p><b>Where it comes from — deriving it with the chain rule.</b> The trick is to collapse the surface back to one variable. Walk a straight line out of $P$ in a fixed heading $\\mathbf p=(p_1,p_2)$; your position after distance $s$ is</p>
+    <p><b>This is the directional derivative, one order up.</b> In one variable the word "derivative" hides a choice you never had to make: with only the $x$-axis, "the slope" and "the curvature" come with a built-in direction. With two inputs that choice is out in the open — every rate is measured along a heading $\\mathbf p$. The slope you read is exactly the <em>directional derivative</em> from the previous beat; the curvature is its second-order sibling:</p>
+    <div class="eqbox">slope $=\\nabla f\\cdot\\mathbf p$ &nbsp;(directional derivative)$\\qquad$ curvature $=\\mathbf p^{\\mathsf T}H\\mathbf p$ &nbsp;(directional <em>second</em> derivative)</div>
+    <p>So the readouts above aren't two unrelated numbers: they're the first and second directional derivatives of $f$ at $P$ along the heading you're pointing.</p>
+
+    <p><b>Where the curvature term comes from.</b> To pin down that second directional derivative, collapse the surface back to one variable. Walk a straight line out of $P$ in a fixed heading $\\mathbf p=(p_1,p_2)$; your position after distance $s$ is</p>
     <div class="eqbox">$$x(s)=x_0+s\\,p_1,\\qquad y(s)=y_0+s\\,p_2,\\qquad\\text{so}\\quad \\frac{dx}{ds}=p_1,\\ \\ \\frac{dy}{ds}=p_2.$$</div>
-    <p>Let $g(s)=f\\big(x(s),y(s)\\big)$ — your height as you walk. It's the blue slice: an ordinary function of the single variable $s$, so the familiar 1-D Taylor expansion from Module 6 applies:</p>
+    <p>Let $g(s)=f\\big(x(s),y(s)\\big)$ — your height as you walk. It is the blue slice: an ordinary function of the single variable $s$, so the 1-D Taylor expansion from Module 6 applies:</p>
     <div class="eqbox">$$g(s)\\approx g(0)+g'(0)\\,s+\\tfrac12\\,g''(0)\\,s^2.$$</div>
-    <p><b>First derivative (chain rule, once).</b> $f$ changes with $s$ only through $x$ and $y$, so the multivariable chain rule adds the two routes:</p>
+    <p><b>First derivative — chain rule, once.</b> $f$ changes with $s$ only through $x$ and $y$, so the multivariable chain rule adds the two routes:</p>
     <div class="eqbox">$$g'(s)=f_x\\,\\frac{dx}{ds}+f_y\\,\\frac{dy}{ds}=f_x\\,p_1+f_y\\,p_2=\\nabla f\\cdot\\mathbf p.$$</div>
-    <p>That's the <em>slope</em> of the slice: the gradient's component along $\\mathbf p$.</p>
-    <p><b>Second derivative (chain rule, a second time).</b> Differentiate $g'(s)=f_x\\,p_1+f_y\\,p_2$ again in $s$. The constants $p_1,p_2$ stay put, but $f_x$ and $f_y$ are <em>themselves</em> functions of $(x,y)$ that move as you walk — so each one needs the chain rule again, exactly like $f$ did:</p>
-    <div class="eqbox">$$\\frac{d}{ds}f_x=f_{xx}\\,\\frac{dx}{ds}+f_{xy}\\,\\frac{dy}{ds}=f_{xx}\\,p_1+f_{xy}\\,p_2,$$</div>
-    <div class="eqbox">$$\\frac{d}{ds}f_y=f_{yx}\\,\\frac{dx}{ds}+f_{yy}\\,\\frac{dy}{ds}=f_{xy}\\,p_1+f_{yy}\\,p_2.$$</div>
+    <p>That is the slope of the slice — the first directional derivative, as expected.</p>
+    <p><b>Second derivative — chain rule, a second time.</b> Differentiate $g'(s)=f_x\\,p_1+f_y\\,p_2$ again in $s$. The constants $p_1,p_2$ stay put, but $f_x$ and $f_y$ are themselves functions of $(x,y)$ that move as you walk, so each needs the chain rule again:</p>
+    <div class="eqbox">$$\\frac{d}{ds}f_x=f_{xx}\\,p_1+f_{xy}\\,p_2,\\qquad \\frac{d}{ds}f_y=f_{xy}\\,p_1+f_{yy}\\,p_2.$$</div>
     <p>Feed those back in:</p>
-    <div class="eqbox">$$g''(s)=p_1\\big(f_{xx}p_1+f_{xy}p_2\\big)+p_2\\big(f_{xy}p_1+f_{yy}p_2\\big)=f_{xx}\\,p_1^2+2f_{xy}\\,p_1p_2+f_{yy}\\,p_2^2.$$</div>
-    <p>And that final line is precisely $\\mathbf p$ dotted with $H\\mathbf p$ — the quadratic form again:</p>
-    <div class="eqbox">$$g'(0)=\\nabla f\\cdot\\mathbf p,\\qquad g''(0)=\\mathbf p^{\\mathsf T}H\\,\\mathbf p.$$</div>
-    <p>The mixed partial $f_{xy}$ shows up once from differentiating $f_x$ and once from differentiating $f_y$, and the two copies merge into the single $2f_{xy}\\,p_1p_2$ cross-term. So the Hessian term is nothing mysterious: it is the chain rule applied <em>twice</em>.</p>
+    <div class="eqbox">$$g''(s)=p_1\\big(f_{xx}p_1+f_{xy}p_2\\big)+p_2\\big(f_{xy}p_1+f_{yy}p_2\\big)=f_{xx}\\,p_1^2+2f_{xy}\\,p_1p_2+f_{yy}\\,p_2^2=\\mathbf p^{\\mathsf T}H\\mathbf p.$$</div>
+    <p>The mixed partial $f_{xy}$ appears once from differentiating $f_x$ and once from $f_y$, and the two copies merge into the single $2f_{xy}\\,p_1p_2$ cross-term. The Hessian term is the chain rule applied twice.</p>
 
-    <p><b>Now put the pieces straight back into the 1-D expansion — no need to look back up.</b> Drop $g(0)=f(P)$, $g'(0)=\\nabla f\\cdot\\mathbf p$, and $g''(0)=\\mathbf p^{\\mathsf T}H\\mathbf p$ into $g(s)\\approx g(0)+g'(0)s+\\tfrac12 g''(0)s^2$:</p>
+    <p><b>Assemble the model.</b> Substitute the three pieces $g(0)=f(P)$, $g'(0)=\\nabla f\\cdot\\mathbf p$, $g''(0)=\\mathbf p^{\\mathsf T}H\\mathbf p$ into $g(s)\\approx g(0)+g'(0)s+\\tfrac12 g''(0)s^2$:</p>
     <div class="eqbox">$$g(s)\\approx f(P)+(\\nabla f\\cdot\\mathbf p)\\,s+\\tfrac12\\,(\\mathbf p^{\\mathsf T}H\\mathbf p)\\,s^2.$$</div>
-    <p>The step you actually take is the displacement vector $\\Delta=s\\,\\mathbf p$ (go distance $s$ along heading $\\mathbf p$). Since $(\\nabla f\\cdot\\mathbf p)\\,s=\\nabla f\\cdot(s\\mathbf p)=\\nabla f\\cdot\\Delta$ and $(\\mathbf p^{\\mathsf T}H\\mathbf p)\\,s^2=(s\\mathbf p)^{\\mathsf T}H(s\\mathbf p)=\\Delta^{\\mathsf T}H\\Delta$, the slice model <em>is</em> the surface model:</p>
+    <p>Each term adds one layer to the picture below: start flat at the height $f(P)$, tilt by the slope, then bend by the curvature. The three layers stack up to the slice itself.</p>
+    <canvas id="cvd" width="640" height="300"></canvas>
+    <p class="small" style="margin-top:6px;color:#9fb0c4">Along $x$ ($\\mathbf p=(1,0)$) at $P=(1,0)$: height $f(P)=1$, slope $2$, curvature $2$. Here $f$ is itself quadratic, so the two-term bend already matches the true slice exactly.</p>
+    <p>The step you actually take is the displacement $\\Delta=s\\,\\mathbf p$. Since $(\\nabla f\\cdot\\mathbf p)\\,s=\\nabla f\\cdot\\Delta$ and $(\\mathbf p^{\\mathsf T}H\\mathbf p)\\,s^2=\\Delta^{\\mathsf T}H\\Delta$, the slice model is the surface model:</p>
     <div class="eqbox">$$f(P+\\Delta)\\approx f(P)+\\nabla f\\cdot\\Delta+\\tfrac12\\,\\Delta^{\\mathsf T}H\\Delta,$$</div>
-    <p>which, written in components $\\Delta=(\\Delta x,\\Delta y)$, is exactly the boxed model we opened with. The 3-D cut and the 1-D derivation describe the same thing.</p>
+    <p>which in components $\\Delta=(\\Delta x,\\Delta y)$ is the model we opened with. The 3-D cut and the 1-D derivation are the same statement.</p>
 
-    <p><b>The upshot is on the canvas.</b> The slope of the slice is $\\nabla f\\cdot\\mathbf p$ and <em>its curvature is $\\mathbf p^{\\mathsf T}H\\mathbf p$</em>. Spin the heading and the curvature readout traces $2+\\sin2\\theta$ — the bowl genuinely bends by a different amount in different directions, and the Hessian is what reports that bend for whichever way you face. Here it stays positive (always curving up); for a saddle it would go positive one way and negative another. That one object — curvature in every direction, bundled into $H$ — is what the next beat reads to classify a critical point, what convexity checks, and what Newton's method uses to size its jump.</p></div>`;
+    <p><b>The upshot is on the canvas.</b> The slope of the slice is $\\nabla f\\cdot\\mathbf p$ and its curvature is $\\mathbf p^{\\mathsf T}H\\mathbf p$. Spin the heading and the curvature readout traces $2+\\sin2\\theta$: the bowl genuinely bends by a different amount in different directions, and the Hessian reports that bend for whichever way you face. The rose below plots it directly — the radius in each heading is the curvature there. Drag above and the gold marker rides around it.</p>
+    <canvas id="cvr" width="640" height="300"></canvas>
+    <p class="small" style="margin-top:6px;color:#9fb0c4">This bowl is stiffest along the $45°$ diagonal (bend $3$) and softest along $135°$ (bend $1$), but always positive — it curves up every way you turn. For a saddle the rose would cross the origin, positive one way and negative another. That single object, curvature in every direction bundled into $H$, is what the next beat reads to classify a critical point, what convexity checks, and what Newton's method uses to size its jump.</p></div>`;
 
   // ===== shared state =====
   const f=(x,y)=>x*x+x*y+y*y;let th=0;
@@ -2364,18 +2369,51 @@ function c7_taylor(){
     document.getElementById('g2').textContent=g2.toFixed(2);
     const ob=document.getElementById('obs3');if(ob)ob.textContent=Math.abs(g1)<0.08?'Slope ≈ 0 here — this heading runs along a contour, so the tangent line is flat even though the slice still bends.':'Swing the heading and watch the bend of the blue slice change — that bend is the directional curvature.';}
 
-  function draw(){draw3d();draw2d();}
+  // ===== curvature rose: bend by heading =====
+  const cvr=document.getElementById('cvr');const ctxr=cvr&&cvr.getContext&&cvr.getContext('2d');const Wr=cvr.width,Hr=cvr.height;const cxr=Wr/2,cyr=Hr/2+8,kr=38;
+  function drawRose(){if(!ctxr)return;ctxr.clearRect(0,0,Wr,Hr);
+    ctxr.strokeStyle='#1a2534';ctxr.lineWidth=1;
+    for(const r of [1,2,3]){ctxr.beginPath();ctxr.arc(cxr,cyr,r*kr,0,7);ctxr.stroke();ctxr.fillStyle='#3a4c66';ctxr.font='10px sans-serif';ctxr.fillText(String(r),cxr+r*kr-9,cyr-3);}
+    ctxr.strokeStyle='#223247';ctxr.lineWidth=1;ctxr.beginPath();ctxr.moveTo(cxr-135,cyr);ctxr.lineTo(cxr+135,cyr);ctxr.moveTo(cxr,cyr-120);ctxr.lineTo(cxr,cyr+120);ctxr.stroke();
+    // principal directions
+    ctxr.setLineDash([4,4]);
+    ctxr.strokeStyle='rgba(63,185,143,0.45)';ctxr.beginPath();ctxr.moveTo(cxr-3*kr*Math.cos(Math.PI/4),cyr+3*kr*Math.sin(Math.PI/4));ctxr.lineTo(cxr+3*kr*Math.cos(Math.PI/4),cyr-3*kr*Math.sin(Math.PI/4));ctxr.stroke();
+    ctxr.strokeStyle='rgba(217,143,143,0.45)';ctxr.beginPath();ctxr.moveTo(cxr-1.6*kr*Math.cos(3*Math.PI/4),cyr+1.6*kr*Math.sin(3*Math.PI/4));ctxr.lineTo(cxr+1.6*kr*Math.cos(3*Math.PI/4),cyr-1.6*kr*Math.sin(3*Math.PI/4));ctxr.stroke();
+    ctxr.setLineDash([]);
+    // the rose r=2+sin2θ
+    ctxr.strokeStyle='#7ab8ff';ctxr.lineWidth=2.4;ctxr.beginPath();
+    for(let a=0;a<=2*Math.PI+0.01;a+=0.02){const r=(2+Math.sin(2*a))*kr;const X=cxr+r*Math.cos(a),Y=cyr-r*Math.sin(a);a?ctxr.lineTo(X,Y):ctxr.moveTo(X,Y);}ctxr.stroke();
+    // current heading radial + marker
+    const rc=2+Math.sin(2*th);const X=cxr+rc*kr*Math.cos(th),Y=cyr-rc*kr*Math.sin(th);
+    ctxr.strokeStyle='#e8b84b';ctxr.lineWidth=2;ctxr.beginPath();ctxr.moveTo(cxr,cyr);ctxr.lineTo(X,Y);ctxr.stroke();
+    ctxr.fillStyle='#dbe6f4';ctxr.beginPath();ctxr.arc(X,Y,5,0,7);ctxr.fill();
+    ctxr.fillStyle='#3fb98f';ctxr.font='11px sans-serif';ctxr.fillText('stiffest · 3',cxr+3*kr*0.72,cyr-3*kr*0.72-4);
+    ctxr.fillStyle='#d98f8f';ctxr.fillText('softest · 1',cxr-1*kr*0.72-54,cyr-1*kr*0.72-4);
+    ctxr.fillStyle='#9fb0c4';ctxr.font='12px sans-serif';ctxr.fillText('curvature by heading   pᵀHp = 2 + sin 2θ',14,18);
+    ctxr.fillStyle='#e8b84b';ctxr.fillText('θ = '+(((th*180/Math.PI)%360+360)%360).toFixed(0)+'°,  bend = '+rc.toFixed(2),14,Hr-12);}
 
-  // ===== drag either canvas to swing the heading =====
+  function draw(){draw3d();draw2d();drawRose();}
+
+  // ===== build-up graphic (static, along x) =====
+  (function(){const c=document.getElementById('cvd');if(!c)return;const pld=plot(c,{xmin:-2.5,xmax:2.5,ymin:-1.5,ymax:8});pld.grid();
+    pld.curve(s=>1,'#5d7186',1.6);
+    pld.curve(s=>1+2*s,'#e8b84b',2);
+    pld.curve(s=>1+2*s+s*s,'#7ab8ff',2.8);
+    const {ctx,px,py}=pld;ctx.font='12px sans-serif';
+    ctx.fillStyle='#5d7186';ctx.fillText('f(P) = 1',px(-2.4),py(1.5));
+    ctx.fillStyle='#e8b84b';ctx.fillText('+ slope·s   (tilt)',px(-2.4),py(7.4));
+    ctx.fillStyle='#7ab8ff';ctx.fillText('+ ½·curvature·s²   (bend) = the slice',px(-2.4),py(6.5));})();
+
+  // ===== drag either live canvas to swing the heading =====
   function bind(el){el.style.touchAction='none';let drg=false;
     const setP=e=>{const r=el.getBoundingClientRect();const X=(e.clientX-r.left)*(el.width/Math.max(1,r.width));th=X/el.width*2*Math.PI;draw();};
     el.addEventListener('pointerdown',e=>{drg=true;try{el.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
     el.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
     const end=()=>drg=false;el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);}
-  bind(cv);bind(cv3);
+  bind(cv);bind(cv3);bind(cvr);
   draw();
 
-  numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ pᵀHp = 2</div><p>With $\\mathbf p=(1,0)$, $\\mathbf p^{\\mathsf T}H\\mathbf p$ just picks out the top-left Hessian entry, $f_{xx}=2$. So along $x$ the quadratic term is $\\tfrac12(2)s^2=s^2$: the blue slice sits exactly $s^2$ above the flat gold line. Spin the heading and the curvature readout runs $2+\\sin2\\theta$ — same bowl, a different bend every way you face.</p>`);});
+  numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ pᵀHp = 2</div><p>With $\\mathbf p=(1,0)$, $\\mathbf p^{\\mathsf T}H\\mathbf p$ picks out the top-left Hessian entry, $f_{xx}=2$. So along $x$ the quadratic term is $\\tfrac12(2)s^2=s^2$: the blue slice sits exactly $s^2$ above the flat gold line. Spin the heading and the curvature runs $2+\\sin2\\theta$ — same bowl, a different bend every way you face.</p>`);});
   setHints([`pᵀHp with p=(1,0) picks out the top-left Hessian entry f_xx.`,`That entry is 2.`]);
 }
 function c7_convexity(){
