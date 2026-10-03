@@ -2923,51 +2923,138 @@ function c7_polar(){
 
 function c7_jacobian(){
   stage.innerHTML=`<div class="card"><h2>The Jacobian: the area factor for <em>any</em> change of variables</h2>
-    <p>Polar worked because we found its exact area factor, $r$. But polar is one map among many — you might stretch coordinates to fit an ellipse, shear them, or invent new coordinates $(u,v)$ tailored to whatever region a problem hands you (that's where $u,v$ come from: they're <em>your</em> chosen replacements for $x,y$). Each such change has its own area factor. We need one formula that produces it every time.</p>
-    <p>The key idea: zoom in far enough and <em>any</em> smooth change of coordinates looks <b>linear</b> — it sends a tiny grid square to a tiny <b>parallelogram</b>. So first answer the purely linear question: if the square's two edges become the vectors $\\mathbf e_1$ and $\\mathbf e_2$, what is the area of the parallelogram they span? Drag the tip of $\\mathbf e_2$ and watch.</p>
-    <canvas id="cv" width="640" height="380"></canvas>
+    <p>Polar handed us the factor $r$ by looking at one cell. But polar is one map among many — you might stretch coordinates to fit an ellipse, shear them, or invent coordinates $(u,v)$ tailored to a region (that's all $u,v$ are: <em>your</em> chosen replacements for $x,y$). Each change rescales area by its own factor, and one formula delivers it every time. The one-variable case already shows the shape of the answer.</p>
+    <div class="eqbox">$$\\int f(x)\\,dx=\\int f(g(u))\\,\\underbrace{|g'(u)|}_{\\text{length stretch}}\\,du.$$</div>
+    <p>That's $u$-substitution from Module 6. Substituting $x=g(u)$ turns $dx$ into $|g'(u)|\\,du$: a step $du$ becomes a step $g'(u)\\,du$ in $x$, so lengths are rescaled by $|g'(u)|$. In two variables we're rescaling <b>area</b>, not length — so we need the factor by which a tiny patch of area grows under the map. Build it in two moves: first the area of a parallelogram, then where the parallelogram comes from.</p>
+
+    <p><b>Move 1 — a parallelogram's area is a determinant.</b> Forget curvy maps for a moment. If a little cell's two edges are the vectors $\\mathbf e_1$ and $\\mathbf e_2$, what area do they enclose? Drag the tip of $\\mathbf e_2$ and watch.</p>
+    <canvas id="cv" width="640" height="360"></canvas>
     <div class="readout"><div class="rdc"><div class="k">e&#8321;</div><div class="v" id="e1v">(2, 0)</div></div><div class="rdc"><div class="k">e&#8322;</div><div class="v" id="e2v">—</div></div><div class="rdc"><div class="k">area = |e&#8321;&#8339;e&#8322;&#7527; &#8722; e&#8321;&#7527;e&#8322;&#8339;|</div><div class="v" id="arv">—</div></div></div>
-    <div class="task"><b>Read off the area rule</b>With edges $\\mathbf e_1=(2,0)$ and $\\mathbf e_2=(1,3)$, what is the area of the parallelogram they span? (Drag to check, or compute $|e_{1x}e_{2y}-e_{1y}e_{2x}|$.)</div>
+    <div class="task"><b>Read off the area rule</b>With edges $\\mathbf e_1=(2,0)$ and $\\mathbf e_2=(1,3)$, what area do they span? (Drag to check, or compute $|e_{1x}e_{2y}-e_{1y}e_{2x}|$.)</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+    <p style="margin-top:14px">The parallelogram from $\\mathbf e_1=(a,b)$ and $\\mathbf e_2=(c,d)$ has area $|ad-bc|$ — largest when the edges are perpendicular, shrinking to $0$ as they line up (a flattened, degenerate cell). That combination is the <b>$2\\times2$ determinant</b>:</p>
+    <div class="eqbox">$$\\text{area}=\\Big|\\det\\begin{pmatrix}a&c\\\\ b&d\\end{pmatrix}\\Big|=|ad-bc|.$$</div>
 
-    <p style="margin-top:16px"><b>That area is a determinant.</b> The parallelogram built from $\\mathbf e_1=(a,b)$ and $\\mathbf e_2=(c,d)$ has area $|ad-bc|$ — biggest when the edges are perpendicular, and shrinking to $0$ as they line up (a squashed, degenerate cell). That combination is the <b>$2\\times2$ determinant</b>:</p>
-    <div class="eqbox">$$\\text{area}=\\left|\\det\\begin{pmatrix}a&c\\\\ b&d\\end{pmatrix}\\right|=|ad-bc|.$$</div>
+    <p><b>Move 2 — where the edge vectors come from.</b> A change of variables is a <b>map</b>: feed it $(u,v)$, it returns an output point $\\big(x(u,v),\\,y(u,v)\\big)$. Freeze $v$ and nudge $u$ by a small $du$. The output point slides a little — and by the linear (tangent-plane) approximation from the differentiation module, it moves by the vector</p>
+    <div class="eqbox">$$\\Big(\\tfrac{\\partial x}{\\partial u},\\ \\tfrac{\\partial y}{\\partial u}\\Big)\\,du.$$</div>
+    <p>Read it literally: $\\partial x/\\partial u$ is how fast the output's $x$-coordinate moves per unit $u$, and $\\partial y/\\partial u$ the same for $y$ — together they're the <em>velocity</em> of the output point as you push $u$, and multiplying by the step $du$ gives how far it actually travels. Freeze $u$ instead and nudge $v$ by $dv$, and the point moves by $\\big(\\tfrac{\\partial x}{\\partial v},\\tfrac{\\partial y}{\\partial v}\\big)dv$. <b>Those two displacements are the edges of the mapped cell.</b> Place the gold cell on the left and watch it land on the right — the two arrows are exactly those edge vectors.</p>
+    <div class="seg" id="segm"></div>
+    <canvas id="cvm" width="640" height="360"></canvas>
+    <p class="small" id="obsm" style="margin-top:6px;color:#9fb0c4"></p>
+    <div class="readout"><div class="rdc"><div class="k">u-edge ∂(x,y)/∂u · du</div><div class="v" id="juv">—</div></div><div class="rdc"><div class="k">v-edge ∂(x,y)/∂v · dv</div><div class="v" id="jvv">—</div></div><div class="rdc"><div class="k">area factor |det J|</div><div class="v" id="detv">—</div></div></div>
 
-    <p><b>Now make the map curvy.</b> A real change of variables $(u,v)\\mapsto\\big(x(u,v),\\,y(u,v)\\big)$ isn't linear — but on a tiny cell it is, to first order. Step $du$ in $u$ (holding $v$): the point $(x,y)$ moves by $\\big(\\tfrac{\\partial x}{\\partial u},\\tfrac{\\partial y}{\\partial u}\\big)du$ — the partials just measure "how far $x$ and $y$ shift per unit $u$." Likewise a step $dv$ moves it by $\\big(\\tfrac{\\partial x}{\\partial v},\\tfrac{\\partial y}{\\partial v}\\big)dv$. Those two vectors are the edges $\\mathbf e_1,\\mathbf e_2$ of the little parallelogram, so its area is their determinant:</p>
-    <div class="eqbox">$$dx\\,dy=|J|\\,du\\,dv,\\qquad J=\\det\\begin{pmatrix}\\tfrac{\\partial x}{\\partial u}&\\tfrac{\\partial x}{\\partial v}\\\\[2pt]\\tfrac{\\partial y}{\\partial u}&\\tfrac{\\partial y}{\\partial v}\\end{pmatrix}=\\frac{\\partial x}{\\partial u}\\frac{\\partial y}{\\partial v}-\\frac{\\partial x}{\\partial v}\\frac{\\partial y}{\\partial u}.$$</div>
-    <p>This determinant $J$ is the <b>Jacobian</b> — the local area-stretch factor of the map.</p>
+    <p style="margin-top:16px"><b>Assemble it.</b> The two edge vectors are the columns of a matrix of partial derivatives — the <b>Jacobian</b> — and Move 1 says the cell's area is the absolute determinant of that matrix, times $du\\,dv$:</p>
+    <div class="eqbox">$$dx\\,dy=|\\det J|\\,du\\,dv,\\qquad J=\\begin{pmatrix}\\tfrac{\\partial x}{\\partial u}&\\tfrac{\\partial x}{\\partial v}\\\\[3pt]\\tfrac{\\partial y}{\\partial u}&\\tfrac{\\partial y}{\\partial v}\\end{pmatrix}.$$</div>
+    <p>It's the exact 2-D version of the 1-D line: $|g'(u)|$ rescaled length, $|\\det J|$ rescales area. The columns are the two edge arrows in the picture; the determinant turns them into the area they enclose.</p>
 
-    <p><b>Check it against polar.</b> For $x=r\\cos\\theta,\\ y=r\\sin\\theta$ (so $u=r,\\ v=\\theta$): $\\tfrac{\\partial x}{\\partial r}=\\cos\\theta,\\ \\tfrac{\\partial y}{\\partial r}=\\sin\\theta,\\ \\tfrac{\\partial x}{\\partial\\theta}=-r\\sin\\theta,\\ \\tfrac{\\partial y}{\\partial\\theta}=r\\cos\\theta$, so</p>
-    <div class="eqbox">$$J=\\cos\\theta\\,(r\\cos\\theta)-(-r\\sin\\theta)\\,\\sin\\theta=r(\\cos^2\\theta+\\sin^2\\theta)=r.$$</div>
-    <p>The formula reproduces the $r$ we found by hand — but now it will hand you the factor for a stretch, a shear, or any coordinate change you cook up. (ML echo: this is exactly the machinery behind <b>normalizing flows</b>, where a network warps a simple distribution into a complex one and the log-likelihood picks up a $\\log|\\det J|$ term — the same Jacobian, tracking how the map stretches probability mass.)</p></div>`;
+    <p><b>Check it against polar.</b> For $x=r\\cos\\theta,\\ y=r\\sin\\theta$ (so $u=r,\\ v=\\theta$), the two edge vectors are exactly the arrows you dragged: stepping $r$ gives $(\\cos\\theta,\\sin\\theta)$ — a unit radial step — and stepping $\\theta$ gives $(-r\\sin\\theta,\\ r\\cos\\theta)$ — a sideways step of length $r$. They're perpendicular, so the area is base $\\times$ height $=1\\cdot r$, and the determinant agrees:</p>
+    <div class="eqbox">$$\\det J=\\cos\\theta\\,(r\\cos\\theta)-(-r\\sin\\theta)\\,\\sin\\theta=r(\\cos^2\\theta+\\sin^2\\theta)=r.$$</div>
+    <p>That's the same $r$ the polar beat found by measuring the arc — now you can see why: the sideways edge <em>is</em> the arc $r\\,d\\theta$, and it grows with $r$ while the radial edge stays fixed. The formula reproduces it, and will hand you the factor for a stretch, a shear, or any coordinates you cook up.</p>
+
+    <p><b>The full change-of-variables rule.</b> Swapping an integral into new coordinates, you replace $dx\\,dy$ by $|\\det J|\\,du\\,dv$ and re-express the region:</p>
+    <div class="eqbox">$$\\iint_R f(x,y)\\,dx\\,dy=\\iint_S f\\big(x(u,v),y(u,v)\\big)\\,|\\det J|\\,du\\,dv.$$</div>
+    <p>(ML echo: this is the machinery behind <b>normalizing flows</b>, where a network warps a simple distribution into a complex one and the log-likelihood picks up a $\\log|\\det J|$ term — the same Jacobian, tracking how the map stretches probability mass.)</p></div>`;
+
+  const arrow=(c,X0,Y0,X1,Y1,col,w)=>{if(!c)return;c.strokeStyle=col;c.lineWidth=w||2.5;c.beginPath();c.moveTo(X0,Y0);c.lineTo(X1,Y1);c.stroke();const a=Math.atan2(Y1-Y0,X1-X0);c.fillStyle=col;c.beginPath();c.moveTo(X1,Y1);c.lineTo(X1-11*Math.cos(a-0.4),Y1-11*Math.sin(a-0.4));c.lineTo(X1-11*Math.cos(a+0.4),Y1-11*Math.sin(a+0.4));c.closePath();c.fill();};
+
+  // ============ Move 1: parallelogram area = determinant ============
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=44,ox=150,oy=250;
   const px=x=>ox+x*S,py=y=>oy-y*S;
   const e1=[2,0];let e2=[1,2];
-  function arrow(X0,Y0,X1,Y1,col,w){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=w||2.5;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();const a=Math.atan2(Y1-Y0,X1-X0);ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-11*Math.cos(a-0.4),Y1-11*Math.sin(a-0.4));ctx.lineTo(X1-11*Math.cos(a+0.4),Y1-11*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
-  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
-    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=-1;g<=8;g++){ctx.beginPath();ctx.moveTo(px(g),py(-1));ctx.lineTo(px(g),py(5));ctx.stroke();ctx.beginPath();ctx.moveTo(px(-1),py(g));ctx.lineTo(px(8),py(g));ctx.stroke();}
-    ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(px(-1),py(0));ctx.lineTo(px(8),py(0));ctx.moveTo(px(0),py(-1));ctx.lineTo(px(0),py(5));ctx.stroke();
-    // parallelogram 0, e1, e1+e2, e2
+  function drawPar(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=-1;g<=8;g++){ctx.beginPath();ctx.moveTo(px(g),py(-1));ctx.lineTo(px(g),py(4.5));ctx.stroke();ctx.beginPath();ctx.moveTo(px(-1),py(g));ctx.lineTo(px(8),py(g));ctx.stroke();}
+    ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(px(-1),py(0));ctx.lineTo(px(8),py(0));ctx.moveTo(px(0),py(-1));ctx.lineTo(px(0),py(4.5));ctx.stroke();
     const O=[px(0),py(0)],A=[px(e1[0]),py(e1[1])],B=[px(e1[0]+e2[0]),py(e1[1]+e2[1])],C=[px(e2[0]),py(e2[1])];
     ctx.fillStyle='rgba(122,184,255,0.16)';ctx.beginPath();ctx.moveTo(O[0],O[1]);ctx.lineTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.lineTo(C[0],C[1]);ctx.closePath();ctx.fill();
     ctx.strokeStyle='#3a4c66';ctx.lineWidth=1;ctx.stroke();
-    arrow(O[0],O[1],A[0],A[1],'#7ab8ff');
-    arrow(O[0],O[1],C[0],C[1],'#e8b84b');
-    ctx.fillStyle='#7ab8ff';ctx.font='600 13px sans-serif';ctx.fillText('e\u2081',A[0]+6,A[1]+16);
-    ctx.fillStyle='#e8b84b';ctx.fillText('e\u2082',C[0]-22,C[1]-2);
+    arrow(ctx,O[0],O[1],A[0],A[1],'#7ab8ff');arrow(ctx,O[0],O[1],C[0],C[1],'#e8b84b');
+    ctx.fillStyle='#7ab8ff';ctx.font='600 13px sans-serif';ctx.fillText('e₁',A[0]+6,A[1]+16);
+    ctx.fillStyle='#e8b84b';ctx.fillText('e₂',C[0]-22,C[1]-2);
     const area=Math.abs(e1[0]*e2[1]-e1[1]*e2[0]);
     document.getElementById('e2v').textContent='('+e2[0].toFixed(1)+', '+e2[1].toFixed(1)+')';
     document.getElementById('arv').textContent=area.toFixed(2);}
   cv.style.touchAction='none';let drg=false;
-  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));e2=[Math.max(-1.5,Math.min(4.5,(X-ox)/S)),Math.max(-1,Math.min(4.5,(oy-Y)/S))];draw();}
-  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
-  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  function setPar(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));e2=[Math.max(-1.5,Math.min(4.5,(X-ox)/S)),Math.max(-1,Math.min(3.8,(oy-Y)/S))];drawPar();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setPar(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setPar(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
-  draw();
-  numChk(stage.querySelector('.card'),6,()=>{addReveal(`<div class="rh">✓ 6</div><p>$|e_{1x}e_{2y}-e_{1y}e_{2x}|=|2\\cdot3-0\\cdot1|=6$. Because $\\mathbf e_1$ lies flat along the $x$-axis (height $0$), the area is just base $2$ times height $3$ — and the determinant $ad-bc$ is exactly that "base times perpendicular height," for edges pointing any which way. Slide $\\mathbf e_2$ down onto the $x$-axis and the area collapses to $0$: the cell is squashed flat, the determinant vanishes, and the coordinate change is degenerate there.</p>`);});
-  setHints([`Area = |e1x·e2y − e1y·e2x| with e1=(2,0), e2=(1,3).`,`|2·3 − 0·1| = |6| = 6.`]);
-}
+  drawPar();
 
+  // ============ Move 2: dual-grid map, cell -> parallelogram ============
+  const MAPS={
+    polar:{uname:'r',vname:'θ',umin:0.4,umax:3,vmin:0,vmax:2*Math.PI,du:0.5,dv:Math.PI/6,u0:1.5,v0:Math.PI/6,ug:0.5,vg:Math.PI/6,
+      f:(u,v)=>[u*Math.cos(v),u*Math.sin(v)],Ju:(u,v)=>[Math.cos(v),Math.sin(v)],Jv:(u,v)=>[-u*Math.sin(v),u*Math.cos(v)],
+      view:[-3.2,3.2,-3.2,3.2],det:(u)=>u,
+      note:'Polar: drag the cell outward (bigger r). The radial edge keeps length dr, but the sideways edge is the arc r·dθ — it grows with r, so the cell gets bigger. |det J| = r.'},
+    stretch:{uname:'u',vname:'v',umin:0,umax:3,vmin:0,vmax:3,du:0.5,dv:0.5,u0:1,v0:1,ug:0.5,vg:0.5,
+      f:(u,v)=>[1.6*u,0.7*v],Ju:()=>[1.6,0],Jv:()=>[0,0.7],
+      view:[0,5,0,2.6],det:()=>1.12,
+      note:'Stretch: every cell maps to the same rectangle — the factor |det J| = 1.6·0.7 = 1.12 is constant everywhere.'},
+    curvy:{uname:'u',vname:'v',umin:0,umax:3,vmin:0,vmax:3,du:0.5,dv:0.5,u0:1,v0:1,ug:0.5,vg:0.5,
+      f:(u,v)=>[u+0.3*v,v+0.25*u*u],Ju:(u)=>[1,0.5*u],Jv:()=>[0.3,1],
+      view:[0,4.2,0,5.8],det:(u)=>1-0.15*u,
+      note:'Curvy: the grid bends and the cell shears. The factor |det J| = 1 − 0.15u changes from place to place — drag around and watch it.'}
+  };
+  let mkey='polar', u0=MAPS.polar.u0, v0=MAPS.polar.v0;
+  const cvm=document.getElementById('cvm');const cm=cvm&&cvm.getContext&&cvm.getContext('2d');const Wm=cvm.width,Hm=cvm.height;
+  const IX=40,IY=28,IW=250,IH=304, OXp=352,OYp=28,OW=256,OH=304;
+  function drawMap(){if(!cm)return;cm.clearRect(0,0,Wm,Hm);const M=MAPS[mkey];
+    // input isotropic
+    const sIn=Math.min(IW/(M.umax-M.umin), IH/(M.vmax-M.vmin));const Cx=IX+IW/2,Cy=IY+IH/2,uc=(M.umin+M.umax)/2,vc=(M.vmin+M.vmax)/2;
+    const Lx=u=>Cx+(u-uc)*sIn, Ly=v=>Cy-(v-vc)*sIn;
+    // output isotropic
+    const [xm,xM,ym,yM]=M.view;const sOut=Math.min(OW/(xM-xm),OH/(yM-ym));const Ox=OXp+OW/2,Oy=OYp+OH/2,xc=(xm+xM)/2,yc=(ym+yM)/2;
+    const Rx=x=>Ox+(x-xc)*sOut, Ry=y=>Oy-(y-yc)*sOut;
+    // pane frames
+    cm.strokeStyle='#223247';cm.lineWidth=1;cm.strokeRect(IX,IY,IW,IH);cm.strokeRect(OXp,OYp,OW,OH);
+    cm.fillStyle='#5d7186';cm.font='12px sans-serif';cm.fillText('input ('+M.uname+', '+M.vname+')',IX+4,IY-8);cm.fillText('output (x, y)',OXp+4,OYp-8);
+    cm.fillStyle='#8095ab';cm.font='20px sans-serif';cm.fillText('↦',(IX+IW+OXp)/2-10,Hm/2);
+    // input grid
+    cm.strokeStyle='#1c2838';cm.lineWidth=1;
+    for(let u=M.umin;u<=M.umax+1e-9;u+=M.ug){cm.beginPath();cm.moveTo(Lx(u),Ly(M.vmin));cm.lineTo(Lx(u),Ly(M.vmax));cm.stroke();}
+    for(let v=M.vmin;v<=M.vmax+1e-9;v+=M.vg){cm.beginPath();cm.moveTo(Lx(M.umin),Ly(v));cm.lineTo(Lx(M.umax),Ly(v));cm.stroke();}
+    // output warped grid
+    cm.strokeStyle='#223a52';cm.lineWidth=1;
+    for(let u=M.umin;u<=M.umax+1e-9;u+=M.ug){cm.beginPath();let st=false;for(let v=M.vmin;v<=M.vmax+1e-9;v+=(M.vmax-M.vmin)/60){const p=M.f(u,v);const X=Rx(p[0]),Y=Ry(p[1]);st?cm.lineTo(X,Y):cm.moveTo(X,Y);st=true;}cm.stroke();}
+    for(let v=M.vmin;v<=M.vmax+1e-9;v+=M.vg){cm.beginPath();let st=false;for(let u=M.umin;u<=M.umax+1e-9;u+=(M.umax-M.umin)/60){const p=M.f(u,v);const X=Rx(p[0]),Y=Ry(p[1]);st?cm.lineTo(X,Y):cm.moveTo(X,Y);st=true;}cm.stroke();}
+    // highlighted input cell
+    cm.fillStyle='rgba(232,184,75,0.22)';cm.strokeStyle='#e8b84b';cm.lineWidth=2;
+    cm.beginPath();cm.rect(Lx(u0),Ly(v0+M.dv),(Lx(u0+M.du)-Lx(u0)),(Ly(v0)-Ly(v0+M.dv)));cm.fill();cm.stroke();
+    // mapped cell (sample edges for curvature)
+    const edge=(ua,va,ub,vb)=>{const pts=[];for(let i=0;i<=12;i++){const p=M.f(ua+(ub-ua)*i/12, va+(vb-va)*i/12);pts.push([Rx(p[0]),Ry(p[1])]);}return pts;};
+    const loop=[].concat(edge(u0,v0,u0+M.du,v0),edge(u0+M.du,v0,u0+M.du,v0+M.dv),edge(u0+M.du,v0+M.dv,u0,v0+M.dv),edge(u0,v0+M.dv,u0,v0));
+    cm.fillStyle='rgba(232,184,75,0.22)';cm.strokeStyle='#e8b84b';cm.lineWidth=2;cm.beginPath();loop.forEach((p,i)=>i?cm.lineTo(p[0],p[1]):cm.moveTo(p[0],p[1]));cm.closePath();cm.fill();cm.stroke();
+    // edge vectors from mapped corner
+    const O=M.f(u0,v0),ju=M.Ju(u0,v0),jv=M.Jv(u0,v0);
+    const Oc=[Rx(O[0]),Ry(O[1])];
+    const uend=[Rx(O[0]+ju[0]*M.du),Ry(O[1]+ju[1]*M.du)],vend=[Rx(O[0]+jv[0]*M.dv),Ry(O[1]+jv[1]*M.dv)];
+    arrow(cm,Oc[0],Oc[1],uend[0],uend[1],'#7ab8ff');arrow(cm,Oc[0],Oc[1],vend[0],vend[1],'#e8b84b');
+    cm.fillStyle='#dbe6f4';cm.beginPath();cm.arc(Oc[0],Oc[1],3.5,0,7);cm.fill();
+    // readouts
+    const dj=Math.abs(M.det(u0,v0));
+    document.getElementById('juv').textContent='('+(ju[0]*M.du).toFixed(2)+', '+(ju[1]*M.du).toFixed(2)+')';
+    document.getElementById('jvv').textContent='('+(jv[0]*M.dv).toFixed(2)+', '+(jv[1]*M.dv).toFixed(2)+')';
+    document.getElementById('detv').textContent=dj.toFixed(2);
+    const ob=document.getElementById('obsm');if(ob)ob.textContent=M.note;}
+  function buildSeg(){const el=document.getElementById('segm');if(!el)return;
+    el.innerHTML=['polar','stretch','curvy'].map(k=>`<span class="segb ${k===mkey?'on':''}" data-k="${k}">${k}</span>`).join('');
+    el.querySelectorAll('.segb').forEach(b=>b.onclick=()=>{mkey=b.dataset.k;u0=MAPS[mkey].u0;v0=MAPS[mkey].v0;buildSeg();drawMap();});}
+  buildSeg();
+  cvm.style.touchAction='none';let dm=false;
+  function setMap(e){const M=MAPS[mkey];const r=cvm.getBoundingClientRect();const X=(e.clientX-r.left)*(Wm/Math.max(1,r.width)),Y=(e.clientY-r.top)*(Hm/Math.max(1,r.height));
+    if(X>IX+IW+6)return;                 // only the input pane drives the cell
+    const sIn=Math.min(IW/(M.umax-M.umin),IH/(M.vmax-M.vmin));const Cx=IX+IW/2,Cy=IY+IH/2,uc=(M.umin+M.umax)/2,vc=(M.vmin+M.vmax)/2;
+    u0=Math.max(M.umin,Math.min(M.umax-M.du, uc+(X-Cx)/sIn));
+    v0=Math.max(M.vmin,Math.min(M.vmax-M.dv, vc-(Y-Cy)/sIn));
+    drawMap();}
+  cvm.addEventListener('pointerdown',e=>{dm=true;try{cvm.setPointerCapture(e.pointerId);}catch(x){}setMap(e);e.preventDefault();});
+  cvm.addEventListener('pointermove',e=>{if(dm){e.preventDefault();setMap(e);}});
+  const endm=()=>dm=false;cvm.addEventListener('pointerup',endm);cvm.addEventListener('pointercancel',endm);
+  drawMap();
+
+  numChk(stage.querySelector('.card'),6,()=>{addReveal(`<div class="rh">✓ 6</div><p>$|e_{1x}e_{2y}-e_{1y}e_{2x}|=|2\\cdot3-0\\cdot1|=6$. With $\\mathbf e_1$ flat along the $x$-axis, that's just base $2$ times height $3$ — and the determinant $ad-bc$ is exactly "base times perpendicular height" for edges pointing any direction. Slide $\\mathbf e_2$ down onto the axis and the area collapses to $0$: the cell is squashed flat, the determinant vanishes, and the map is degenerate there.</p>`);});
+  setHints([`Area = |e1x·e2y − e1y·e2x| with e1=(2,0), e2=(1,3).`,`|2·3 − 0·1| = 6.`]);
+}
 function c7_doubleint(){
   stage.innerHTML=`<div class="card"><h2>Double integrals: adding up a solid</h2>
     <p>In one variable you found the <b>area</b> under a curve by slicing $[a,b]$ into thin strips, giving each strip a height and a width, and adding. Nothing about that recipe cared that the domain was a line. Lift the domain to a <b>patch of the plane</b> $R$ and the same recipe builds the <b>volume</b> between a surface $z=f(x,y)$ and that patch.</p>
