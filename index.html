@@ -331,6 +331,18 @@ const RECALL={
    {q:"What is a Taylor/Maclaurin series, and the expansions of $e^x$, $\\sin$, $\\cos$?",
     a:"$f(x)=\\sum\\frac{f^{(n)}(0)}{n!}x^n$. In particular $e^x=\\sum\\frac{x^n}{n!}$, $\\sin x=x-\\frac{x^3}{3!}+\\cdots$, $\\cos x=1-\\frac{x^2}{2!}+\\cdots$ — each valid for every $x$.", b:8}
  ]},
+ c7:{title:'Module 8 — Multivariable Differentiation', cues:[
+   {q:"With several inputs, what plays the role of the derivative, and how do you compute one?",
+    a:"A <b>partial derivative</b>: hold every other variable fixed and differentiate in one. $\\partial f/\\partial x$ is the slope of the slice through the surface in the $x$-direction — compute it by treating $y$ as a constant.", b:2},
+   {q:"Those slopes assemble into which local approximation of the surface?",
+    a:"The <b>tangent plane</b> $f(P)+f_x\\,\\Delta x+f_y\\,\\Delta y$ — the two-input version of the tangent line, the best flat stand-in for the surface near $P$.", b:3},
+   {q:"Package the partials into one vector. Which way does it point, and how long is it?",
+    a:"The <b>gradient</b> $\\nabla f=(f_x,f_y)$. It points in the direction of steepest ascent, perpendicular to the level curves, and its length is that steepest slope.", b:4},
+   {q:"How fast does $f$ change if you head off in an arbitrary unit direction $\\mathbf u$?",
+    a:"The <b>directional derivative</b> $D_{\\mathbf u}f=\\nabla f\\cdot\\mathbf u$ — the gradient's component along $\\mathbf u$. Largest when $\\mathbf u$ aligns with $\\nabla f$, and zero along a contour.", b:5},
+   {q:"A path $x(t),y(t)$ threads through $f$. How does the height change with $t$?",
+    a:"The <b>multivariable chain rule</b>: $\\frac{dz}{dt}=f_x\\,x'+f_y\\,y'=\\nabla f\\cdot(x',y')$ — add the routes through each input. This is the engine of backpropagation.", b:6}
+ ]},
  c8:{title:'Module 9 — Multivariable Optimization', cues:[
    {q:"On a surface $z=f(x,y)$, what single vector equation locates every peak, valley, and mountain pass?",
     a:"$\\nabla f=\\mathbf 0$ — every partial vanishes at once. It's Fermat's one-variable rule $f'(0)=0$ lifted: a flat spot in <em>all</em> directions. Each solution is a local max, local min, or saddle.", b:0},
@@ -1889,7 +1901,7 @@ function c6_recap(){
 /* ================= MODULE 8 — MULTIVARIABLE CALCULUS ================= */
 function c7_recall(){recallFrom(`Module 8 takes calculus into several variables at once — the terrain of every machine-learning loss surface. Everything here is built on the single-variable machine, so rebuild that first.`,['c0','c1','c2','c3','c4','c5','c6'],RECALL_HINT);}
 
-function c7_recall10(){recallFrom(`Module 10 turns from the <em>slope</em> of a surface to the <em>volume</em> beneath it — integration in several variables. First lock in Module 9, the hunt for the best point and the engine of model training. Run the chain top to bottom.`,['c8'],RECALL_HINT);}
+function c7_recall10(){recallFrom(`Module 10 weaves two threads together: <b>integration</b> — the 1-D integral, now doubled up — and the <b>multivariable</b> view of working one variable at a time. Both feed directly into double integrals, so roll up the chain from each before we build.`,['c4','c5','c7','c8'],RECALL_HINT);}
 function c7_intro(){
   stage.innerHTML=`<div class="card"><h2>From a curve to a surface</h2>
     <p>Everything so far had <em>one</em> input, so its graph was a curve. Now let a function take <em>two</em>: $f(x,y)$ assigns a <b>height</b> to each point $(x,y)$ of the flat plane. Sweep over the whole plane and those heights trace out a <b>surface</b> — a landscape of hills and valleys hanging over the floor.</p>
@@ -2951,7 +2963,7 @@ function c7_doubleint(){
     <div class="eqbox">$$S_N=8\\left(1-\\tfrac1N\\right)\\;\\xrightarrow[\\;N\\to\\infty\\;]{}\\;8.$$</div>
     <p>So $N=2$ gives $8(1-\\tfrac12)=4$ (your hand sum), $N=4$ gives $6$, $N=10$ gives $7.2$, climbing to the true volume $8$. That limit <em>is</em> the double integral:</p>
     <div class="eqbox">$$\\iint_{[0,2]^2}(x+y)\\,dA=8.$$</div>
-    <p>Two reminders that carry over from one variable. The integral is a <b>signed</b> volume: where $f\\lt0$ the boxes hang below the plane and count negative. And this limit-of-a-double-sum is the <em>definition</em>, not a method — nobody evaluates it by summing boxes forever. The next beat collapses $\\iint$ into two ordinary one-variable integrals you already know how to do.</p></div>`;
+    <p>Two reminders that carry over from one variable. The integral is a <b>signed</b> volume: where $f\\lt0$ the boxes hang below the plane and count negative. And this limit-of-a-double-sum is the <em>definition</em>, not a method — nobody evaluates it by summing boxes forever. The next beat collapses $\\iint$ into two ordinary one-variable integrals.</p></div>`;
 
   // ---- 3-D Riemann-box interactive ----
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
@@ -3023,57 +3035,119 @@ function c7_doubleint(){
 }
 function c7_iterated(){
   stage.innerHTML=`<div class="card"><h2>Iterated integrals: slice, then stack</h2>
-    <p>A double integral is computed as two ordinary integrals, one variable at a time (<b>Fubini's theorem</b>). The idea is exactly volume-by-slices from Module 6: at a fixed $y$, the slice through the solid has cross-sectional area $A(y)=\\int f(x,y)\\,dx$; sweeping $y$ and stacking those slices fills the volume $\\int A(y)\\,dy$. Below is the solid under $z=f(x,y)=x+y$ over $[0,3]\\times[0,2]$ in 3-D — drag left-to-right to sweep the gold slice and watch the solid build up.</p>
+    <p>The double integral $\\iint_R f\\,dA$ is defined as a limit of a double sum — and nobody wants to take that limit directly. The way out is to reduce it to something we can already do: ordinary one-variable integrals. Watch what happens if we add up the little boxes <b>one row at a time</b>.</p>
+    <p>Group the double sum by rows. Fix a row at height $y_j$ and sum across it first; then add up the rows:</p>
+    <div class="eqbox">$$\\sum_j\\bigg(\\underbrace{\\sum_i f(x_i,y_j)\\,\\Delta x}_{\\text{a 1-D sum along the row}}\\bigg)\\Delta y.$$</div>
+    <p>The inner sum is just a one-variable Riemann sum along a single row — $y_j$ is held still while $x$ runs. In the limit it becomes an ordinary integral in $x$, a number that depends on which row you picked. Call it the <b>slice area</b> $A(y)$:</p>
+    <div class="eqbox">$$A(y)=\\int_a^b f(x,y)\\,dx\\qquad(\\text{integrate over }x,\\ \\text{treat }y\\text{ as a constant}).$$</div>
+    <p>Then the outer sum stacks those slices and becomes an integral in $y$. Two nested one-variable integrals — this is <b>Fubini's theorem</b>:</p>
+    <div class="eqbox">$$\\iint_R f\\,dA=\\int_c^d\\!\\!\\underbrace{\\bigg(\\int_a^b f(x,y)\\,dx\\bigg)}_{A(y)}dy.$$</div>
+
+    <p>It's the volume-by-slices idea from Module 6, lifted one dimension: back then a slice was a flat area; here each slice is itself a flat area $A(y)$, and stacking them sweeps out a volume. Below is the solid under $z=f(x,y)=x+y$ over $[0,3]\\times[0,2]$. <b>Drag to sweep the gold slice</b>; the panel beneath shows that same slice flattened, with its area $A$ shaded — the inner integral, live.</p>
+    <div class="seg" id="segm"></div>
     <canvas id="cv" width="640" height="380"></canvas>
-    <div class="readout"><div class="rdc"><div class="k">slice y</div><div class="v" id="yv">—</div></div><div class="rdc"><div class="k">slice area A(y)</div><div class="v" id="av">—</div></div><div class="rdc"><div class="k">volume so far</div><div class="v" id="vv">—</div></div></div>
+    <canvas id="cvS" width="640" height="240"></canvas>
+    <p class="small" id="obsI" style="margin-top:6px;color:#9fb0c4"></p>
+    <div class="readout"><div class="rdc"><div class="k" id="k1">slice at</div><div class="v" id="yv">—</div></div><div class="rdc"><div class="k" id="k2">slice area A</div><div class="v" id="av">—</div></div><div class="rdc"><div class="k">volume so far</div><div class="v" id="vv">—</div></div></div>
     <div class="task"><b>Evaluate the whole thing</b>Sweep all the way, or compute: $\\displaystyle\\int_0^2\\!\\!\\int_0^3 (x+y)\\,dx\\,dy$.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
-    <p style="margin-top:16px"><b>Work it inside-out.</b> The <em>inner</em> integral treats $y$ as a constant and integrates over $x$ — that is the slice area:</p>
-    <div class="eqbox">$$A(y)=\\int_0^3 (x+y)\\,dx=\\Big[\\tfrac{x^2}{2}+xy\\Big]_0^3=\\tfrac{9}{2}+3y$$</div>
+
+    <p style="margin-top:16px"><b>Work it inside-out.</b> The <em>inner</em> integral holds $y$ fixed and integrates over $x$ — the shaded slice area:</p>
+    <div class="eqbox">$$A(y)=\\int_0^3 (x+y)\\,dx=\\Big[\\tfrac{x^2}{2}+xy\\Big]_0^3=\\tfrac{9}{2}+3y.$$</div>
     <p>Then the <em>outer</em> integral stacks the slices over $y$:</p>
-    <div class="eqbox">$$\\int_0^2\\Big(\\tfrac{9}{2}+3y\\Big)dy=\\Big[\\tfrac92 y+\\tfrac{3}{2}y^2\\Big]_0^2=9+6=15$$</div>
-    <p>So the volume is $15$. Fubini also lets you swap the order — integrate over $y$ first, then $x$ — and you get the same number; choose whichever is easier. That's the whole computational engine of multivariable integration.</p></div>`;
+    <div class="eqbox">$$\\int_0^2\\Big(\\tfrac{9}{2}+3y\\Big)dy=\\Big[\\tfrac92 y+\\tfrac{3}{2}y^2\\Big]_0^2=9+6=15.$$</div>
+
+    <p><b>Slice the other way — same solid, same volume.</b> Flip the switch above the picture to sweep in $x$ instead. Now the inner integral runs over $y$ with $x$ held fixed, $B(x)=\\int_0^2(x+y)\\,dy=2x+2$, and the outer integral stacks those:</p>
+    <div class="eqbox">$$\\int_0^3\\!\\!\\int_0^2 (x+y)\\,dy\\,dx=\\int_0^3(2x+2)\\,dx=\\big[x^2+2x\\big]_0^3=9+6=15.$$</div>
+    <p>Both orders give $15$. That freedom is the useful half of Fubini: pick whichever inner integral is easier. (On a rectangle the inner limits are plain numbers; over a curved region they can depend on the outer variable — the next beats handle that.) This is the entire computational engine of multivariable integration.</p></div>`;
+
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
   const OX=150,OY=260,exX=50,exY=17,eyX=48,eyY=-31,ezZ=24;
   const P=(x,y,z)=>[OX+x*exX+y*eyX, OY+x*exY+y*eyY-z*ezZ];
-  const f=(x,y)=>x+y;let y0=1;
+  const f=(x,y)=>x+y;
+  let mode='y', t=1;                       // t = outer sweep position
+  const Tmax=()=>mode==='y'?2:3;
   function poly(pts,fill,stroke,w){if(!ctx)return;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=w||1;ctx.stroke();}}
   function seg(a,b,color,w){if(!ctx)return;ctx.strokeStyle=color;ctx.lineWidth=w||1;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();}
-  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
-    // base region (z=0)
+  function sliceQuad(u){return mode==='y'
+    ? [P(0,u,0),P(3,u,0),P(3,u,f(3,u)),P(0,u,f(0,u))]
+    : [P(u,0,0),P(u,2,0),P(u,2,f(u,2)),P(u,0,f(u,0))];}
+  function draw3d(){if(!ctx)return;ctx.clearRect(0,0,W,H);
     poly([P(0,0,0),P(3,0,0),P(3,2,0),P(0,2,0)],'rgba(20,30,45,0.65)',null);
     for(let gx=0;gx<=3;gx++)seg(P(gx,0,0),P(gx,2,0),'#243347',1);
     for(let gy=0;gy<=2;gy++)seg(P(0,gy,0),P(3,gy,0),'#243347',1);
-    // fill the solid from y=0 up to y0, back(y0) to front(0) so nearer slices overlay
     const step=0.045;
-    for(let y=y0;y>=-1e-9;y-=step){
-      poly([P(0,y,0),P(3,y,0),P(3,y,f(3,y)),P(0,y,f(0,y))],'rgba(122,184,255,0.11)',null);}
-    // current slice, gold
-    poly([P(0,y0,0),P(3,y0,0),P(3,y0,f(3,y0)),P(0,y0,f(0,y0))],'rgba(232,184,75,0.30)','#e8b84b',2);
-    // roof wireframe (surface boundary)
+    for(let u=t;u>=-1e-9;u-=step)poly(sliceQuad(u),'rgba(122,184,255,0.11)',null);
+    poly(sliceQuad(t),'rgba(232,184,75,0.30)','#e8b84b',2);
     seg(P(0,0,f(0,0)),P(3,0,f(3,0)),'#7ab8ff',1.5);
     seg(P(3,0,f(3,0)),P(3,2,f(3,2)),'#7ab8ff',1.5);
     seg(P(3,2,f(3,2)),P(0,2,f(0,2)),'#7ab8ff',1.5);
     seg(P(0,2,f(0,2)),P(0,0,f(0,0)),'#7ab8ff',1.5);
-    // vertical edges
     seg(P(0,0,0),P(0,0,f(0,0)),'#3a4c66',1);seg(P(3,0,0),P(3,0,f(3,0)),'#3a4c66',1);
     seg(P(3,2,0),P(3,2,f(3,2)),'#3a4c66',1);seg(P(0,2,0),P(0,2,f(0,2)),'#3a4c66',1);
     ctx.fillStyle='#5d7186';ctx.font='12px sans-serif';
     ctx.fillText('z = x + y',P(0,2,f(0,2))[0]-4,P(0,2,f(0,2))[1]-8);
     ctx.fillText('x',P(3,0,0)[0]+6,P(3,0,0)[1]+4);ctx.fillText('y',P(0,2,0)[0]-14,P(0,2,0)[1]-2);
-    document.getElementById('yv').textContent=y0.toFixed(2);
-    document.getElementById('av').textContent=(4.5+3*y0).toFixed(2);
-    document.getElementById('vv').textContent=(4.5*y0+1.5*y0*y0).toFixed(2);}
-  let drg=false;cv.style.touchAction='none';
-  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));y0=Math.max(0,Math.min(2,(X-40)/(W-80)*2));draw();}
+    // readouts
+    const A=mode==='y'?(4.5+3*t):(2*t+2);
+    const V=mode==='y'?(4.5*t+1.5*t*t):(t*t+2*t);
+    document.getElementById('yv').textContent=t.toFixed(2);
+    document.getElementById('av').textContent=A.toFixed(2);
+    document.getElementById('vv').textContent=V.toFixed(2);
+    document.getElementById('k1').textContent=mode==='y'?'slice y':'slice x';
+    document.getElementById('k2').textContent=mode==='y'?'slice area A(y)=∫f dx':'slice area A(x)=∫f dy';
+    const ob=document.getElementById('obsI');if(ob)ob.textContent=mode==='y'
+      ?'Slicing ⟂ y: each gold slice has area A(y)=∫₀³(x+y)dx. Sweep y from 0 to 2 and the areas stack into the volume.'
+      :'Slicing ⟂ x: each gold slice has area B(x)=∫₀²(x+y)dy. Sweep x from 0 to 3 — the volume comes out the same, 15.';}
+
+  // ---- 2-D inset: the current slice, flattened, with its area shaded (the inner integral) ----
+  const cvs=document.getElementById('cvS');const cs=cvs&&cvs.getContext&&cvs.getContext('2d');const Ws=cvs.width,Hs=cvs.height;
+  const ml=56,mr=20,mt=22,mb=42,zmax=5.6;
+  function drawSlice(){if(!cs)return;cs.clearRect(0,0,Ws,Hs);
+    const T=mode==='y'?3:2;                 // inner variable range
+    const inner=mode==='y'?'x':'y';const held=mode==='y'?('y = '+t.toFixed(2)):('x = '+t.toFixed(2));
+    const pw=Ws-ml-mr,ph=Hs-mt-mb;
+    const sx=u=>ml+(u/T)*pw, sy=z=>mt+ph-(z/zmax)*ph;
+    // axes
+    cs.strokeStyle='#2b3a4f';cs.lineWidth=1.2;cs.beginPath();cs.moveTo(ml,mt);cs.lineTo(ml,mt+ph);cs.lineTo(ml+pw,mt+ph);cs.stroke();
+    // height along the slice: z = (inner var) + (held value), from the held line up
+    const hv=t;                              // held value equals t in both modes (f=x+y)
+    const z0=u=>u+hv;
+    // shaded area under the profile
+    cs.fillStyle='rgba(232,184,75,0.22)';cs.beginPath();cs.moveTo(sx(0),sy(0));
+    for(let u=0;u<=T+1e-9;u+=T/120)cs.lineTo(sx(u),sy(z0(u)));
+    cs.lineTo(sx(T),sy(0));cs.closePath();cs.fill();
+    // profile line
+    cs.strokeStyle='#e8b84b';cs.lineWidth=2.6;cs.beginPath();for(let u=0;u<=T+1e-9;u+=T/120){const X=sx(u),Y=sy(z0(u));u?cs.lineTo(X,Y):cs.moveTo(X,Y);}cs.stroke();
+    // ticks + labels
+    cs.fillStyle='#5d7186';cs.font='12px sans-serif';
+    cs.fillText(inner,ml+pw-6,mt+ph+28);cs.fillText('z',ml-30,mt+8);
+    cs.fillText('0',ml-14,mt+ph+16);cs.fillText(String(T),ml+pw-4,mt+ph+16);
+    const A=mode==='y'?(4.5+3*t):(2*t+2);
+    cs.fillStyle='#e8b84b';cs.font='600 13px sans-serif';
+    cs.fillText('inner integral = shaded area  A = '+A.toFixed(2),ml+8,mt+16);
+    cs.fillStyle='#9fb0c4';cs.font='12px sans-serif';
+    cs.fillText('slice at '+held+'  ·  height z = '+inner+' + '+t.toFixed(2),ml+8,mt+ph+28-0);}
+
+  function draw(){draw3d();drawSlice();}
+
+  // ---- Fubini direction toggle ----
+  function buildSeg(){const el=document.getElementById('segm');if(!el)return;
+    el.innerHTML=`<span class="segb ${mode==='y'?'on':''}" data-m="y">slice ⟂ y  (inner ∫dx)</span><span class="segb ${mode==='x'?'on':''}" data-m="x">slice ⟂ x  (inner ∫dy)</span>`;
+    el.querySelectorAll('.segb').forEach(b=>b.onclick=()=>{mode=b.dataset.m;t=Tmax()/2;buildSeg();draw();});}
+  buildSeg();
+
+  // drag the 3-D solid to sweep
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));t=Math.max(0,Math.min(Tmax(),(X-40)/(W-80)*Tmax()));draw();}
   cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),15,()=>{addReveal(`<div class="rh">✓ 15</div><p>Inner integral (slice area) $A(y)=\\tfrac92+3y$; outer integral stacks the slices to $9+6=15$. Sweep the gold slice from $y=0$ to $2$ and the "volume so far" readout climbs to exactly $15$ — the slice areas run from $A(0)=4.5$ up to $A(2)=10.5$, and their accumulation is the solid's volume. Two single integrals, nested.</p>`);});
+
+  numChk(stage.querySelector('.card'),15,()=>{addReveal(`<div class="rh">✓ 15</div><p>Inner integral (slice area) $A(y)=\\tfrac92+3y$; the outer integral stacks the slices to $9+6=15$. Sweep the gold slice from $y=0$ to $2$ and the "volume so far" readout climbs to exactly $15$, as the slice areas run from $A(0)=4.5$ up to $A(2)=10.5$. Flip the switch and slice the other way: $\\int_0^3(2x+2)\\,dx=15$ too. Two single integrals, nested either way.</p>`);});
   setHints([`Inner first: ∫₀³(x+y)dx = 9/2 + 3y (treat y as constant). Then ∫₀²(9/2+3y)dy.`,`[9y/2 + 3y²/2] from 0 to 2 = 9 + 6 = 15.`]);
 }
-
 function c7_problems(){
   stage.innerHTML=`<div class="card"><h2>Problem set</h2>
     <p>Surfaces, partials, the tangent plane, the gradient, directional derivatives, and the chain rule. Paper first; solutions fold open.</p>
