@@ -151,7 +151,7 @@ const MODULES=[
   beats:[c7_critical,c7_graddescent,c7_taylor,c7_secondderiv,c7_convexity,c7_newton,c7_lagrange]},
  {id:'c9',title:'Multiple Integrals',sub:'Double integrals as volume, iterated integrals and Fubini, polar coordinates, and change of variables via the Jacobian.',ready:true,
   outro:`A double integral accumulates a function over a 2-D region — volume under a surface — computed as iterated single integrals (Fubini). Polar coordinates and the general change of variables, with its Jacobian area factor, make round and warped regions tractable.`,
-  beats:[c7_doubleint,c7_iterated,c7_polar,c7_jacobian]},
+  beats:[c7_recall10,c7_doubleint,c7_iterated,c7_polar,c7_jacobian]},
  {id:'c10',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:false},
  {id:'c11',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:false},
 ];
@@ -330,6 +330,22 @@ const RECALL={
     a:"With $L=\\lim\\left|\\frac{a_{n+1}}{a_n}\\right|$: $L&lt;1$ converges, $L&gt;1$ diverges, $L=1$ inconclusive. It works by trapping the tail under a convergent geometric series with ratio $r$ chosen between $L$ and $1$.", b:6},
    {q:"What is a Taylor/Maclaurin series, and the expansions of $e^x$, $\\sin$, $\\cos$?",
     a:"$f(x)=\\sum\\frac{f^{(n)}(0)}{n!}x^n$. In particular $e^x=\\sum\\frac{x^n}{n!}$, $\\sin x=x-\\frac{x^3}{3!}+\\cdots$, $\\cos x=1-\\frac{x^2}{2!}+\\cdots$ — each valid for every $x$.", b:8}
+ ]},
+ c8:{title:'Module 9 — Multivariable Optimization', cues:[
+   {q:"On a surface $z=f(x,y)$, what single vector equation locates every peak, valley, and mountain pass?",
+    a:"$\\nabla f=\\mathbf 0$ — every partial vanishes at once. It's Fermat's one-variable rule $f'(0)=0$ lifted: a flat spot in <em>all</em> directions. Each solution is a local max, local min, or saddle.", b:0},
+   {q:"$\\nabla f=\\mathbf 0$ only says \"flat\" — so what tells a bowl from a dome from a saddle?",
+    a:"The local <b>quadratic model</b> $f(\\mathbf x+\\mathbf p)\\approx f(\\mathbf x)+\\nabla f\\cdot\\mathbf p+\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\mathbf p$. At a critical point $\\nabla f=\\mathbf 0$, so the curvature term $\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\mathbf p$ alone decides. $H$ is the <b>Hessian</b>, the symmetric matrix of second partials.", b:2},
+   {q:"Turn that curvature into a test you run on the second partials.",
+    a:"The discriminant $D=\\det H=f_{xx}f_{yy}-f_{xy}^2$. Then: $D&gt;0$ with $f_{xx}&gt;0$ is a min, $D&gt;0$ with $f_{xx}&lt;0$ a max, $D&lt;0$ a saddle, $D=0$ inconclusive. It's the 1-D sign-of-$f''$ test, upgraded to a determinant.", b:3},
+   {q:"When is a single critical point guaranteed to be <em>the</em> global minimum, with no other valleys?",
+    a:"When $f$ is <b>convex</b> — its Hessian is positive-semidefinite everywhere, $\\mathbf p^{\\mathsf T}H\\mathbf p\\ge 0$ in every direction (never curves down). Then any $\\nabla f=\\mathbf 0$ is the global min. On non-convex high-dimensional surfaces, saddles vastly outnumber true minima.", b:4},
+   {q:"How do you actually walk downhill to a minimum using only the gradient?",
+    a:"<b>Gradient descent</b>: $\\mathbf x\\leftarrow\\mathbf x-\\alpha\\,\\nabla f$, stepping against the steepest-ascent direction. The learning rate $\\alpha$ is the whole game — too large overshoots, zigzags, or explodes; too small crawls. It's $x-\\alpha f'(x)$ with two directions instead of one.", b:1},
+   {q:"If you also know the curvature, how do you reach the minimum faster?",
+    a:"<b>Newton's method</b>: $\\mathbf x\\leftarrow\\mathbf x-H^{-1}\\nabla f$, which jumps straight to the minimum of the quadratic model in a single step. Gradient descent uses slope only; Newton uses the Hessian to scale and rotate the step.", b:5},
+   {q:"How do you find the best point while <em>stuck on a constraint</em> $g=c$?",
+    a:"<b>Lagrange multipliers</b>: at the constrained optimum the objective's level curve is tangent to the constraint curve, so the gradients are parallel — $\\nabla f=\\lambda\\,\\nabla g$. Solve that together with $g(\\mathbf x)=c$. The scalar $\\lambda$ just matches their lengths.", b:6}
  ]}
 };
 const RECALL_HINT=`Run it as one unbroken chain — each cue answers the previous one's "so what?". If a link takes you away to review, one tap on Back returns you to this list.`;
@@ -1873,6 +1889,7 @@ function c6_recap(){
 /* ================= MODULE 8 — MULTIVARIABLE CALCULUS ================= */
 function c7_recall(){recallFrom(`Module 8 takes calculus into several variables at once — the terrain of every machine-learning loss surface. Everything here is built on the single-variable machine, so rebuild that first.`,['c0','c1','c2','c3','c4','c5','c6'],RECALL_HINT);}
 
+function c7_recall10(){recallFrom(`Module 10 turns from the <em>slope</em> of a surface to the <em>volume</em> beneath it — integration in several variables. First lock in Module 9, the hunt for the best point and the engine of model training. Run the chain top to bottom.`,['c8'],RECALL_HINT);}
 function c7_intro(){
   stage.innerHTML=`<div class="card"><h2>From a curve to a surface</h2>
     <p>Everything so far had <em>one</em> input, so its graph was a curve. Now let a function take <em>two</em>: $f(x,y)$ assigns a <b>height</b> to each point $(x,y)$ of the flat plane. Sweep over the whole plane and those heights trace out a <b>surface</b> — a landscape of hills and valleys hanging over the floor.</p>
