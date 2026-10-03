@@ -2670,118 +2670,135 @@ function c7_secondderiv(){
 function c7_lagrange(){
   stage.innerHTML=`<div class="card"><h2>Lagrange multipliers: the best point on a constraint</h2>
     <p>So far we've hunted for the best point <em>anywhere</em>. Usually life is more restrictive: find the best point while <b>stuck on a curve</b>. Here's the cleanest example to build the idea on.</p>
-    <p>You have $10$ units of edging for the two sides of a rectangle; call the sides $x$ and $y$. You want the largest area. Two different roles are in play, and it pays to name them:</p>
+    <p>You have $10$ units of edging for the two sides of a rectangle; call the sides $x$ and $y$. You want the largest area. Two roles are in play, and it pays to name them:</p>
     <p>&bull; the <b>objective</b> — the thing you're maximizing — is the area $f(x,y)=xy$;</p>
-    <p>&bull; the <b>constraint</b> — the rule you can't break — is that the two sides sum to $10$. Write that rule as its own function pinned to a fixed value: $g(x,y)=x+y$, held at $g=10$. The split-points you're <em>allowed</em> to stand on form the <b>constraint curve</b> $g=10$ — here, the line $x+y=10$.</p>
-    <p><b>Slide the split</b> along that line and find the biggest area.</p>
+    <p>&bull; the <b>constraint</b> — the rule you can't break — is that the sides sum to $10$. Write it as its own function pinned to a value: $g(x,y)=x+y$, held at $g=10$. The split-points you're <em>allowed</em> to stand on form the <b>constraint curve</b> $g=10$ — here, the line $x+y=10$.</p>
+    <div class="eqbox">Keep the cast straight: $f$ and $g$ are <b>surfaces</b> over the plane. Their <b>level curves</b> live down in the input plane — the hyperbolas $xy=\\text{const}$ and the one curve $g=c$ you're pinned to. Each <b>gradient</b> is computed from its surface but <b>drawn in the input plane</b>, where it sits perpendicular to that surface's level curves.</div>
+    <p><b>Slide the split</b> along the constraint and find the biggest area. Watch the new readout — $df/ds$, the slope of the objective <em>as you walk along the constraint</em>.</p>
+    <div class="seg" id="segc"></div>
     <canvas id="cv" width="640" height="380"></canvas>
     <p class="small" id="obs" style="margin-top:8px;color:#9fb0c4"></p>
-    <p>The flat map above looks straight down on the input plane. Lift it into 3-D and the setup sharpens: the <span class="cy">objective is a surface</span> $z=xy$, and the constraint is a <b>wall</b> standing straight up over the line $x+y=10$. Being "stuck on the constraint" means walking the <b>cut curve</b> where that wall slices the surface — and the best split is simply its <b>high point</b>. Slide the split and the marker climbs the cut to the top at $(5,5)$, height $25$.</p>
+    <div class="readout"><div class="rdc"><div class="k">point (x, y)</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">objective f = xy</div><div class="v" id="fv">—</div></div><div class="rdc"><div class="k">slope along constraint df/ds</div><div class="v" id="dv">—</div></div></div>
+
+    <p style="margin-top:14px">Lift it into 3-D and the setup sharpens: the <span class="cy">objective is a surface</span> $z=xy$, and the constraint is a <b>wall</b> standing over its curve. Being stuck on the constraint means walking the <b>cut curve</b> where the wall slices the surface — and the best point is just its <b>high point</b>. The marker rides the cut as you slide.</p>
     <canvas id="cv3d" width="640" height="300"></canvas>
-    <div class="readout"><div class="rdc"><div class="k">split (x, y)</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">objective f = xy</div><div class="v" id="fv">—</div></div><div class="rdc"><div class="k">constraint g = x + y</div><div class="v" id="gv">—</div></div></div>
-    <div class="task"><b>Find the biggest area</b>Slide to the largest rectangle. What is the maximum of the objective $f=xy$ while $g=x+y$ stays at $10$?</div>
+
+    <div class="task"><b>Find the biggest area</b>With the straight constraint $x+y=10$, slide to the largest rectangle. What is the maximum of $f=xy$?</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
 
-    <p style="margin-top:16px"><b>Why is the square best? Watch the contours.</b> The gold curves are the objective's <b>level curves</b> $f=xy=\\text{const}$ — each one a set of splits with equal area, labelled by that area. Stand at a split that isn't the square: the area-curve through you <em>cuts across</em> the constraint line. That crossing is the tell — a point just beside you on the line sits on a <em>higher</em> area-curve, so you can slide there and gain. You keep gaining until the area-curve stops crossing and merely <b>touches</b> the line at a single point. There, sliding either way drops you to a lower area: you're at the maximum.</p>
-    <div class="eqbox">constrained optimum $\\iff$ the objective's level curve is <b>tangent</b> to the constraint curve.</div>
+    <p style="margin-top:16px"><b>Why is the tangent point the best? Walk the constraint.</b> Stuck on the curve, the only moves you have are <em>along</em> it. Measure your position by the distance $s$ you've walked; your objective $f$ becomes a plain function of the single variable $s$. Optimizing it is the one-variable rule you already have: keep going while the slope $df/ds\\neq0$, stop where $df/ds=0$. The chain rule turns that slope into a dot product:</p>
+    <div class="eqbox">$$\\frac{df}{ds}=\\nabla f\\cdot\\mathbf T,\\qquad \\mathbf T=\\text{unit tangent to the constraint.}$$</div>
+    <p>So the optimum is where $\\nabla f\\cdot\\mathbf T=0$: the objective's gradient has <b>no push along any direction you're allowed to move</b>. In the slider that's the instant $df/ds$ crosses zero — positive while a higher area lies ahead, negative once you've passed the peak, exactly like $f'(x)$ changing sign at a one-variable maximum.</p>
+    <div class="eqbox">unconstrained: zero slope in <b>every</b> direction $(\\nabla f=\\mathbf 0)$ $\\qquad$ constrained: zero slope only in the <b>allowed</b> directions $(\\nabla f\\cdot\\mathbf T=0)$</div>
 
-    <p><b>Turn tangency into an equation.</b> The figure below zooms right in on the meeting point of the two curves. <b>Flip the switch</b> from "curves cross" to "curves tangent" and watch the two gradient arrows: while the curves merely cross they point different ways, but the instant they're tangent the arrows line up. Here's why:</p>
+    <p><b>From "no push along the curve" to parallel gradients.</b> The figure below zooms in on the meeting point. <b>Flip the switch</b> from "curves cross" to "curves tangent" and watch the gradient arrows line up.</p>
     <div class="seg" id="seg2"></div>
     <canvas id="cv2" width="640" height="300"></canvas>
     <p class="small" id="obs2" style="margin-top:6px;color:#9fb0c4"></p>
-    <p>&bull; $\\nabla g$ (green) points perpendicular to the constraint curve — a gradient is always perpendicular to its own level curve, and the constraint is the level curve $g=10$.</p>
-    <p>&bull; $\\nabla f$ (gold) points perpendicular to the objective's level curve — the very same fact, applied to $f$.</p>
-    <p>When the two curves are tangent they share <em>one</em> tangent line, so both gradients are perpendicular to that same line. And in the plane, two vectors perpendicular to a single line can only point along one direction — they must be <b>parallel</b>. Parallel means one is a scalar multiple of the other:</p>
+    <p>&bull; $\\nabla g$ (green) points perpendicular to the constraint curve — a gradient is always perpendicular to its own level curve, and the constraint <em>is</em> the level curve $g=c$. So $\\nabla g$ is perpendicular to $\\mathbf T$.</p>
+    <p>&bull; At the optimum $\\nabla f\\cdot\\mathbf T=0$ means $\\nabla f$ is <em>also</em> perpendicular to $\\mathbf T$.</p>
+    <p>Two vectors perpendicular to the same tangent line (in the plane) can only point along one direction — they're <b>parallel</b>. Parallel means one is a scalar multiple of the other:</p>
     <div class="eqbox">$$\\nabla f=\\lambda\\,\\nabla g.$$</div>
-    <p>The scalar $\\lambda$ — the <b>Lagrange multiplier</b> — just absorbs the difference in the gradients' lengths; they share a <em>direction</em>, not a size.</p>
+    <p>The scalar $\\lambda$ — the <b>Lagrange multiplier</b> — just absorbs the difference in the gradients' lengths; they share a direction, not a size.</p>
 
-    <p><b>Write the whole system.</b> That single vector equation is one scalar equation per component — and, easy to forget, you still have to state that you're actually <em>on</em> the constraint. Three equations:</p>
+    <p><b>Does this survive a curved constraint?</b> Flip the constraint toggle above from the line to the <b>circle</b> $x^2+y^2=18$ (same objective $f=xy$). Nothing in the argument used straightness: at each point the constraint still has one tangent direction $\\mathbf T$, and you still walk until $df/ds=\\nabla f\\cdot\\mathbf T=0$. The optimum lands at $(3,3)$ with area $9$, right where a hyperbola $xy=9$ kisses the circle and where $\\nabla f=(3,3)$ lines up with the radial $\\nabla g=(6,6)$. The cut curve in 3-D is now carved by a curved wall, but it's still a 1-D curve with a single top.</p>
+
+    <p><b>What if the constraint is a surface?</b> In three variables a single constraint $g(x,y,z)=c$ is no longer a curve but a whole <b>surface</b>, and you're free to roam anywhere on it — the allowed directions fill a 2-D <b>tangent plane</b>. The optimum still needs $\\nabla f\\cdot\\mathbf d=0$ for <em>every</em> allowed direction $\\mathbf d$, and the only way a vector can be perpendicular to an entire plane of directions is to point straight along that surface's <b>normal</b>. The normal to a level surface is its gradient, so once again</p>
+    <div class="eqbox">$$\\nabla f=\\lambda\\,\\nabla g,$$</div>
+    <p>only now it says the two <em>level surfaces</em> — $f=\\text{const}$ and $g=c$ — are tangent, sharing a tangent plane, instead of two level curves sharing a tangent line. Pile on a second constraint surface $g_2=c_2$ and you're pinned to where the two surfaces <b>intersect</b>, usually a curve; the one allowed direction is that curve's tangent, perpendicular to both $\\nabla g_1$ and $\\nabla g_2$, which forces $\\nabla f$ into the plane they span:</p>
+    <div class="eqbox">$$\\nabla f=\\lambda_1\\,\\nabla g_1+\\lambda_2\\,\\nabla g_2.$$</div>
+    <p>One multiplier per constraint — exactly the general form behind the KKT conditions in ML. The rule "the gradient must be perpendicular to every allowed direction" never changed; only the number of allowed directions did. Tangent level curves were just its flat, two-variable shadow.</p>
+
+    <p><b>Write the whole system.</b> The vector equation $\\nabla f=\\lambda\\nabla g$ is one scalar equation per component, plus the reminder that you're actually <em>on</em> the constraint:</p>
     <div class="eqbox">$$f_x=\\lambda\\,g_x,\\qquad f_y=\\lambda\\,g_y,\\qquad g(x,y)=c.$$</div>
-    <p><b>Solve ours.</b> The objective $f=xy$ has $\\nabla f=(f_x,f_y)=(y,x)$; the constraint $g=x+y$ has $\\nabla g=(g_x,g_y)=(1,1)$. Component by component, then drop in the constraint:</p>
-    <div class="eqbox">$$y=\\lambda\\cdot1,\\quad x=\\lambda\\cdot1\\ \\Rightarrow\\ x=y;\\qquad g=x+y=10\\ \\Rightarrow\\ x=y=5.$$</div>
-    <p>So $x=y=5$ (with $\\lambda=5$): the best rectangle of a fixed perimeter is the <b>square</b>, area $25$. The recipe — set $\\nabla f=\\lambda\\nabla g$, add the constraint $g=c$, solve — is the entire method, and it scales straight up: many variables, and one multiplier $\\lambda$ for each constraint you add. It's the backbone of constrained optimization in ML — the dual view of support-vector machines, maximum-entropy models, and the KKT conditions that extend it to inequality constraints all start exactly here.</p></div>`;
-  // ---------- main interactive: slide the split ----------
+    <p><b>Solve the line case.</b> Here $\\nabla f=(f_x,f_y)=(y,x)$ and $\\nabla g=(1,1)$. Component by component, then drop in the constraint:</p>
+    <div class="eqbox">$$y=\\lambda\\cdot1,\\quad x=\\lambda\\cdot1\\ \\Rightarrow\\ x=y;\\qquad x+y=10\\ \\Rightarrow\\ x=y=5.$$</div>
+    <p>So $x=y=5$ (with $\\lambda=5$): the best rectangle of a fixed perimeter is the <b>square</b>, area $25$. The recipe — set $\\nabla f=\\lambda\\nabla g$, add the constraint $g=c$, solve — is the whole method, and it scales straight up: many variables, one multiplier $\\lambda$ per constraint. It's the backbone of constrained optimization in ML — the dual view of support-vector machines, maximum-entropy models, and the KKT conditions that extend it to inequality constraints all start here.</p></div>`;
+
+  const R=Math.sqrt(18);
+  let cmode='line', u=0.18;                       // u in [0,1] along the constraint
+  function arrow(c2,X0,Y0,X1,Y1,col){if(!c2)return;c2.strokeStyle=col;c2.lineWidth=2.5;c2.beginPath();c2.moveTo(X0,Y0);c2.lineTo(X1,Y1);c2.stroke();const a=Math.atan2(Y1-Y0,X1-X0);c2.fillStyle=col;c2.beginPath();c2.moveTo(X1,Y1);c2.lineTo(X1-11*Math.cos(a-0.4),Y1-11*Math.sin(a-0.4));c2.lineTo(X1-11*Math.cos(a+0.4),Y1-11*Math.sin(a+0.4));c2.closePath();c2.fill();}
+  // constraint parametrization: point, unit tangent T, grad g
+  function at(uu){if(cmode==='line'){const x=0.5+uu*9,y=10-x;return {x,y,Tx:1/Math.SQRT2,Ty:-1/Math.SQRT2,gx:1,gy:1};}
+    const ph=0.06+uu*(Math.PI/2-0.12),x=R*Math.cos(ph),y=R*Math.sin(ph);return {x,y,Tx:-Math.sin(ph),Ty:Math.cos(ph),gx:2*x,gy:2*y};}
+
+  // ================= contour map =================
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=30,ox=60,oy=340;
   const px=x=>ox+x*S,py=y=>oy-y*S;
-  let x0=2;
-  function arrow(c2,X0,Y0,X1,Y1,col){if(!c2)return;c2.strokeStyle=col;c2.lineWidth=2.5;c2.beginPath();c2.moveTo(X0,Y0);c2.lineTo(X1,Y1);c2.stroke();const a=Math.atan2(Y1-Y0,X1-X0);c2.fillStyle=col;c2.beginPath();c2.moveTo(X1,Y1);c2.lineTo(X1-11*Math.cos(a-0.4),Y1-11*Math.sin(a-0.4));c2.lineTo(X1-11*Math.cos(a+0.4),Y1-11*Math.sin(a+0.4));c2.closePath();c2.fill();}
-  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);const y0=10-x0;
+  function hyp(k,col,w){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=w||1.2;ctx.beginPath();let st=false;for(let xx=Math.max(0.04,k/11);xx<=11;xx+=0.03){const yy=k/xx;if(yy>11)continue;const X=px(xx),Y=py(yy);st?ctx.lineTo(X,Y):ctx.moveTo(X,Y);st=true;}ctx.stroke();}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
     ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=0;g<=11;g++){ctx.beginPath();ctx.moveTo(px(g),py(0));ctx.lineTo(px(g),py(11));ctx.stroke();ctx.beginPath();ctx.moveTo(px(0),py(g));ctx.lineTo(px(11),py(g));ctx.stroke();}
     ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(px(0),py(0));ctx.lineTo(px(11),py(0));ctx.moveTo(px(0),py(0));ctx.lineTo(px(0),py(11));ctx.stroke();
-    for(const k of [9,16,25]){ctx.strokeStyle=k===25?'#5a4a24':'#233042';ctx.lineWidth=1.2;ctx.beginPath();let st=false;for(let xx=k/11;xx<=11;xx+=0.05){const yy=k/xx;if(yy>11)continue;const X=px(xx),Y=py(yy);st?ctx.lineTo(X,Y):ctx.moveTo(X,Y);st=true;}ctx.stroke();
-      if(k<25){const yy=k/8.8;if(yy<=11){ctx.fillStyle='#3a4c66';ctx.font='10px sans-serif';ctx.fillText('xy='+k,px(8.8)+2,py(yy));}}}
-    const k0=x0*y0;ctx.strokeStyle='#e8b84b';ctx.lineWidth=2;ctx.beginPath();let s2=false;for(let xx=Math.max(0.05,k0/11);xx<=11;xx+=0.03){const yy=k0/xx;if(yy>11)continue;const X=px(xx),Y=py(yy);s2?ctx.lineTo(X,Y):ctx.moveTo(X,Y);s2=true;}ctx.stroke();
-    ctx.fillStyle='rgba(122,184,255,0.10)';ctx.fillRect(px(0),py(y0),x0*S,y0*S);
-    ctx.strokeStyle='#3a4c66';ctx.lineWidth=1;ctx.strokeRect(px(0),py(y0),x0*S,y0*S);
-    ctx.strokeStyle='#7ab8ff';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(px(0),py(10));ctx.lineTo(px(10),py(0));ctx.stroke();
-    arrow(ctx,px(x0),py(y0),px(x0)+y0*6,py(y0)-x0*6,'#e8b84b');
-    arrow(ctx,px(x0),py(y0),px(x0)+22,py(y0)-22,'#3fb98f');
-    ctx.fillStyle='#dbe6f4';ctx.beginPath();ctx.arc(px(x0),py(y0),5,0,7);ctx.fill();
-    ctx.fillStyle='#7ab8ff';ctx.font='12px sans-serif';ctx.fillText('constraint g = x+y = 10',px(4.1),py(2.1));
-    ctx.fillStyle='#e8b84b';ctx.fillText('∇f',px(x0)+y0*6+4,py(y0)-x0*6);ctx.fillStyle='#3fb98f';ctx.fillText('∇g',px(x0)+26,py(y0)-24);
-    const tang=Math.abs(x0-y0)<0.25;
-    if(tang){ctx.fillStyle='#3fb98f';ctx.font='600 13px sans-serif';ctx.fillText('tangent — best split',px(5.1),py(6.7));}
-    document.getElementById('pv').textContent='('+x0.toFixed(1)+', '+y0.toFixed(1)+')';
-    document.getElementById('fv').textContent=(x0*y0).toFixed(2);
-    document.getElementById('gv').textContent=(x0+y0).toFixed(1)+' (fixed)';
-    const ob=document.getElementById('obs');if(ob)ob.textContent=tang?'The area-curve is tangent to the line — sliding either way lowers the area. This is the maximum.':'The gold area-curve crosses the line — a higher area-curve lies just to one side, so you can still do better.';}
-  cv.style.touchAction='none';let drg=false;
-  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));x0=Math.max(0.5,Math.min(9.5,(X-ox)/S));draw();if(typeof draw3d==='function')draw3d();}
-  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
-  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
-  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
-  draw();
-  // ---------- 3-D companion: the constraint wall cutting the objective surface ----------
-  const cv3=document.getElementById('cv3d');const ctx3=cv3&&cv3.getContext&&cv3.getContext('2d');const W3=cv3?cv3.width:0,H3=cv3?cv3.height:0;
-  const L3=22,V3=7.5,Z3=2.6,CX=300,CY=118,CLIP=42,WTOP=30;
-  const Q=(x,y,z)=>[CX+(x-y)*L3, CY+(x+y)*V3 - z*Z3];
-  function draw3d(){if(!ctx3)return;ctx3.clearRect(0,0,W3,H3);
-    const o=Q(0,0,0),axx=Q(10,0,0),axy=Q(0,10,0);
-    ctx3.strokeStyle='#1a2534';ctx3.lineWidth=1;ctx3.beginPath();ctx3.moveTo(o[0],o[1]);ctx3.lineTo(axx[0],axx[1]);ctx3.moveTo(o[0],o[1]);ctx3.lineTo(axy[0],axy[1]);ctx3.stroke();
-    // objective surface mesh z=xy, clipped to xy<=CLIP so the cut band stays prominent
-    ctx3.strokeStyle='#243a52';ctx3.lineWidth=1;
-    for(let i=0;i<=10;i++){const x=i,ymax=Math.min(10,x>0?CLIP/x:10);ctx3.beginPath();let st=false;for(let y=0;y<=ymax+1e-9;y+=0.5){const q=Q(x,y,x*y);st?ctx3.lineTo(q[0],q[1]):ctx3.moveTo(q[0],q[1]);st=true;}ctx3.stroke();}
-    for(let j=0;j<=10;j++){const y=j,xmax=Math.min(10,y>0?CLIP/y:10);ctx3.beginPath();let st=false;for(let x=0;x<=xmax+1e-9;x+=0.5){const q=Q(x,y,x*y);st?ctx3.lineTo(q[0],q[1]):ctx3.moveTo(q[0],q[1]);st=true;}ctx3.stroke();}
-    // constraint wall over x+y=10 (translucent), floor up to WTOP
-    const fl=[],tp=[];for(let x=0;x<=10.0001;x+=0.25){fl.push(Q(x,10-x,0));tp.push(Q(x,10-x,WTOP));}
-    ctx3.fillStyle='rgba(122,184,255,0.12)';ctx3.beginPath();ctx3.moveTo(fl[0][0],fl[0][1]);for(const p of fl)ctx3.lineTo(p[0],p[1]);for(let i=tp.length-1;i>=0;i--)ctx3.lineTo(tp[i][0],tp[i][1]);ctx3.closePath();ctx3.fill();
-    ctx3.strokeStyle='#7ab8ff';ctx3.setLineDash([5,4]);ctx3.lineWidth=1.6;ctx3.beginPath();fl.forEach((p,i)=>i?ctx3.lineTo(p[0],p[1]):ctx3.moveTo(p[0],p[1]));ctx3.stroke();ctx3.setLineDash([]);
-    // cut curve = objective lifted along the constraint (bold)
-    ctx3.strokeStyle='#e8b84b';ctx3.lineWidth=3;ctx3.beginPath();let s3=false;for(let x=0;x<=10.0001;x+=0.1){const q=Q(x,10-x,x*(10-x));s3?ctx3.lineTo(q[0],q[1]):ctx3.moveTo(q[0],q[1]);s3=true;}ctx3.stroke();
+    const P=at(u),fv=P.x*P.y;
+    // objective level curves (hyperbolas)
+    for(const k of [4,9,16,25]){hyp(k,'#233042',1.1);const xl=8.8;if(k/xl<=11){ctx.fillStyle='#33465e';ctx.font='10px sans-serif';ctx.fillText('xy='+k,px(xl)+2,py(k/xl));}}
+    // active level curve through the point
+    hyp(fv,'#e8b84b',2);
+    // constraint
+    ctx.strokeStyle='#7ab8ff';ctx.lineWidth=2.5;ctx.beginPath();
+    if(cmode==='line'){ctx.moveTo(px(0),py(10));ctx.lineTo(px(10),py(0));}
+    else{let st=false;for(let a=0;a<=Math.PI/2+0.001;a+=0.03){const X=px(R*Math.cos(a)),Y=py(R*Math.sin(a));st?ctx.lineTo(X,Y):ctx.moveTo(X,Y);st=true;}}
+    ctx.stroke();
+    // tangent direction (dashed) and gradients at the point
+    ctx.strokeStyle='rgba(159,176,196,0.7)';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(px(P.x-P.Tx*1.6),py(P.y-P.Ty*1.6));ctx.lineTo(px(P.x+P.Tx*1.6),py(P.y+P.Ty*1.6));ctx.stroke();ctx.setLineDash([]);
+    const fn=Math.hypot(P.y,P.x)||1,gn=Math.hypot(P.gx,P.gy)||1;
+    arrow(ctx,px(P.x),py(P.y),px(P.x+(P.y/fn)*1.6),py(P.y+(P.x/fn)*1.6),'#e8b84b');
+    arrow(ctx,px(P.x),py(P.y),px(P.x+(P.gx/gn)*1.6),py(P.y+(P.gy/gn)*1.6),'#3fb98f');
+    ctx.fillStyle='#dbe6f4';ctx.beginPath();ctx.arc(px(P.x),py(P.y),5,0,7);ctx.fill();
+    ctx.fillStyle='#e8b84b';ctx.font='12px sans-serif';ctx.fillText('∇f',px(P.x+(P.y/fn)*1.6)+4,py(P.y+(P.x/fn)*1.6));
+    ctx.fillStyle='#3fb98f';ctx.fillText('∇g',px(P.x+(P.gx/gn)*1.6)+4,py(P.y+(P.gy/gn)*1.6));
+    ctx.fillStyle='#7ab8ff';ctx.fillText(cmode==='line'?'constraint x+y=10':'constraint x²+y²=18',px(4.3),py(cmode==='line'?2.0:0.6));
+    const dfds=P.y*P.Tx+P.x*P.Ty, tang=Math.abs(dfds)<0.14;
+    if(tang){ctx.fillStyle='#3fb98f';ctx.font='600 13px sans-serif';ctx.fillText('tangent — best point',px(P.x)+10,py(P.y)-12);}
+    document.getElementById('pv').textContent='('+P.x.toFixed(2)+', '+P.y.toFixed(2)+')';
+    document.getElementById('fv').textContent=fv.toFixed(2);
+    document.getElementById('dv').textContent=(Math.abs(dfds)<0.005?0:dfds).toFixed(2);
+    const ob=document.getElementById('obs');if(ob)ob.textContent=tang
+      ?'df/ds = 0 — the objective stops changing as you walk, so ∇f ⟂ the constraint and ∇f ∥ ∇g. This is the optimum.'
+      :(dfds>0?'df/ds > 0 — the area still rises as you walk forward, so keep going.':'df/ds < 0 — you have passed the peak; the area is falling.');}
+
+  // ================= 3-D: wall cutting the objective surface =================
+  const cv3=document.getElementById('cv3d');const c3=cv3&&cv3.getContext&&cv3.getContext('2d');const W3=cv3?cv3.width:0,H3=cv3?cv3.height:0;
+  function proj(){return cmode==='line'?{L:22,V:7.2,Z:2.4,CX:300,CY:120,PX:10,CLIP:42,WTOP:30,pk:[5,5,25]}
+                                       :{L:46,V:15,Z:8,CX:300,CY:140,PX:4.6,CLIP:14,WTOP:11,pk:[3,3,9]};}
+  function draw3d(){if(!c3)return;c3.clearRect(0,0,W3,H3);const pr=proj();const Q=(x,y,z)=>[pr.CX+(x-y)*pr.L, pr.CY+(x+y)*pr.V - z*pr.Z];
+    const o=Q(0,0,0),axx=Q(pr.PX,0,0),axy=Q(0,pr.PX,0);
+    c3.strokeStyle='#1a2534';c3.lineWidth=1;c3.beginPath();c3.moveTo(o[0],o[1]);c3.lineTo(axx[0],axx[1]);c3.moveTo(o[0],o[1]);c3.lineTo(axy[0],axy[1]);c3.stroke();
+    // objective surface mesh z=xy, clipped so the cut band stays prominent
+    c3.strokeStyle='#243a52';c3.lineWidth=1;const N=10,hi=pr.PX;
+    for(let i=0;i<=N;i++){const x=hi*i/N,ymax=Math.min(hi,x>0?pr.CLIP/x:hi);c3.beginPath();let st=false;for(let y=0;y<=ymax+1e-9;y+=hi/N/2){const q=Q(x,y,x*y);st?c3.lineTo(q[0],q[1]):c3.moveTo(q[0],q[1]);st=true;}c3.stroke();}
+    for(let j=0;j<=N;j++){const y=hi*j/N,xmax=Math.min(hi,y>0?pr.CLIP/y:hi);c3.beginPath();let st=false;for(let x=0;x<=xmax+1e-9;x+=hi/N/2){const q=Q(x,y,x*y);st?c3.lineTo(q[0],q[1]):c3.moveTo(q[0],q[1]);st=true;}c3.stroke();}
+    // constraint path points
+    const fl=[],tp=[],cu=[];
+    if(cmode==='line'){for(let x=0;x<=10.0001;x+=0.25){fl.push(Q(x,10-x,0));tp.push(Q(x,10-x,pr.WTOP));cu.push(Q(x,10-x,x*(10-x)));}}
+    else{for(let a=0;a<=Math.PI/2+1e-9;a+=0.025){const x=R*Math.cos(a),y=R*Math.sin(a);fl.push(Q(x,y,0));tp.push(Q(x,y,pr.WTOP));cu.push(Q(x,y,x*y));}}
+    // wall (translucent)
+    c3.fillStyle='rgba(122,184,255,0.12)';c3.beginPath();c3.moveTo(fl[0][0],fl[0][1]);for(const p of fl)c3.lineTo(p[0],p[1]);for(let i=tp.length-1;i>=0;i--)c3.lineTo(tp[i][0],tp[i][1]);c3.closePath();c3.fill();
+    // constraint on floor (dashed)
+    c3.strokeStyle='#7ab8ff';c3.setLineDash([5,4]);c3.lineWidth=1.6;c3.beginPath();fl.forEach((p,i)=>i?c3.lineTo(p[0],p[1]):c3.moveTo(p[0],p[1]));c3.stroke();c3.setLineDash([]);
+    // cut curve (bold)
+    c3.strokeStyle='#e8b84b';c3.lineWidth=3;c3.beginPath();cu.forEach((p,i)=>i?c3.lineTo(p[0],p[1]):c3.moveTo(p[0],p[1]));c3.stroke();
     // peak + current marker
-    const pk=Q(5,5,25);const y0=10-x0,cur=Q(x0,y0,x0*y0);
-    ctx3.fillStyle='#3fb98f';ctx3.beginPath();ctx3.arc(pk[0],pk[1],5,0,7);ctx3.fill();
-    ctx3.fillStyle='#dbe6f4';ctx3.beginPath();ctx3.arc(cur[0],cur[1],5,0,7);ctx3.fill();
-    ctx3.font='12px sans-serif';
-    ctx3.fillStyle='#5d7186';ctx3.fillText('objective surface  z = xy',12,18);
-    ctx3.fillStyle='#7ab8ff';ctx3.fillText('constraint wall over x+y=10',12,H3-10);
-    ctx3.fillStyle='#caa64e';ctx3.fillText('cut curve',pk[0]+12,pk[1]-6);
-    ctx3.fillStyle='#3fb98f';ctx3.fillText('top = max 25',pk[0]+12,pk[1]+11);}
-  if(cv3){cv3.style.touchAction='none';let d3=false;const set3=e=>{const r=cv3.getBoundingClientRect();const X=(e.clientX-r.left)*(W3/Math.max(1,r.width));x0=Math.max(0.5,Math.min(9.5,X/W3*10));draw();draw3d();};
-    cv3.addEventListener('pointerdown',e=>{d3=true;try{cv3.setPointerCapture(e.pointerId);}catch(x){}set3(e);e.preventDefault();});
-    cv3.addEventListener('pointermove',e=>{if(d3){e.preventDefault();set3(e);}});
-    const e3=()=>d3=false;cv3.addEventListener('pointerup',e3);cv3.addEventListener('pointercancel',e3);}
-  draw3d();
-  // ---------- dedicated schematic: tangency ⇒ parallel gradients ----------
+    const pk=Q(pr.pk[0],pr.pk[1],pr.pk[2]);c3.fillStyle='#3fb98f';c3.beginPath();c3.arc(pk[0],pk[1],5,0,7);c3.fill();
+    const P=at(u),cur=Q(P.x,P.y,P.x*P.y);c3.fillStyle='#dbe6f4';c3.beginPath();c3.arc(cur[0],cur[1],5,0,7);c3.fill();
+    c3.font='12px sans-serif';c3.fillStyle='#5d7186';c3.fillText('objective surface  z = xy',12,18);
+    c3.fillStyle='#7ab8ff';c3.fillText(cmode==='line'?'straight wall over x+y=10':'curved wall over x²+y²=18',12,H3-10);
+    c3.fillStyle='#3fb98f';c3.fillText('top = '+pr.pk[2],pk[0]+10,pk[1]+4);}
+
+  // ================= tangency schematic (cross vs tangent) =================
   const cv2=document.getElementById('cv2');const g2=cv2&&cv2.getContext&&cv2.getContext('2d');const W2=cv2.width,H2=cv2.height;
   const Pc=[W2/2,160];let st2='cross';
-  function rmark(u,v,col){if(!g2)return;const s=15;g2.strokeStyle=col;g2.lineWidth=1.6;g2.beginPath();g2.moveTo(Pc[0]+u[0]*s,Pc[1]+u[1]*s);g2.lineTo(Pc[0]+(u[0]+v[0])*s,Pc[1]+(u[1]+v[1])*s);g2.lineTo(Pc[0]+v[0]*s,Pc[1]+v[1]*s);g2.stroke();}
+  function rmark(uu,v,col){if(!g2)return;const s=15;g2.strokeStyle=col;g2.lineWidth=1.6;g2.beginPath();g2.moveTo(Pc[0]+uu[0]*s,Pc[1]+uu[1]*s);g2.lineTo(Pc[0]+(uu[0]+v[0])*s,Pc[1]+(uu[1]+v[1])*s);g2.lineTo(Pc[0]+v[0]*s,Pc[1]+v[1]*s);g2.stroke();}
   function draw2(){if(!g2)return;g2.clearRect(0,0,W2,H2);
     const aL=0.30, dL=[Math.cos(aL),Math.sin(aL)], nG=[Math.sin(aL),-Math.cos(aL)];
     const aF=(st2==='tan')?aL:aL+0.62, dF=[Math.cos(aF),Math.sin(aF)], nF=[Math.sin(aF),-Math.cos(aF)], mF=[-Math.sin(aF),Math.cos(aF)];
-    // constraint line
     g2.strokeStyle='#7ab8ff';g2.lineWidth=2.5;g2.beginPath();g2.moveTo(Pc[0]-dL[0]*300,Pc[1]-dL[1]*300);g2.lineTo(Pc[0]+dL[0]*300,Pc[1]+dL[1]*300);g2.stroke();
-    // objective level curve (parabola tangent to dF at Pc)
     g2.strokeStyle='#e8b84b';g2.lineWidth=2.5;g2.beginPath();let st=false;for(let t=-170;t<=170;t+=4){const q=0.0017*t*t;const X=Pc[0]+dF[0]*t+mF[0]*q,Y=Pc[1]+dF[1]*t+mF[1]*q;st?g2.lineTo(X,Y):g2.moveTo(X,Y);st=true;}g2.stroke();
-    // in crossing state, show the objective's distinct tangent direction (dashed)
     if(st2==='cross'){g2.strokeStyle='rgba(232,184,75,0.6)';g2.lineWidth=1.5;g2.setLineDash([6,4]);g2.beginPath();g2.moveTo(Pc[0]-dF[0]*150,Pc[1]-dF[1]*150);g2.lineTo(Pc[0]+dF[0]*150,Pc[1]+dF[1]*150);g2.stroke();g2.setLineDash([]);}
-    // gradient arrows
     arrow(g2,Pc[0],Pc[1],Pc[0]+nG[0]*74,Pc[1]+nG[1]*74,'#3fb98f');
     arrow(g2,Pc[0],Pc[1],Pc[0]+nF[0]*74,Pc[1]+nF[1]*74,'#e8b84b');
-    // right-angle marks (gradient ⟂ its curve's tangent)
     rmark(nG,dL,'#3fb98f');rmark(nF,dF,'#e8b84b');
     g2.fillStyle='#dbe6f4';g2.beginPath();g2.arc(Pc[0],Pc[1],5,0,7);g2.fill();
-    // labels
     g2.font='12px sans-serif';
     g2.fillStyle='#3fb98f';g2.fillText('∇g',Pc[0]+nG[0]*82-6,Pc[1]+nG[1]*82);
     g2.fillStyle='#e8b84b';g2.fillText('∇f',Pc[0]+nF[0]*82-6,Pc[1]+nF[1]*82);
@@ -2789,14 +2806,26 @@ function c7_lagrange(){
     g2.fillStyle='#caa64e';g2.fillText('objective level curve  f = const',Pc[0]-150,Pc[1]-120);
     if(st2==='tan'){g2.fillStyle='#9fb0c4';g2.font='600 12px sans-serif';g2.fillText('one shared tangent line',Pc[0]+dL[0]*150-30,Pc[1]+dL[1]*150-8);}
     const ob=document.getElementById('obs2');if(ob)ob.textContent=(st2==='tan')?'Tangent: the curves share one tangent line, so ∇f and ∇g are both perpendicular to it — they point the same way. Parallel ⇒ optimum.':'Crossing: the two curves have different tangent directions, so ∇f and ∇g point different ways — not parallel, and you can still improve.';}
-  function build2(){document.getElementById('seg2').innerHTML=
-    `<span class="segb ${st2==='cross'?'on':''}" data-s="cross">curves cross (not optimal)</span><span class="segb ${st2==='tan'?'on':''}" data-s="tan">curves tangent (optimal)</span>`;
-    document.querySelectorAll('#seg2 .segb').forEach(b=>b.onclick=()=>{st2=b.dataset.s;build2();draw2();});}
-  build2();draw2();
-  numChk(stage.querySelector('.card'),25,()=>{addReveal(`<div class="rh">✓ 25</div><p>At $x=y=5$ the area is $25$. That's exactly where the gold area-curve $xy=25$ stops crossing and just kisses the constraint line — tangent — and where $\\nabla f=(y,x)=(5,5)$ and $\\nabla g=(1,1)$ point the same way, so $\\nabla f=5\\,\\nabla g$ (that's $\\lambda=5$). Slide off the square and the area-curve cuts the line again and the area falls.</p>`);});
-  setHints([`At the optimum ∇f=λ∇g forces x=y. Put x=y into the constraint x+y=10.`,`x=y=5, so the maximum area is 5·5=25.`]);
-}
 
+  // controls
+  function buildC(){const el=document.getElementById('segc');if(!el)return;el.innerHTML=`<span class="segb ${cmode==='line'?'on':''}" data-m="line">straight constraint</span><span class="segb ${cmode==='circle'?'on':''}" data-m="circle">curved constraint</span>`;
+    el.querySelectorAll('.segb').forEach(b=>b.onclick=()=>{cmode=b.dataset.m;u=0.18;draw();draw3d();});}
+  function build2(){const el=document.getElementById('seg2');if(!el)return;el.innerHTML=`<span class="segb ${st2==='cross'?'on':''}" data-s="cross">curves cross (not optimal)</span><span class="segb ${st2==='tan'?'on':''}" data-s="tan">curves tangent (optimal)</span>`;
+    el.querySelectorAll('.segb').forEach(b=>b.onclick=()=>{st2=b.dataset.s;build2();draw2();});}
+  buildC();build2();
+
+  // drag the contour map (or the 3-D) to move along the constraint
+  function bind(el){if(!el)return;el.style.touchAction='none';let drg=false;
+    const setU=e=>{const r=el.getBoundingClientRect();const X=(e.clientX-r.left)*(el.width/Math.max(1,r.width));u=Math.max(0,Math.min(1,(X-ox)/(10*S)));if(el!==cv)u=Math.max(0,Math.min(1,X/el.width));draw();draw3d();};
+    el.addEventListener('pointerdown',e=>{drg=true;try{el.setPointerCapture(e.pointerId);}catch(x){}setU(e);e.preventDefault();});
+    el.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setU(e);}});
+    const end=()=>drg=false;el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);}
+  bind(cv);bind(cv3);
+  draw();draw3d();draw2();
+
+  numChk(stage.querySelector('.card'),25,()=>{addReveal(`<div class="rh">✓ 25</div><p>At $x=y=5$ the area is $25$ — exactly where $df/ds=(y-x)/\\sqrt2$ crosses zero, where the hyperbola $xy=25$ just kisses the line, and where $\\nabla f=(5,5)$ and $\\nabla g=(1,1)$ point the same way, so $\\nabla f=5\\,\\nabla g$ ($\\lambda=5$). Flip to the curved constraint and the same walk lands at $(3,3)$, area $9$.</p>`);});
+  setHints([`Walk until df/ds = 0. For the line that forces x=y; the constraint x+y=10 then gives x=y=5.`,`x=y=5, so the maximum area is 25.`]);
+}
 function c7_optproblems(){
   stage.innerHTML=`<div class="card"><h2>Problem set</h2>
     <p>Locating critical points, classifying them with the Hessian, convexity, gradient descent, Newton's step, and Lagrange multipliers. Paper first; solutions fold open.</p>
