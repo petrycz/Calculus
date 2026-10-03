@@ -2074,7 +2074,10 @@ function c7_gradient(){
     <p>You now have two separate slopes at every point — $f_x$ (steepness heading east) and $f_y$ (steepness heading north). Bundle them into a single vector and something remarkable falls out. That vector is the <b>gradient</b>:</p>
     <div class="eqbox">$$\\nabla f=\\Big(\\frac{\\partial f}{\\partial x},\\ \\frac{\\partial f}{\\partial y}\\Big).$$</div>
     <p><b>It's the 1-D derivative, upgraded to a direction.</b> In one variable the derivative $f'(x)$ is a single number — and its <em>sign</em> already encodes a direction: with only two ways to move, you step right to climb when $f'&gt;0$ and left when $f'&lt;0$, while $|f'|$ says how steep. With two inputs, each partial plays that role for its own axis — $f_x$ says which way along $x$ is uphill, $f_y$ which way along $y$ — and the gradient just stacks them into one arrow. Its direction is the single combined uphill heading, and its length $|\\nabla f|$ is the steepness, exactly as $|f'|$ was in one dimension.</p>
-    <p>A crucial point up front: the gradient is an arrow drawn <b>on the flat map</b> — in the input plane, where you choose which way to walk — not an arrow on the 3-D surface. Below is the contour map of the bowl $f=x^2+y^2$ (dark = low, bright = high). <b>Drag the point</b> and watch its gradient arrow. Notice two things: it always points <em>straight across the rings toward higher ground</em>, and it's <em>longer where the rings bunch up</em>.</p>
+    <p><b>Three things not to confuse.</b> The gradient is an arrow on the <b>flat input map</b> — not an arrow on the 3-D surface. The figure below separates the three objects for the bowl $f=x^2+y^2$:</p>
+    <canvas id="cvg" width="640" height="300"></canvas>
+    <p class="small" style="margin-top:4px;color:#9fb0c4">The <span style="color:#caa64e">surface</span> (graph) lives up in 3-D. Slice it at one height and that slice drops to a <span class="cy">level curve</span> on the floor — a contour. The <span class="grn">gradient</span> is an arrow lying <em>on the floor</em>, pointing straight across that contour. And the <span style="color:#e8b84b">steepest climb on the surface</span> (the tilted arrow) is the thing whose <em>shadow</em> on the floor is exactly the gradient — the gradient itself never leaves the floor.</p>
+    <p>Now here's that same bowl seen from directly above, as a contour map (dark = low, bright = high). <b>Drag the point</b> and watch its gradient arrow: it always points <em>straight across the rings toward higher ground</em>, and it's <em>longer where the rings bunch up</em>.</p>
     <canvas id="cv" width="640" height="380"></canvas>
     <div class="readout"><div class="rdc"><div class="k">point (x, y)</div><div class="v" id="pv">—</div></div><div class="rdc"><div class="k">∇f = (2x, 2y)</div><div class="v" id="gv">—</div></div><div class="rdc"><div class="k">steepest slope |∇f|</div><div class="v" id="mv">—</div></div></div>
     <div class="task"><b>How steep is the steepest climb?</b>For $f=x^2+y^2$, $\\nabla f=(2x,2y)$. At the point $(3,4)$, compute the magnitude $|\\nabla f|=\\sqrt{f_x^{\\,2}+f_y^{\\,2}}$.</div>
@@ -2086,6 +2089,31 @@ function c7_gradient(){
     <p>&bull; <b>Perpendicular to the contours.</b> Walk <em>along</em> a contour and your height doesn't change, so $\\Delta f=0$, which means $\\nabla f\\cdot(\\text{step along the contour})=0$. A zero dot product means a right angle — so the gradient is perpendicular to the level curve it sits on.</p>
     <p>&bull; <b>Steepest ascent, and how steep.</b> For a step of fixed length, the dot product $\\nabla f\\cdot(\\text{step})$ is largest when the step points the <em>same way</em> as $\\nabla f$. So the gradient's direction is the steepest-uphill direction, and its length $|\\nabla f|$ is exactly how steep that best climb is — which is why the arrow stretches where the rings crowd together (steep) and shrinks where they spread out (gentle).</p>
     <p>For our bowl, $\\nabla f=(2x,2y)$ points radially outward, straight away from the low point — the fastest way up the wall. At $(3,4)$ it's $(6,8)$, with $|\\nabla f|=\\sqrt{36+64}=10$. Next we'll ask not just for the steepest direction but for the slope in <em>any</em> direction — and the gradient will answer that too.</p></div>`;
+  // ---------- 3-D clarifier: graph vs level curve vs gradient ----------
+  (function(){const gc=document.getElementById('cvg');const g=gc&&gc.getContext&&gc.getContext('2d');if(!g)return;const GW=gc.width,GH=gc.height;
+    const CX=320,CY=212,SX=60,SY=20,SZ=12.5;
+    const PP=p=>[CX+(p[0]-p[1])*SX, CY+(p[0]+p[1])*SY - p[2]*SZ];
+    const gf=(x,y)=>x*x+y*y;const r0=Math.SQRT2,A=0.62;
+    g.clearRect(0,0,GW,GH);
+    g.strokeStyle='#5aa0e0';g.lineWidth=1.5;g.setLineDash([5,4]);g.beginPath();for(let i=0;i<=64;i++){const t=i/64*2*Math.PI;const q=PP([r0*Math.cos(t),r0*Math.sin(t),0]);i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]);}g.stroke();g.setLineDash([]);
+    g.strokeStyle='rgba(232,184,75,0.45)';g.lineWidth=1;
+    for(let gx=-2;gx<=2.001;gx+=0.5){g.beginPath();let s=false;for(let y=-2;y<=2.001;y+=0.1){const q=PP([gx,y,gf(gx,y)]);s?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]);s=true;}g.stroke();}
+    for(let gy=-2;gy<=2.001;gy+=0.5){g.beginPath();let s=false;for(let x=-2;x<=2.001;x+=0.1){const q=PP([x,gy,gf(x,gy)]);s?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]);s=true;}g.stroke();}
+    g.strokeStyle='#7ab8ff';g.lineWidth=2;g.beginPath();for(let i=0;i<=64;i++){const t=i/64*2*Math.PI;const q=PP([r0*Math.cos(t),r0*Math.sin(t),r0*r0]);i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]);}g.stroke();
+    const fx=r0*Math.cos(A),fy=r0*Math.sin(A),F=[fx,fy,0],Ssf=[fx,fy,r0*r0],Fp=PP(F),Sp=PP(Ssf);
+    g.strokeStyle='rgba(220,230,244,0.4)';g.lineWidth=1;g.setLineDash([3,3]);g.beginPath();g.moveTo(Fp[0],Fp[1]);g.lineTo(Sp[0],Sp[1]);g.stroke();g.setLineDash([]);
+    function garrow(a,b,col){const Aa=PP(a),Bb=PP(b);g.strokeStyle=col;g.lineWidth=2.5;g.beginPath();g.moveTo(Aa[0],Aa[1]);g.lineTo(Bb[0],Bb[1]);g.stroke();const an=Math.atan2(Bb[1]-Aa[1],Bb[0]-Aa[0]);g.fillStyle=col;g.beginPath();g.moveTo(Bb[0],Bb[1]);g.lineTo(Bb[0]-10*Math.cos(an-0.4),Bb[1]-10*Math.sin(an-0.4));g.lineTo(Bb[0]-10*Math.cos(an+0.4),Bb[1]-10*Math.sin(an+0.4));g.closePath();g.fill();}
+    const ur=[Math.cos(A),Math.sin(A)];
+    garrow(F,[fx+ur[0]*1.25,fy+ur[1]*1.25,0],'#3fb98f');
+    const d=[Math.cos(A),Math.sin(A),2*r0],dl=Math.hypot(d[0],d[1],d[2]),sc=1.5;
+    garrow(Ssf,[fx+d[0]/dl*sc,fy+d[1]/dl*sc,r0*r0+d[2]/dl*sc],'#e8b84b');
+    g.fillStyle='#fff';g.strokeStyle='#0a111b';g.lineWidth=2;g.beginPath();g.arc(Fp[0],Fp[1],4,0,7);g.fill();g.stroke();g.beginPath();g.arc(Sp[0],Sp[1],4,0,7);g.fill();g.stroke();
+    g.font='12px sans-serif';
+    g.fillStyle='#caa64e';const lg=PP([-2,2,gf(-2,2)]);g.fillText('graph  z = x²+y²',lg[0]-6,lg[1]-6);
+    g.fillStyle='#5aa0e0';const lc=PP([-r0*Math.cos(A),-r0*Math.sin(A),0]);g.fillText('level curve (floor)',lc[0]-70,lc[1]+14);
+    g.fillStyle='#3fb98f';const gt=PP([fx+ur[0]*1.25,fy+ur[1]*1.25,0]);g.fillText('∇f (on the floor)',gt[0]+4,gt[1]+12);
+    g.fillStyle='#e8b84b';const st=PP([fx+d[0]/dl*sc,fy+d[1]/dl*sc,r0*r0+d[2]/dl*sc]);g.fillText('steepest climb (on surface)',st[0]-70,st[1]-6);})();
+  // ---------- main interactive: contour map ----------
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=27,cx=W/2,cy=H/2;
   const f=(x,y)=>x*x+y*y;
   const px=x=>cx+x*S,py=y=>cy-y*S,mx=X=>(X-cx)/S,my=Y=>(cy-Y)/S;
@@ -2096,7 +2124,6 @@ function c7_gradient(){
   function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
     for(let X=0;X<W;X+=9)for(let Y=0;Y<H;Y+=9){const x=mx(X+4),y=my(Y+4);ctx.fillStyle=col(f(x,y));ctx.fillRect(X,Y,9,9);}
     for(const h of [4,9,16,25,36]){const r=Math.sqrt(h);ctx.strokeStyle='rgba(220,230,244,0.35)';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<=72;i++){const t=i/72*2*Math.PI;const X=px(r*Math.cos(t)),Y=py(r*Math.sin(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();}
-    // highlight the contour through the point
     const rp=Math.sqrt(f(xp,yp));if(rp>0.05){ctx.strokeStyle='rgba(220,230,244,0.75)';ctx.lineWidth=1.6;ctx.beginPath();for(let i=0;i<=72;i++){const t=i/72*2*Math.PI;const X=px(rp*Math.cos(t)),Y=py(rp*Math.sin(t));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();}
     const gx=2*xp,gy=2*yp,k=0.3;
     arrow(px(xp),py(yp),px(xp+k*gx),py(yp+k*gy),'#3fb98f');
@@ -2714,38 +2741,99 @@ function c7_jacobian(){
 }
 
 function c7_doubleint(){
-  stage.innerHTML=`<div class="card"><h2>Double integrals: volume over a region</h2>
-    <p>Integration also lifts to two variables. The <b>double integral</b> $\\iint_R f\\,dA$ is the signed volume between the surface $z=f(x,y)$ and the region $R$ in the plane — the 2-D echo of "area under a curve." Build it the same way: chop $R$ into little cells, multiply each cell's area by the height above it, and sum. Tap to refine the grid over the unit square with $f=x+y$ and watch the sum settle.</p>
-    <div class="seg" id="seg"></div>
-    <canvas id="cv" width="640" height="380"></canvas>
-    <div class="readout"><div class="rdc"><div class="k">grid</div><div class="v" id="nv">—</div></div><div class="rdc"><div class="k">Riemann sum</div><div class="v" id="sv">—</div></div></div>
-    <div class="task"><b>The volume</b>What does $\\displaystyle\\iint_{[0,1]\\times[0,1]}(x+y)\\,dA$ come out to? (Read it off the refining sum, or compute — it's a round number.)</div>
-    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
-    <p style="margin-top:16px"><b>The definition.</b> Grid $R$ into cells of area $\\Delta A=\\Delta x\\,\\Delta y$, sample the height $f(x_i,y_j)$ in each, and take the limit as the cells shrink — a double Riemann sum:</p>
-    <div class="eqbox">$$\\iint_R f\\,dA=\\lim_{\\Delta A\\to0}\\sum_i\\sum_j f(x_i,y_j)\\,\\Delta A$$</div>
-    <p>For a positive $f$ each term is the volume of a thin box (base $\\Delta A$, height $f$), so the sum is the total volume. Exactly as in one variable, we don't want this limit by hand — the next beat turns it into ordinary single integrals.</p></div>`;
-  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
-  const X0=180,X1=520,Y0=350,Y1=30;   // unit square region on canvas
-  const px=x=>X0+x*(X1-X0),py=y=>Y0+y*(Y1-Y0);
-  const f=(x,y)=>x+y;const ns=['4','8','16'];let sel='4';
-  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
-    const n=parseInt(sel),d=1/n;let S=0;
-    for(let i=0;i<n;i++)for(let j=0;j<n;j++){const xc=(i+0.5)*d,yc=(j+0.5)*d,h=f(xc,yc);S+=h*d*d;
-      const t=h/2;ctx.fillStyle='rgb('+Math.round(50+t*170)+','+Math.round(90+t*90)+','+Math.round(210-t*140)+')';
-      ctx.fillRect(px(i*d),py((j+1)*d),(X1-X0)/n,(Y0-Y1)/n);}
-    ctx.strokeStyle='rgba(13,20,32,0.5)';ctx.lineWidth=1;
-    for(let i=0;i<=n;i++){ctx.beginPath();ctx.moveTo(px(i*d),py(0));ctx.lineTo(px(i*d),py(1));ctx.stroke();ctx.beginPath();ctx.moveTo(px(0),py(i*d));ctx.lineTo(px(1),py(i*d));ctx.stroke();}
-    ctx.strokeStyle='#8095ab';ctx.lineWidth=1.5;ctx.strokeRect(px(0),py(1),X1-X0,Y0-Y1);
-    ctx.fillStyle='#5d7186';ctx.font='12px sans-serif';ctx.fillText('R = [0,1]×[0,1],  height f = x+y (dark→light)',X0,Y0+22);
-    document.getElementById('nv').textContent=n+' × '+n;
-    document.getElementById('sv').textContent=S.toFixed(4);}
-  function build(){document.getElementById('seg').innerHTML=ns.map(k=>`<span class="segb ${k===sel?'on':''}" data-k="${k}">${k}×${k}</span>`).join('');
-    document.querySelectorAll('#seg .segb').forEach(b=>b.onclick=()=>{sel=b.dataset.k;build();draw();});}
-  build();draw();
-  numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ 1</div><p>The refining sums close in on $1$. By symmetry it's believable: the average height of $x+y$ over the unit square is $1$ (average of $x$ is $\\tfrac12$, of $y$ is $\\tfrac12$), times area $1$. The next beat computes it exactly with iterated integrals.</p>`);});
-  setHints([`Crank the grid up and read the Riemann-sum box — it settles on a whole number.`,`It approaches 1.`]);
-}
+  stage.innerHTML=`<div class="card"><h2>Double integrals: adding up a solid</h2>
+    <p>In one variable you found the <b>area</b> under a curve by slicing $[a,b]$ into thin strips, giving each strip a height and a width, and adding. Nothing about that recipe cared that the domain was a line. Lift the domain to a <b>patch of the plane</b> $R$ and the same recipe builds the <b>volume</b> between a surface $z=f(x,y)$ and that patch.</p>
 
+    <p><b>Start from the one-variable sum and change one thing at a time.</b></p>
+    <div class="eqbox">$$\\underbrace{\\int_a^b f(x)\\,dx}_{\\text{area}}=\\lim_{\\Delta x\\to0}\\sum_i f(x_i)\\,\\underbrace{\\Delta x}_{\\text{width}}$$</div>
+    <p>A strip is a thin <em>rectangle</em>: width $\\Delta x$, height $f(x_i)$, so each term $f(x_i)\\,\\Delta x$ is a sliver of <b>area</b>. Now the domain is 2-D, so a "strip" becomes a little <b>tile</b> of the plane with its own small area $\\Delta A=\\Delta x\\,\\Delta y$. Perch the height $f(x_i,y_j)$ on top of that tile and the term $f(x_i,y_j)\\,\\Delta A$ is no longer a sliver of area — it's a thin <b>box</b>, a sliver of <b>volume</b>.</p>
+    <div class="eqbox">$$\\underbrace{\\iint_R f(x,y)\\,dA}_{\\text{volume}}=\\lim_{\\Delta A\\to0}\\sum_i\\sum_j f(x_i,y_j)\\,\\underbrace{\\Delta A}_{\\text{tile area}}$$</div>
+    <p class="small" style="color:#9fb0c4">One sum became a <em>double</em> sum because tiling a 2-D patch needs two indices — a row index and a column index — where the line needed one. That is the whole leap: $\\int\\to\\iint$, strip $\\to$ tile, area $\\to$ volume.</p>
+
+    <p style="margin-top:16px"><b>Watch the boxes fill the solid.</b> Here $f(x,y)=x+y$ over the square $R=[0,2]\\times[0,2]$ — a tilted roof. Each box stands on one tile; its height is $f$ sampled at the tile's <b>lower-left corner</b>. Drag to refine the grid and watch the staircase of boxes climb to fill the wedge under the roof.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <p class="small" id="obs" style="margin-top:6px;color:#9fb0c4">Drag left–right to change the grid.</p>
+    <div class="readout"><div class="rdc"><div class="k">grid</div><div class="v" id="nv">—</div></div><div class="rdc"><div class="k">box sum</div><div class="v" id="sv">—</div></div><div class="rdc"><div class="k">true volume</div><div class="v">8</div></div><div class="rdc"><div class="k">gap left</div><div class="v" id="gapv">—</div></div></div>
+
+    <p style="margin-top:16px"><b>Build the coarsest sum by hand.</b> Take the $2\\times2$ grid: four square tiles, each $1\\times1$, so every tile has area $\\Delta A=1$. The height on each tile is $f$ at its lower-left corner. The picture below marks those four corners and their heights $f=x+y$:</p>
+    <canvas id="cv2" width="640" height="260"></canvas>
+    <div class="task"><b>The 2×2 box sum</b>Add the four box volumes: $\\displaystyle\\sum f(\\text{corner})\\cdot\\Delta A$ with $\\Delta A=1$. What total do you get?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>Why it undershoots, and where it lands.</b> $f=x+y$ <em>grows</em> across each tile, so the lower-left corner is the tile's <b>lowest</b> point — every box sits entirely under the roof and the sum underestimates. Refine and the boxes slide up into the leftover wedge. For this example the corner sum has a clean closed form:</p>
+    <div class="eqbox">$$S_N=8\\left(1-\\tfrac1N\\right)\\;\\xrightarrow[\\;N\\to\\infty\\;]{}\\;8.$$</div>
+    <p>So $N=2$ gives $8(1-\\tfrac12)=4$ (your hand sum), $N=4$ gives $6$, $N=10$ gives $7.2$, climbing to the true volume $8$. That limit <em>is</em> the double integral:</p>
+    <div class="eqbox">$$\\iint_{[0,2]^2}(x+y)\\,dA=8.$$</div>
+    <p>Two reminders that carry over from one variable. The integral is a <b>signed</b> volume: where $f\\lt0$ the boxes hang below the plane and count negative. And this limit-of-a-double-sum is the <em>definition</em>, not a method — nobody evaluates it by summing boxes forever. The next beat collapses $\\iint$ into two ordinary one-variable integrals you already know how to do.</p></div>`;
+
+  // ---- 3-D Riemann-box interactive ----
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
+  const sx=68,sy=30,sz=24,cx=300,cy=232;
+  const P=(x,y,z)=>[cx+(x-y)*sx, cy+(x+y)*sy - z*sz];
+  const f=(x,y)=>x+y;
+  let N=4;
+  function face(p,fill,stroke){if(!ctx)return;ctx.beginPath();ctx.moveTo(p[0][0],p[0][1]);for(let i=1;i<p.length;i++)ctx.lineTo(p[i][0],p[i][1]);ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    const d=2/N,dA=d*d;let S=0;
+    // floor outline of the region R
+    face([P(0,0,0),P(2,0,0),P(2,2,0),P(0,2,0)],'rgba(122,184,255,0.05)','#223247');
+    // target roof plane z=x+y (drawn first, behind the tall front boxes it is mostly hidden; light wireframe)
+    ctx.strokeStyle='rgba(232,184,75,0.45)';ctx.lineWidth=1.2;
+    for(const yy of [0,2]){const A=P(0,yy,f(0,yy)),B=P(2,yy,f(2,yy));ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();}
+    for(const xx of [0,2]){const A=P(xx,0,f(xx,0)),B=P(xx,2,f(xx,2));ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();}
+    // collect + painter-sort boxes back(small i+j)->front(large i+j)
+    const cells=[];for(let i=0;i<N;i++)for(let j=0;j<N;j++)cells.push([i,j]);
+    cells.sort((a,b)=>(a[0]+a[1])-(b[0]+b[1]));
+    for(const [i,j] of cells){const x=i*d,y=j*d,h=f(x,y);S+=h*dA;
+      if(h<=0)continue;
+      const t=Math.max(0,Math.min(1,h/4));
+      const top='rgb('+Math.round(60+t*150)+','+Math.round(110+t*80)+','+Math.round(210-t*120)+')';
+      const rt='rgb('+Math.round(40+t*110)+','+Math.round(80+t*60)+','+Math.round(160-t*90)+')';
+      const ft='rgb('+Math.round(28+t*85)+','+Math.round(60+t*45)+','+Math.round(120-t*70)+')';
+      const x1=x+d,y1=y+d;
+      // right (+x) face
+      face([P(x1,y,0),P(x1,y1,0),P(x1,y1,h),P(x1,y,h)],rt,'rgba(13,20,32,0.55)');
+      // front (+y) face
+      face([P(x,y1,0),P(x1,y1,0),P(x1,y1,h),P(x,y1,h)],ft,'rgba(13,20,32,0.55)');
+      // top
+      face([P(x,y,h),P(x1,y,h),P(x1,y1,h),P(x,y1,h)],top,'rgba(13,20,32,0.55)');}
+    ctx.fillStyle='#5d7186';ctx.font='12px sans-serif';ctx.fillText('z = f(x,y) = x + y   over   [0,2]×[0,2]',14,22);
+    document.getElementById('nv').textContent=N+' × '+N;
+    document.getElementById('sv').textContent=S.toFixed(3);
+    document.getElementById('gapv').textContent=(8-S).toFixed(3);
+    const ob=document.getElementById('obs');if(ob)ob.textContent=N<=2?'Coarsest grid: four fat boxes, far under the roof — sum 4, a gap of 4 still empty.':(N>=10?'Fine grid: the staircase nearly fills the wedge — sum 7.2, only 0.8 to go.':'Boxes climbing into the wedge under the roof. Each refinement shrinks the gap.');}
+  cv.style.touchAction='none';let drg=false;
+  function setN(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)/Math.max(1,r.width);N=Math.max(2,Math.min(10,Math.round(2+X*8)));draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setN(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setN(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+
+  // ---- 2-D companion: the 2x2 grid with corner samples labelled ----
+  (function(){const c=document.getElementById('cv2');const g=c&&c.getContext&&c.getContext('2d');if(!g)return;const CW=c.width,CH=c.height;
+    const ax=150,bx=470,ay=230,by=30;const qx=x=>ax+(x/2)*(bx-ax),qy=y=>ay+(y/2)*(by-ay);
+    g.clearRect(0,0,CW,CH);
+    // tiles
+    for(let i=0;i<2;i++)for(let j=0;j<2;j++){const h=i+j;const t=h/2;
+      g.fillStyle='rgba('+Math.round(60+t*150)+','+Math.round(110+t*80)+','+Math.round(210-t*120)+',0.28)';
+      g.fillRect(qx(i),qy(j+1),(bx-ax)/2,(ay-by)/2);}
+    g.strokeStyle='#45586f';g.lineWidth=1.3;
+    for(let k=0;k<=2;k++){g.beginPath();g.moveTo(qx(k),qy(0));g.lineTo(qx(k),qy(2));g.stroke();g.beginPath();g.moveTo(qx(0),qy(k));g.lineTo(qx(2),qy(k));g.stroke();}
+    // axes ticks
+    g.fillStyle='#5d7186';g.font='12px sans-serif';
+    g.fillText('x',bx+8,qy(0)+4);g.fillText('y',qx(0)-6,by-8);
+    g.fillText('0',qx(0)-10,qy(0)+16);g.fillText('1',qx(1)-4,qy(0)+16);g.fillText('2',qx(2)-4,qy(0)+16);
+    g.fillText('1',qx(0)-16,qy(1)+4);g.fillText('2',qx(0)-16,qy(2)+4);
+    // corner samples (lower-left of each tile)
+    const corners=[[0,0],[1,0],[0,1],[1,1]];
+    for(const [i,j] of corners){const h=i+j;g.fillStyle='#e8b84b';g.beginPath();g.arc(qx(i),qy(j),5,0,7);g.fill();
+      g.fillStyle='#f2e3c0';g.font='600 13px sans-serif';g.fillText('f = '+h,qx(i)+9,qy(j)-7);}
+    g.fillStyle='#7f93a8';g.font='12px sans-serif';g.fillText('each tile 1×1  →  ΔA = 1',ax,ay+28);
+  })();
+
+  numChk(stage.querySelector('.card'),4,()=>{addReveal(`<div class="rh">✓ 4</div><p>The four corner heights are $0,1,1,2$ and each tile has area $\\Delta A=1$, so the box sum is $(0+1+1+2)\\cdot1=4$. Drag the grid down to $2\\times2$ and the readout confirms it. Refine and the sum climbs: $4\\to6\\to7.2\\to\\cdots\\to8$, the true volume under the roof.</p>`);});
+  setHints([`Four tiles, each ΔA=1. Read the four corner heights off the picture: 0, 1, 1, 2.`,`(0+1+1+2)·1 = 4.`]);
+}
 function c7_iterated(){
   stage.innerHTML=`<div class="card"><h2>Iterated integrals: slice, then stack</h2>
     <p>A double integral is computed as two ordinary integrals, one variable at a time (<b>Fubini's theorem</b>). The idea is exactly volume-by-slices from Module 6: at a fixed $y$, the slice through the solid has cross-sectional area $A(y)=\\int f(x,y)\\,dx$; sweeping $y$ and stacking those slices fills the volume $\\int A(y)\\,dy$. Below is the solid under $z=f(x,y)=x+y$ over $[0,3]\\times[0,2]$ in 3-D — drag left-to-right to sweep the gold slice and watch the solid build up.</p>
