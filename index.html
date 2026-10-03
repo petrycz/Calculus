@@ -148,7 +148,7 @@ const MODULES=[
   beats:[c7_recall,c7_intro,c7_partials,c7_tangentplane,c7_gradient,c7_directional,c7_chainrule,c7_problems,c7_recap]},
  {id:'c8',title:'Multivariable Optimization',sub:'Critical points and gradient descent, the local quadratic model and the Hessian, the second-derivative test, convexity, Newton’s method, and Lagrange multipliers.',ready:true,
   outro:`Optimization is calculus hunting for the best point: $\\nabla f=\\mathbf 0$ locates the flat spots, the Taylor quadratic model and its Hessian say whether each is a bowl, dome, or saddle, convexity guarantees a single global minimum, gradient descent and Newton’s method walk to it, and Lagrange multipliers handle a constraint. This is the mathematical core of training a model.`,
-  beats:[c7_critical,c7_graddescent,c7_taylor,c7_secondderiv,c7_convexity,c7_newton,c7_lagrange]},
+  beats:[c7_critical,c7_graddescent,c7_taylor,c7_secondderiv,c7_convexity,c7_newton,c7_lagrange,c7_optproblems]},
  {id:'c9',title:'Multiple Integrals',sub:'Double integrals as volume, iterated integrals and Fubini, polar coordinates, and change of variables via the Jacobian.',ready:true,
   outro:`A double integral accumulates a function over a 2-D region — volume under a surface — computed as iterated single integrals (Fubini). Polar coordinates and the general change of variables, with its Jacobian area factor, make round and warped regions tractable.`,
   beats:[c7_recall10,c7_doubleint,c7_iterated,c7_polar,c7_jacobian]},
@@ -2667,6 +2667,58 @@ function c7_lagrange(){
   setHints([`At the optimum ∇f=λ∇g forces x=y. Put x=y into the constraint x+y=10.`,`x=y=5, so the maximum area is 5·5=25.`]);
 }
 
+function c7_optproblems(){
+  stage.innerHTML=`<div class="card"><h2>Problem set</h2>
+    <p>Locating critical points, classifying them with the Hessian, convexity, gradient descent, Newton's step, and Lagrange multipliers. Paper first; solutions fold open.</p>
+
+    <div class="prob"><span class="lvl">critical points</span><div class="ph">Problem 1</div>
+    <p>Find every critical point of $f(x,y)=x^2+y^2-4x+6y$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>Set $\\nabla f=\\mathbf 0$: $f_x=2x-4=0\\Rightarrow x=2$, and $f_y=2y+6=0\\Rightarrow y=-3$. One critical point, $(2,-3)$. (Completing the square, $f=(x-2)^2+(y+3)^2-13$, shows it's the global minimum, value $-13$.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">classify · second-derivative test</span><div class="ph">Problem 2</div>
+    <p>Find and classify all critical points of $f(x,y)=x^3-3x+y^2$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\nabla f=(3x^2-3,\\;2y)=\\mathbf 0\\Rightarrow x=\\pm1,\\ y=0$ — two critical points. The Hessian is $H=\\begin{pmatrix}6x&0\\\\0&2\\end{pmatrix}$, so $D=\\det H=12x$.</p>
+    <p>At $(1,0)$: $D=12&gt;0$ and $f_{xx}=6&gt;0$ — a <b>local minimum</b>. At $(-1,0)$: $D=-12&lt;0$ — a <b>saddle</b>. (The $x$-slice $x^3-3x$ has a min then a max; the $y^2$ makes the max a saddle.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">Hessian with a cross-term</span><div class="ph">Problem 3</div>
+    <p>Classify the critical point of $f(x,y)=x^2+xy+y^2$ at the origin.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\nabla f=(2x+y,\\;x+2y)=\\mathbf 0$ gives $(0,0)$. Second partials: $f_{xx}=2,\\ f_{yy}=2,\\ f_{xy}=1$, so $H=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}$ and $D=\\det H=2\\cdot2-1^2=3&gt;0$ with $f_{xx}=2&gt;0$ — a <b>local minimum</b>. The cross-term tilts the bowl but doesn't open a downhill direction.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">reading a saddle off the determinant</span><div class="ph">Problem 4</div>
+    <p>Show that $f(x,y)=x^2-y^2$ has a saddle at the origin, using $\\det H$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\nabla f=(2x,-2y)=\\mathbf 0\\Rightarrow(0,0)$. $H=\\begin{pmatrix}2&0\\\\0&-2\\end{pmatrix}$, so $D=\\det H=(2)(-2)=-4&lt;0$ — a <b>saddle</b>. A negative determinant means the two curvatures have opposite signs: uphill along $x$, downhill along $y$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">convexity</span><div class="ph">Problem 5</div>
+    <p>Is $f(x,y)=x^2+xy+y^2$ convex? If so, what does that tell you about the critical point from Problem 3?</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>The Hessian $H=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}$ is constant. For any direction $\\mathbf p=(a,b)$, $\\mathbf p^{\\mathsf T}H\\mathbf p=2a^2+2ab+2b^2=a^2+b^2+(a+b)^2\\ge 0$ — positive-semidefinite (here strictly positive unless $\\mathbf p=\\mathbf 0$). So $f$ is <b>convex</b>, and a convex function has no saddles or false valleys: the single critical point $(0,0)$ is the <b>global minimum</b>.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">gradient descent · the learning rate</span><div class="ph">Problem 6</div>
+    <p>Minimizing $f(x,y)=x^2+y^2$ by gradient descent from $(2,2)$, take one step with learning rate $\\alpha$. Which single $\\alpha$ lands exactly on the minimum $(0,0)$?</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\nabla f=(2x,2y)=(4,4)$ at $(2,2)$. The step is $\\mathbf x\\leftarrow\\mathbf x-\\alpha\\nabla f=(2-4\\alpha,\\;2-4\\alpha)$. This is $(0,0)$ when $2-4\\alpha=0$, i.e. $\\alpha=\\tfrac12$. Smaller $\\alpha$ undershoots (crawls in); larger overshoots past the floor and can diverge.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">Newton's method</span><div class="ph">Problem 7</div>
+    <p>For $f(x,y)=x^2+4y^2$, take one Newton step $\\mathbf x\\leftarrow\\mathbf x-H^{-1}\\nabla f$ from $(3,1)$. Where does it land, and why in one step?</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\nabla f=(2x,8y)=(6,8)$; $H=\\begin{pmatrix}2&0\\\\0&8\\end{pmatrix}$, so $H^{-1}\\nabla f=\\left(\\tfrac{6}{2},\\tfrac{8}{8}\\right)=(3,1)$. The step gives $(3,1)-(3,1)=(0,0)$ — the exact minimum. Newton lands in one step on any quadratic, because the quadratic model <em>is</em> the function. Note how $H^{-1}$ rescales each direction by its own curvature — something a single learning rate can't do.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">Lagrange · closest point</span><div class="ph">Problem 8</div>
+    <p>Find the point on the line $x+2y=5$ closest to the origin, by minimizing $f=x^2+y^2$ subject to $g=x+2y=5$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\nabla f=\\lambda\\nabla g$: $(2x,2y)=\\lambda(1,2)$, so $2x=\\lambda$ and $2y=2\\lambda=4x\\Rightarrow y=2x$. Drop into the constraint: $x+2(2x)=5\\Rightarrow x=1,\\ y=2$. The closest point is $(1,2)$, at distance $\\sqrt{1^2+2^2}=\\sqrt5$. (As expected, the line from the origin to $(1,2)$ is perpendicular to the constraint line.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">challenge · Lagrange on a circle</span><div class="ph">Problem 9</div>
+    <p>Maximize $f(x,y)=xy$ subject to $x^2+y^2=8$.</p>
+    <details><summary>Show solution</summary><div class="sol">
+    <p>$\\nabla f=(y,x)$, $\\nabla g=(2x,2y)$. From $y=\\lambda\\,2x$ and $x=\\lambda\\,2y$: substituting, $x=2\\lambda(2\\lambda x)=4\\lambda^2 x$, so $4\\lambda^2=1$, $\\lambda=\\pm\\tfrac12$. Taking $\\lambda=\\tfrac12$ gives $y=x$; on the circle $x^2+x^2=8\\Rightarrow x=\\pm2$, so $(2,2)$ or $(-2,-2)$, each with $f=4$ — the <b>maximum</b>. ($\\lambda=-\\tfrac12$ gives $y=-x$ and $f=-4$, the minimum.) The product is largest where the level hyperbola $xy=4$ just kisses the circle.</p></div></details></div>
+  </div>`;
+  setHints([]);unlock();
+}
 function c7_polar(){
   stage.innerHTML=`<div class="card"><h2>Polar coordinates: the $r$ that makes round regions easy</h2>
     <p>Disks, rings, wedges — anything round — are painful to integrate in $x,y$ (the limits involve $\\sqrt{1-x^2}$). Polar coordinates $x=r\\cos\\theta,\\ y=r\\sin\\theta$ describe them effortlessly. But you can't just swap $dx\\,dy$ for $dr\\,d\\theta$: a little polar cell is not the same size as a little square. Below is the polar grid — drag the gold cell outward and watch its area <em>grow</em> even though $dr$ and $d\\theta$ never change.</p>
