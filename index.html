@@ -259,7 +259,9 @@ const RECALL={
    {q:'How are logs related to exponentials, and what are the log laws?',
     a:'<span class="mono">log_a</span> is the inverse of <span class="mono">aˣ</span> (graphs mirror across y=x). Laws: <span class="mono">log(xy)=log x+log y</span>, <span class="mono">log(xᵖ)=p log x</span>. e is the base where growth rate equals height (deferred to Module 6).', b:3},
    {q:'How are sin θ and cos θ defined on the unit circle, and what two identities matter?',
-    a:'The point at angle θ (in radians = arc length) is <span class="mono">(cos θ, sin θ)</span>. Identities: <span class="mono">sin²θ+cos²θ=1</span> and angle addition <span class="mono">sin(A+B)=sin A cos B+cos A sin B</span>.', b:4}
+    a:'The point at angle θ (in radians = arc length) is <span class="mono">(cos θ, sin θ)</span>. Identities: <span class="mono">sin²θ+cos²θ=1</span> and angle addition <span class="mono">sin(A+B)=sin A cos B+cos A sin B</span>.', b:4},
+   {q:"Derive — prove $\\cos^2\\theta+\\sin^2\\theta=1$ from the unit-circle definition.",
+    a:"The point at angle $\\theta$ is $(\\cos\\theta,\\sin\\theta)$ by definition, and it lies on the unit circle $x^2+y^2=1$. Substituting gives $\\cos^2\\theta+\\sin^2\\theta=1$ — Pythagoras on the radius-$1$ triangle.", b:4}
  ]},
  c1:{title:'Module 2 — Limits & Continuity', cues:[
    {q:'What does <span class="mono">lim<sub>x→a</sub> f(x) = L</span> mean, intuitively and via the ε-δ definition?',
@@ -271,7 +273,11 @@ const RECALL={
    {q:'Define continuity at a, and state what the Intermediate Value Theorem guarantees.',
     a:'Continuous at a ⟺ <span class="mono">lim<sub>x→a</sub> f = f(a)</span> (value exists, limit exists, they agree). IVT: a function continuous on [a,b] takes every value between f(a) and f(b) — so a sign change guarantees a root.', b:6},
    {q:'For a ratio of polynomials, how do you find the limit as x→∞?',
-    a:'Compare leading terms (divide by the highest power of x): equal degrees → ratio of leading coefficients (a horizontal asymptote); smaller top degree → 0; larger top degree → diverges.', b:7}
+    a:'Compare leading terms (divide by the highest power of x): equal degrees → ratio of leading coefficients (a horizontal asymptote); smaller top degree → 0; larger top degree → diverges.', b:7},
+   {q:"Derive — prove $\\lim_{x\\to2}(3x-1)=5$ with an explicit $\\delta(\\varepsilon)$.",
+    a:"$|(3x-1)-5|=3|x-2|$. To force this $\\lt\\varepsilon$, take $\\delta=\\varepsilon/3$: then $|x-2|\\lt\\delta\\Rightarrow3|x-2|\\lt\\varepsilon$. A $\\delta$ exists for every $\\varepsilon$, so the limit is $5$.", b:3},
+   {q:"Derive — prove the sum law $\\lim(f+g)=L+M$ from the definition.",
+    a:"Given $\\varepsilon$, make $|f-L|\\lt\\varepsilon/2$ and $|g-M|\\lt\\varepsilon/2$ on a common $\\delta$. Then $|(f+g)-(L+M)|\\le|f-L|+|g-M|\\lt\\varepsilon$ by the triangle inequality — split the budget in half.", b:4}
  ]},
  c2:{title:'Module 3 — The Derivative', cues:[
    {q:"What is $f'(a)$ as a limit, and what does it measure geometrically?",
@@ -283,7 +289,11 @@ const RECALL={
    {q:"State the chain rule for a composition $f(g(x))$.",
     a:"$(f\\circ g)'(x)=f'(g(x))\\,g'(x)$ — rate of the whole = rate of the outer (at the inner) times rate of the inner. In Leibniz form $\\frac{dy}{dx}=\\frac{dy}{du}\\frac{du}{dx}$.", b:6},
    {q:"What are $(\\sin x)'$ and $(\\cos x)'$, the limit behind them, and how do differentiable and continuous relate?",
-    a:"$(\\sin x)'=\\cos x$ and $(\\cos x)'=-\\sin x$, both resting on $\\lim_{h\\to 0}\\frac{\\sin h}{h}=1$ (squeeze theorem) plus angle addition. And: differentiable $\\Rightarrow$ continuous, but not the reverse — corners like $|x|$ are continuous yet not differentiable.", b:7}
+    a:"$(\\sin x)'=\\cos x$ and $(\\cos x)'=-\\sin x$, both resting on $\\lim_{h\\to 0}\\frac{\\sin h}{h}=1$ (squeeze theorem) plus angle addition. And: differentiable $\\Rightarrow$ continuous, but not the reverse — corners like $|x|$ are continuous yet not differentiable.", b:7},
+   {q:"Derive — obtain $(x^n)'=nx^{n-1}$ from the limit definition.",
+    a:"$(x+h)^n=x^n+nx^{n-1}h+\\binom n2x^{n-2}h^2+\\cdots$. Subtract $x^n$, divide by $h$: $nx^{n-1}+(\\text{terms carrying }h)$. As $h\\to0$ only $nx^{n-1}$ survives.", b:4},
+   {q:"Derive — prove $(\\sin x)'=\\cos x$.",
+    a:"Angle addition: $\\sin(x+h)=\\sin x\\cos h+\\cos x\\sin h$, so the quotient is $\\sin x\\tfrac{\\cos h-1}{h}+\\cos x\\tfrac{\\sin h}{h}\\to\\sin x\\cdot0+\\cos x\\cdot1=\\cos x$, using $\\tfrac{\\sin h}{h}\\to1$ and $\\tfrac{\\cos h-1}{h}\\to0$.", b:7}
  ]},
  c3:{title:'Module 4 — Applications of the Derivative', cues:[
    {q:"What is a critical point, and what does Fermat's theorem guarantee about extrema?",
@@ -295,7 +305,11 @@ const RECALL={
    {q:"State the Mean Value Theorem and its geometric meaning.",
     a:"If $f$ is continuous on $[a,b]$ and differentiable on $(a,b)$, some $c$ has $f'(c)=\\frac{f(b)-f(a)}{b-a}$ — a tangent parallel to the secant. Rolle's theorem is the flat special case $f(a)=f(b)$.", b:5},
    {q:"How does L'Hôpital's rule evaluate a $\\frac{0}{0}$ limit, and why does it work?",
-    a:"For $\\frac{0}{0}$ at $a$, $\\lim\\frac{f}{g}=\\frac{f'(a)}{g'(a)}$. Since $f(a)=g(a)=0$, dividing top and bottom by $x-a$ turns the quotient into a ratio of difference quotients heading to $f'(a)/g'(a)$.", b:8}
+    a:"For $\\frac{0}{0}$ at $a$, $\\lim\\frac{f}{g}=\\frac{f'(a)}{g'(a)}$. Since $f(a)=g(a)=0$, dividing top and bottom by $x-a$ turns the quotient into a ratio of difference quotients heading to $f'(a)/g'(a)$.", b:8},
+   {q:"Prove — at an interior maximum or minimum, $f'(c)=0$ (Fermat).",
+    a:"At a max the right difference quotient is $\\le0$ (so $f'(c)\\le0$) and the left is $\\ge0$ (so $f'(c)\\ge0$); both hold only if $f'(c)=0$.", b:2},
+   {q:"Derive — the Mean Value Theorem from Rolle's theorem.",
+    a:"Subtract the secant: $h(x)=f(x)-\\big[f(a)+\\tfrac{f(b)-f(a)}{b-a}(x-a)\\big]$ has $h(a)=h(b)=0$, so Rolle gives $h'(c)=0$, i.e. $f'(c)=\\tfrac{f(b)-f(a)}{b-a}$.", b:5}
  ]},
  c4:{title:'Module 5 — Integration & the FTC', cues:[
    {q:"What is the definite integral $\\int_a^b f(x)\\,dx$, and what does 'signed area' mean?",
@@ -307,7 +321,11 @@ const RECALL={
    {q:"What is an antiderivative / indefinite integral, the reverse power rule, and why the $+C$?",
     a:"$F$ with $F'=f$; the family is $\\int f\\,dx=F+C$. Reverse power rule: $\\int x^n dx=\\frac{x^{n+1}}{n+1}+C$ ($n\\ne-1$). The $+C$ is there because constants vanish under $d/dx$, so an initial condition is needed to pin it.", b:5},
    {q:"How are $\\ln$, $e$, and $e^x$ defined from the integral, and what are $(\\ln x)'$ and $(e^x)'$?",
-    a:"$\\ln x:=\\int_1^x \\frac{dt}{t}$, so $(\\ln x)'=\\frac1x$ (FTC Part 1); $e$ is defined by $\\ln e=1$; $e^x$ is the inverse of $\\ln$, and $(e^x)'=e^x$.", b:7}
+    a:"$\\ln x:=\\int_1^x \\frac{dt}{t}$, so $(\\ln x)'=\\frac1x$ (FTC Part 1); $e$ is defined by $\\ln e=1$; $e^x$ is the inverse of $\\ln$, and $(e^x)'=e^x$.", b:7},
+   {q:"Prove — FTC Part 1: $\\tfrac{d}{dx}\\int_a^x f=f(x)$.",
+    a:"$A(x+h)-A(x)=\\int_x^{x+h}f\\approx f(x)\\,h$ (a thin strip is almost a rectangle of height $f(x)$). Divide by $h$ and let $h\\to0$: $A'(x)=f(x)$.", b:4},
+   {q:"Derive — $\\int_0^1 x\\,dx=\\tfrac12$ straight from the Riemann sum.",
+    a:"Right endpoints $x_i=\\tfrac in,\\ \\Delta x=\\tfrac1n$: $\\sum_{i=1}^n\\tfrac in\\cdot\\tfrac1n=\\tfrac1{n^2}\\cdot\\tfrac{n(n+1)}2=\\tfrac12\\big(1+\\tfrac1n\\big)\\to\\tfrac12$.", b:2}
  ]},
  c5:{title:'Module 6 — Techniques & Applications of Integration', cues:[
    {q:"How does substitution work, and which differentiation rule does it reverse?",
@@ -319,7 +337,11 @@ const RECALL={
    {q:"How do you handle an improper integral over an infinite interval, and what is convergence?",
     a:"Integrate to a finite $b$ and take $\\lim_{b\\to\\infty}$. It <em>converges</em> if that limit is finite ($\\int_1^\\infty\\tfrac{1}{x^2}=1$), <em>diverges</em> if not ($\\int_1^\\infty\\tfrac1x=\\infty$).", b:5},
    {q:"How are area between curves, volume of revolution, and arc length each set up as integrals?",
-    a:"Area $=\\int(y_{\\text{top}}-y_{\\text{bottom}})\\,dx$; volume by disks $=\\int\\pi f(x)^2\\,dx$; arc length $=\\int\\sqrt{1+(f')^2}\\,dx$. Each slices the object and integrates one piece.", b:6}
+    a:"Area $=\\int(y_{\\text{top}}-y_{\\text{bottom}})\\,dx$; volume by disks $=\\int\\pi f(x)^2\\,dx$; arc length $=\\int\\sqrt{1+(f')^2}\\,dx$. Each slices the object and integrates one piece.", b:6},
+   {q:"Derive — the substitution rule from the chain rule.",
+    a:"If $F'=f$, the chain rule gives $\\tfrac{d}{dx}F(g(x))=f(g(x))g'(x)$. Integrating, $\\int f(g(x))g'(x)\\,dx=F(g(x))+C=\\int f(u)\\,du$ with $u=g(x)$.", b:2},
+   {q:"Derive — integration by parts from the product rule.",
+    a:"$(uv)'=u'v+uv'$; integrate both sides: $uv=\\int u'v\\,dx+\\int uv'\\,dx$, then rearrange to $\\int u\\,dv=uv-\\int v\\,du$.", b:3}
  ]},
  c6:{title:'Module 7 — Sequences & Series', cues:[
    {q:"When does a series $\\sum a_n$ converge, and what is the geometric series sum?",
@@ -331,7 +353,11 @@ const RECALL={
    {q:"State the ratio test and the idea behind it.",
     a:"With $L=\\lim\\left|\\frac{a_{n+1}}{a_n}\\right|$: $L&lt;1$ converges, $L&gt;1$ diverges, $L=1$ inconclusive. It works by trapping the tail under a convergent geometric series with ratio $r$ chosen between $L$ and $1$.", b:6},
    {q:"What is a Taylor/Maclaurin series, and the expansions of $e^x$, $\\sin$, $\\cos$?",
-    a:"$f(x)=\\sum\\frac{f^{(n)}(0)}{n!}x^n$. In particular $e^x=\\sum\\frac{x^n}{n!}$, $\\sin x=x-\\frac{x^3}{3!}+\\cdots$, $\\cos x=1-\\frac{x^2}{2!}+\\cdots$ — each valid for every $x$.", b:8}
+    a:"$f(x)=\\sum\\frac{f^{(n)}(0)}{n!}x^n$. In particular $e^x=\\sum\\frac{x^n}{n!}$, $\\sin x=x-\\frac{x^3}{3!}+\\cdots$, $\\cos x=1-\\frac{x^2}{2!}+\\cdots$ — each valid for every $x$.", b:8},
+   {q:"Derive — $\\sum_{n=0}^{\\infty}r^n=\\tfrac1{1-r}$ for $|r|\\lt1$.",
+    a:"$S_N-rS_N=1-r^{N+1}$, so $S_N=\\tfrac{1-r^{N+1}}{1-r}$. For $|r|\\lt1$, $r^{N+1}\\to0$, leaving $\\tfrac1{1-r}$.", b:3},
+   {q:"Derive — the Taylor coefficients $c_n=\\tfrac{f^{(n)}(0)}{n!}$, and the series for $e^x$.",
+    a:"Matching $n$-th derivatives at $0$ in $f=\\sum c_nx^n$ pulls down $n!\\,c_n=f^{(n)}(0)$. For $e^x$ every derivative is $1$ at $0$, so $c_n=\\tfrac1{n!}$ and $e^x=\\sum\\tfrac{x^n}{n!}$.", b:8}
  ]},
  c7:{title:'Module 8 — Multivariable Differentiation', cues:[
    {q:"With several inputs, what plays the role of the derivative, and how do you compute one?",
@@ -343,7 +369,11 @@ const RECALL={
    {q:"How fast does $f$ change if you head off in an arbitrary unit direction $\\mathbf u$?",
     a:"The <b>directional derivative</b> $D_{\\mathbf u}f=\\nabla f\\cdot\\mathbf u$ — the gradient's component along $\\mathbf u$. Largest when $\\mathbf u$ aligns with $\\nabla f$, and zero along a contour.", b:5},
    {q:"A path $x(t),y(t)$ threads through $f$. How does the height change with $t$?",
-    a:"The <b>multivariable chain rule</b>: $\\frac{dz}{dt}=f_x\\,x'+f_y\\,y'=\\nabla f\\cdot(x',y')$ — add the routes through each input. This is the engine of backpropagation.", b:6}
+    a:"The <b>multivariable chain rule</b>: $\\frac{dz}{dt}=f_x\\,x'+f_y\\,y'=\\nabla f\\cdot(x',y')$ — add the routes through each input. This is the engine of backpropagation.", b:6},
+   {q:"Derive — $D_{\\mathbf u}f=\\nabla f\\cdot\\mathbf u$, and why $\\nabla f$ is steepest and $\\perp$ to contours.",
+    a:"$g(s)=f(P+s\\mathbf u)$; the chain rule gives $g'(0)=f_xu_1+f_yu_2=\\nabla f\\cdot\\mathbf u=|\\nabla f|\\cos\\varphi$ — largest at $\\varphi=0$ (along $\\nabla f$, steepest), zero along a contour (so $\\nabla f\\perp$ contours).", b:5},
+   {q:"Derive — the multivariable chain rule $\\tfrac{dz}{dt}=\\nabla f\\cdot(x',y')$.",
+    a:"A nudge $dt$ gives $dx=x'dt,\\ dy=y'dt$. Feed into the tangent-plane change $dz\\approx f_x\\,dx+f_y\\,dy$ and divide: $\\tfrac{dz}{dt}=f_xx'+f_yy'=\\nabla f\\cdot(x',y')$.", b:6}
  ]},
  c8:{title:'Module 9 — Multivariable Optimization', cues:[
    {q:"On a surface $z=f(x,y)$, what single vector equation locates every peak, valley, and mountain pass?",
@@ -359,7 +389,11 @@ const RECALL={
    {q:"If you also know the curvature, how do you reach the minimum faster?",
     a:"<b>Newton's method</b>: $\\mathbf x\\leftarrow\\mathbf x-H^{-1}\\nabla f$, which jumps straight to the minimum of the quadratic model in a single step. Gradient descent uses slope only; Newton uses the Hessian to scale and rotate the step.", b:5},
    {q:"How do you find the best point while <em>stuck on a constraint</em> $g=c$?",
-    a:"<b>Lagrange multipliers</b>: at the constrained optimum the objective's level curve is tangent to the constraint curve, so the gradients are parallel — $\\nabla f=\\lambda\\,\\nabla g$. Solve that together with $g(\\mathbf x)=c$. The scalar $\\lambda$ just matches their lengths.", b:6}
+    a:"<b>Lagrange multipliers</b>: at the constrained optimum the objective's level curve is tangent to the constraint curve, so the gradients are parallel — $\\nabla f=\\lambda\\,\\nabla g$. Solve that together with $g(\\mathbf x)=c$. The scalar $\\lambda$ just matches their lengths.", b:6},
+   {q:"Derive — $g''(0)=\\mathbf p^{\\mathsf T}H\\mathbf p$ (the Hessian curvature) by the chain rule twice.",
+    a:"$g'(s)=\\nabla f\\cdot\\mathbf p$; differentiating again sends each of $f_x,f_y$ through the chain rule, giving $f_{xx}p_1^2+2f_{xy}p_1p_2+f_{yy}p_2^2=\\mathbf p^{\\mathsf T}H\\mathbf p$.", b:2},
+   {q:"Derive — the Lagrange condition $\\nabla f=\\lambda\\nabla g$.",
+    a:"On the constraint you move only along its tangent $\\mathbf T$; at the optimum $\\tfrac{df}{ds}=\\nabla f\\cdot\\mathbf T=0$, so $\\nabla f\\perp\\mathbf T$. Since $\\nabla g\\perp\\mathbf T$ as well, the two are parallel: $\\nabla f=\\lambda\\nabla g$.", b:6}
  ]},
  c9:{title:'Module 10 — Multiple Integrals', cues:[
    {q:"What does the double integral $\\iint_R f\\,dA$ actually mean?",
@@ -369,7 +403,11 @@ const RECALL={
    {q:"Why isn't the polar area element just $dr\\,d\\theta$?",
     a:"A polar cell has radial side $dr$ but arc side $r\\,d\\theta$ (arc = radius × angle), so $dA=r\\,dr\\,d\\theta$. Cells farther out are bigger; that growing $r$ is the factor, and it makes round regions easy.", b:3},
    {q:"What is the factor for a general change of variables?",
-    a:"$dx\\,dy=|\\det J|\\,du\\,dv$, where the Jacobian $J$ has columns $\\big(\\tfrac{\\partial x}{\\partial u},\\tfrac{\\partial y}{\\partial u}\\big)$ and $\\big(\\tfrac{\\partial x}{\\partial v},\\tfrac{\\partial y}{\\partial v}\\big)$ — the edges a tiny cell maps to. Its determinant is the local area-stretch factor (for polar it equals $r$).", b:4}
+    a:"$dx\\,dy=|\\det J|\\,du\\,dv$, where the Jacobian $J$ has columns $\\big(\\tfrac{\\partial x}{\\partial u},\\tfrac{\\partial y}{\\partial u}\\big)$ and $\\big(\\tfrac{\\partial x}{\\partial v},\\tfrac{\\partial y}{\\partial v}\\big)$ — the edges a tiny cell maps to. Its determinant is the local area-stretch factor (for polar it equals $r$).", b:4},
+   {q:"Derive — Fubini: why a double integral is two nested single integrals.",
+    a:"Add the boxes row by row: $\\sum_j\\big(\\sum_i f\\,\\Delta x\\big)\\Delta y$. The inner sum is a 1-D Riemann sum along a row, $\\to A(y)=\\int f\\,dx$ (slice area, $y$ held); the outer stacks the slices, $\\int A(y)\\,dy$.", b:2},
+   {q:"Derive — $dx\\,dy=|\\det J|\\,du\\,dv$, and recover polar's $r$.",
+    a:"Steps $du,dv$ map to edge vectors $\\big(\\tfrac{\\partial x}{\\partial u},\\tfrac{\\partial y}{\\partial u}\\big)du$ and $\\big(\\tfrac{\\partial x}{\\partial v},\\tfrac{\\partial y}{\\partial v}\\big)dv$; the parallelogram they span has area $|\\det J|\\,du\\,dv$. For polar $\\det J=r$.", b:4}
  ]}
 };
 const RECALL_HINT=`Run it as one unbroken chain — each cue answers the previous one's "so what?". If a link takes you away to review, one tap on Back returns you to this list.`;
