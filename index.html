@@ -154,7 +154,7 @@ const MODULES=[
   beats:[c7_recall10,c7_doubleint,c7_iterated,c7_polar,c7_jacobian,c7_intproblems]},
  {id:'c10',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:true,
   outro:`A vector field assigns an arrow to every point; the gradient was the first example. The rest of the subject measures a field along paths and over surfaces, and the Green, Stokes, and divergence theorems lift the Fundamental Theorem of Calculus into two and three dimensions.`,
-  beats:[c10_recall,c10_fields,c10_line,c10_conservative,c10_green]},
+  beats:[c10_recall,c10_fields,c10_line,c10_conservative,c10_green,c10_divcurl]},
  {id:'c11',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:false},
 ];
 function setHints(a){hints=a||[];hintIdx=0;hintBtn.style.display=hints.length?'block':'none';}
@@ -3276,7 +3276,7 @@ function c10_conservative(){
   stage.innerHTML=`<div class="card"><h2>Conservative fields: when the route doesn't matter</h2>
     <p>Last beat left a cliffhanger: for the swirling field the work depended on the path, but for the gradient field $\\mathbf F=\\nabla f$ every route gave the same total. That's not luck — it's the Fundamental Theorem, lifted from the number line to paths. This beat is about the special fields that are some scalar's gradient: the <b>conservative</b> ones.</p>
 
-    <p><b>See it first.</b> Below, $\\mathbf F=\\nabla f$ comes from the bowl $f(x,y)=x^2+y^2$ — think of $f$ as <b>elevation</b> and the field as the uphill arrows. Point $A$ is fixed; <b>drag $B$</b>. Two routes are drawn — a straight line and a bowed detour — and the readout shows the work each one does. Flip to the swirl field to see the contrast.</p>
+    <p><b>See it first.</b> Below, $\\mathbf F=\\nabla f$ comes from the bowl $f(x,y)=x^2+y^2$. Picture $f$ as <b>elevation</b> — a height over each point — but note the field $\\nabla f=(2x,2y)$ is a <b>flat 2-D vector field on the input plane</b>, not arrows climbing a 3-D hillside. Each arrow lies on the map and points the compass direction that is steepest-uphill, longer where the ground is steeper — the "which way is up" of the landscape, drawn on the floor. (Right as you suspected: a gradient lives in the input plane, same dimensions in and out.) Point $A$ is fixed; <b>drag $B$</b>. Two routes are drawn — a straight line and a bowed detour — and the readout shows the work each does. Flip to the swirl field to see the contrast.</p>
     <div class="seg" id="segF"></div>
     <canvas id="cv" width="640" height="420"></canvas>
     <p class="small" id="obs" style="margin-top:6px;color:#9fb0c4"></p>
@@ -3284,14 +3284,14 @@ function c10_conservative(){
 
     <p style="margin-top:16px"><b>Why the route washes out.</b> Walk any path $\\mathbf r(t)$ from $A$ to $B$ and feed $\\mathbf F=\\nabla f$ into the line integral. The integrand is $\\nabla f\\cdot\\mathbf r'$ — and that is <em>exactly</em> the multivariable chain rule from Module 8, which says $\\nabla f\\cdot\\mathbf r'=\\dfrac{d}{dt}f(\\mathbf r(t))$. The messy field dotted with the velocity collapses into the plain time-derivative of your <em>height</em> $f$ along the walk:</p>
     <div class="eqbox">$$\\int_C\\nabla f\\cdot d\\mathbf r=\\int_a^b \\nabla f\\cdot\\mathbf r'\\,dt=\\int_a^b \\frac{d}{dt}f(\\mathbf r(t))\\,dt.$$</div>
-    <p>Now the integrand is a pure derivative, so the <em>ordinary</em> Fundamental Theorem from Module 5 finishes the job — the inside only shows up at the two ends:</p>
+    <p>Now the integrand is a pure derivative, so the <em>ordinary</em> Fundamental Theorem from Module 5 finishes the job — the inside only shows up at the two ends. This result has a name, the <b>gradient theorem</b> (or the Fundamental Theorem for line integrals):</p>
     <div class="eqbox">$$\\int_C\\nabla f\\cdot d\\mathbf r=f(\\mathbf r(b))-f(\\mathbf r(a))=f(B)-f(A).$$</div>
     <p>It's the FTC with one swap: $\\displaystyle\\int_a^b f'(x)\\,dx=f(b)-f(a)$ becomes $\\displaystyle\\int_C\\nabla f\\cdot d\\mathbf r=f(B)-f(A)$, the single derivative $f'$ promoted to the gradient $\\nabla f$ and the interval to a path. The whole trip's work is just the <b>change in height</b> between the ends — so every route ties, and a <b>closed loop</b> ($B=A$) does zero net work. Climb a hill by any trail: your net elevation gain depends only on where you start and finish.</p>
 
     <div class="task"><b>Use the shortcut</b>For $\\mathbf F=\\nabla f$ with $f=x^2+y^2$, what is the work from $A=(1,0)$ to $B=(2,2)$ along <em>any</em> path?</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
 
-    <p style="margin-top:16px"><b>Which fields are conservative?</b> Not all — the swirl $(-y,x)$ isn't, as the loop readout shows. There's a quick test. If $\\mathbf F=(P,Q)=\\nabla f$, then $P=f_x$ and $Q=f_y$, so $P_y=f_{xy}$ and $Q_x=f_{yx}$ — equal, because mixed partials agree (the Clairaut fact from the Hessian). So a conservative field must satisfy</p>
+    <p style="margin-top:16px"><b>Which fields are conservative?</b> Not all — the swirl $(-y,x)$ isn't, as the loop readout shows. There's a quick test. Name the field's two components $\\mathbf F=(P,Q)$ — so $P(x,y)$ is its $x$-part and $Q(x,y)$ its $y$-part (the same $P,Q$ we'll use throughout vector calculus). If this field is a gradient, $\\mathbf F=\\nabla f=(f_x,f_y)$, then matching components gives $P=f_x$ and $Q=f_y$. Differentiate once more: $P_y=f_{xy}$ and $Q_x=f_{yx}$ — and these are equal, because mixed partials agree (the Clairaut fact from the Hessian). So a conservative field must satisfy</p>
     <div class="eqbox">$$\\frac{\\partial P}{\\partial y}=\\frac{\\partial Q}{\\partial x}.$$</div>
     <p>Check the two fields: the gradient $(2x,2y)$ has $P_y=0=Q_x$ — it passes. The swirl $(-y,x)$ has $P_y=-1$ but $Q_x=+1$ — it fails, so no potential $f$ exists for it. That mismatch $Q_x-P_y$ is a number measuring the field's built-in "swirl" at a point, and in the next beat it gets a name — the <b>curl</b> — and a theorem (Green's) tying the swirl inside a loop to the circulation around it. (On a domain with no holes, passing the test is also enough to <em>be</em> conservative.)</p></div>`;
 
@@ -3453,6 +3453,71 @@ function c10_green(){
   draw();
   numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ circulation = 2</div><p>Green's theorem replaces the four-edge walk with one area integral: $\\oint\\mathbf F\\cdot d\\mathbf r=\\iint_R(Q_x-P_y)\\,dA$. The curl is the constant $2$ and the unit square has area $1$, so the circulation is $2\\cdot1=2$ — no line integral needed. (The swirl field spins everything at the same rate, so the answer just scales with the area you enclose.)</p>`);});
   setHints([`Green's theorem: circulation = ∬ curl dA. Curl is constant 2, area of the unit square is 1.`,`2 × 1 = 2.`]);
+}
+function c10_divcurl(){
+  stage.innerHTML=`<div class="card"><h2>Curl and divergence: the two things a field does at a point</h2>
+    <p>Green's theorem turned the number $Q_x-P_y$ into a law. It's time to name it — and to meet its partner. Drop a tiny blob of fluid into a field and let the arrows carry it for an instant: it can <b>twist</b> (rotate) and it can <b>swell or shrink</b> (gain or lose area). Those are the two independent local behaviors, and each gets a derivative.</p>
+
+    <p><b>Watch the blob.</b> The grey circle is a speck of fluid; the gold shape is where the field pushes its points an instant later. <b>Drag it around</b> and flip the field: a source swells it, a sink shrinks it, a swirl spins it, a spiral does both.</p>
+    <div class="seg" id="segF"></div>
+    <canvas id="cv" width="640" height="430"></canvas>
+    <p class="small" id="obs" style="margin-top:6px;color:#9fb0c4"></p>
+    <div class="readout"><div class="rdc"><div class="k">divergence Pₓ+Qᵧ (swell rate)</div><div class="v" id="dv">—</div></div><div class="rdc"><div class="k">curl Qₓ−Pᵧ (twist rate)</div><div class="v" id="cu">—</div></div></div>
+
+    <p style="margin-top:16px"><b>Divergence — net outflow.</b> Is more fluid leaving the blob than entering? Add the two ways the field can push outward: how fast the $x$-flow grows as you move in $x$, plus how fast the $y$-flow grows as you move in $y$.</p>
+    <div class="eqbox">$$\\operatorname{div}\\mathbf F=\\frac{\\partial P}{\\partial x}+\\frac{\\partial Q}{\\partial y}.$$</div>
+    <p>Positive means a <b>source</b> (the blob swells, fluid created), negative a <b>sink</b> (it shrinks), zero means incompressible — area conserved. For the source $(x,y)$: $P_x+Q_y=1+1=2$, a steady spring at every point.</p>
+
+    <p><b>Curl — local spin.</b> Does the field spin the blob? That's the swirl from Green's theorem, the circulation packed into a point: how fast the $y$-push grows across $x$, minus how fast the $x$-push grows up $y$.</p>
+    <div class="eqbox">$$\\operatorname{curl}\\mathbf F=\\frac{\\partial Q}{\\partial x}-\\frac{\\partial P}{\\partial y}.$$</div>
+    <p>Positive spins counter-clockwise, negative clockwise, zero not at all. For the swirl $(-y,x)$: $Q_x-P_y=1-(-1)=2$. They're <em>independent</em> — a field can swell without spinning (a source), spin without swelling (a swirl), or do both (a spiral); knowing one tells you nothing about the other.</p>
+
+    <p><b>Both come out of the field's Jacobian.</b> Near a point the field is linear, $\\mathbf F(\\mathbf x+\\mathbf d)\\approx\\mathbf F+J\\mathbf d$ with $J=\\begin{pmatrix}P_x&P_y\\\\Q_x&Q_y\\end{pmatrix}$ — the same local-linearization matrix from the change-of-variables beat. Its <b>trace</b> $P_x+Q_y$ is the divergence (how the blob's area scales), and its off-diagonal twist $Q_x-P_y$ is the curl. Two numbers read off one matrix. Writing $\\nabla=(\\partial_x,\\partial_y)$ as a "vector of derivatives" packs all three operators together: $\\nabla f$ is the gradient, $\\nabla\\cdot\\mathbf F$ the divergence, $\\nabla\\times\\mathbf F$ the curl.</p>
+
+    <p><b>Green's theorem, twice.</b> Both local rates add up over a region to something on its boundary. Summing the spin gives the circulation form you already proved; summing the outflow gives its twin, the <b>flux form</b> — net flow across the boundary equals the divergence totalled inside:</p>
+    <div class="eqbox">$$\\oint_C\\mathbf F\\cdot d\\mathbf r=\\iint_R(\\operatorname{curl}\\mathbf F)\\,dA,\\qquad \\oint_C\\mathbf F\\cdot\\mathbf n\\,ds=\\iint_R(\\operatorname{div}\\mathbf F)\\,dA.$$</div>
+    <p>And curl ties the whole chapter together: a field is <b>conservative</b> exactly when its curl is zero (on a region with no holes) — no spin anywhere means every loop does zero work. The flux form is the 2-D <b>divergence theorem</b>; next it lifts off the plane into Stokes' and the divergence theorems in 3-D.</p>
+
+    <div class="task"><b>Read off a field</b>For the spiral field $\\mathbf F=(x-y,\\ x+y)$, compute the divergence $P_x+Q_y$.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=80,cx=320,cy=215;
+  const px=x=>cx+x*S,py=y=>cy-y*S;
+  const FIELDS={
+    source:{F:(x,y)=>[x,y],div:2,curl:0,label:'source (x, y)'},
+    sink:{F:(x,y)=>[-x,-y],div:-2,curl:0,label:'sink (−x, −y)'},
+    swirl:{F:(x,y)=>[-y,x],div:0,curl:2,label:'swirl (−y, x)'},
+    spiral:{F:(x,y)=>[x-y,x+y],div:2,curl:2,label:'spiral (x−y, x+y)'}
+  };
+  let fk='source';let C=[0.7,0.4];const r0=0.42,dt=0.22;
+  function arrow(X0,Y0,X1,Y1,col,w){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=w||1.5;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();const a=Math.atan2(Y1-Y0,X1-X0),hl=Math.min(9,Math.hypot(X1-X0,Y1-Y0));ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-hl*Math.cos(a-0.4),Y1-hl*Math.sin(a-0.4));ctx.lineTo(X1-hl*Math.cos(a+0.4),Y1-hl*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);const F=FIELDS[fk].F;
+    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=-2;g<=2;g++){ctx.beginPath();ctx.moveTo(px(g),py(-2));ctx.lineTo(px(g),py(2));ctx.stroke();ctx.beginPath();ctx.moveTo(px(-2),py(g));ctx.lineTo(px(2),py(g));ctx.stroke();}
+    for(let gx=-2;gx<=2;gx+=0.5)for(let gy=-2;gy<=2;gy+=0.5){const v=F(gx,gy),m=Math.hypot(v[0],v[1]);if(m<1e-9)continue;const L=Math.max(0.1,Math.min(0.32,m*0.07));arrow(px(gx),py(gy),px(gx+v[0]/m*L),py(gy+v[1]/m*L),'#223247',1.1);}
+    // original blob (grey dashed)
+    ctx.strokeStyle='#6b7d92';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.beginPath();for(let i=0;i<=48;i++){const a=i/48*2*Math.PI;const X=px(C[0]+r0*Math.cos(a)),Y=py(C[1]+r0*Math.sin(a));i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();ctx.setLineDash([]);
+    // advected blob (gold)
+    ctx.fillStyle='rgba(232,184,75,0.16)';ctx.strokeStyle='#e8b84b';ctx.lineWidth=2.5;ctx.beginPath();for(let i=0;i<=48;i++){const a=i/48*2*Math.PI;const bx=C[0]+r0*Math.cos(a),by=C[1]+r0*Math.sin(a);const v=F(bx,by);const X=px(bx+dt*v[0]),Y=py(by+dt*v[1]);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.closePath();ctx.fill();ctx.stroke();
+    // a few flow arrows from original to advected
+    for(let i=0;i<8;i++){const a=i/8*2*Math.PI;const bx=C[0]+r0*Math.cos(a),by=C[1]+r0*Math.sin(a);const v=F(bx,by);arrow(px(bx),py(by),px(bx+dt*v[0]),py(by+dt*v[1]),'rgba(122,184,255,0.7)',1.3);}
+    ctx.fillStyle='#dbe6f4';ctx.beginPath();ctx.arc(px(C[0]),py(C[1]),3.5,0,7);ctx.fill();
+    ctx.fillStyle='#9fb0c4';ctx.font='12px sans-serif';ctx.fillText('grey = now · gold = an instant later',px(-1.95),py(-1.75));
+    const d=FIELDS[fk].div,c=FIELDS[fk].curl;
+    document.getElementById('dv').textContent=d.toFixed(2);
+    document.getElementById('cu').textContent=c.toFixed(2);
+    const ob=document.getElementById('obs');if(ob)ob.textContent=
+      (d>0.01?'The blob swells (divergence '+d+' > 0, a source)':d<-0.01?'The blob shrinks (divergence '+d+' < 0, a sink)':'The blob keeps its area (divergence 0)')+
+      '; '+(c>0.01?'and twists counter-clockwise (curl '+c+' > 0).':c<-0.01?'and twists clockwise (curl '+c+' < 0).':'and does not spin (curl 0).');}
+  function segs(){document.getElementById('segF').innerHTML=Object.keys(FIELDS).map(k=>`<span class="segb ${k===fk?'on':''}" data-k="${k}">${FIELDS[k].label}</span>`).join('');document.querySelectorAll('#segF .segb').forEach(b=>b.onclick=()=>{fk=b.dataset.k;segs();draw();});}
+  segs();
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));C=[Math.max(-1.5,Math.min(1.5,(X-cx)/S)),Math.max(-1.5,Math.min(1.5,(cy-Y)/S))];draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ divergence = 2</div><p>$P=x-y$ gives $P_x=1$; $Q=x+y$ gives $Q_y=1$; so $\\operatorname{div}\\mathbf F=1+1=2$ — the spiral is a source, its blob swells. (Its curl is $Q_x-P_y=1-(-1)=2$ too, so it also spins: swell and twist together.)</p>`);});
+  setHints([`Divergence = P_x + Q_y. Here P = x−y (so P_x = 1) and Q = x+y (so Q_y = 1).`,`1 + 1 = 2.`]);
 }
 function c7_doubleint(){
   stage.innerHTML=`<div class="card"><h2>Double integrals: adding up a solid</h2>
