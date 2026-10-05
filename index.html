@@ -124,34 +124,34 @@ const completed={};
 const MODULES=[
  {id:'c0',title:'Functions & the Building Blocks',sub:'From algebra: what a function is, the building-block library, composition, exponentials/logs, and trig on the unit circle.',ready:true,
   outro:`Every function calculus touches is here — polynomials, powers, rationals, roots, exponentials, logs, and trig defined on the unit circle — plus composition, the seed of the chain rule. Nothing beyond algebra was assumed.`,
-  beats:[c0_intro,c0_library,c0_compose,c0_explog,c0_trig,c0_problems,c0_recap]},
+  beats:[c0_intro,c0_library,c0_compose,c0_explog,c0_trig,c0_problems]},
  {id:'c1',title:'Limits & Continuity',sub:'The ε-δ foundation: what it means to approach a value, and when a function has no breaks.',ready:true,
   outro:`A limit is the value a function approaches — made rigorous by the ε-δ challenge. Continuity is "the limit equals the value," and it powers the Intermediate Value Theorem. Everything in calculus is built on this.`,
-  beats:[c1_recall,c1_intro,c1_intuitive,c1_epsdelta,c1_laws,c1_indet,c1_continuity,c1_infinity,c1_problems,c1_recap]},
+  beats:[c1_recall,c1_intro,c1_intuitive,c1_epsdelta,c1_laws,c1_indet,c1_continuity,c1_infinity,c1_problems]},
  {id:'c2',title:'The Derivative',sub:'Instantaneous rate of change as a limit; the rules and the chain rule.',ready:true,
   outro:`A derivative is one specific limit — the secant slope as the gap closes. Every rule (power via binomial, product/quotient via add-and-subtract, chain, sin/cos via the squeeze limit) is derived from that one definition. eˣ and ln wait for the integral in Module 6.`,
-  beats:[c2_recall,c2_intro,c2_slopefn,c2_notation,c2_powerrule,c2_prodquot,c2_chain,c2_trig,c2_diffcont,c2_problems,c2_recap]},
+  beats:[c2_recall,c2_intro,c2_slopefn,c2_notation,c2_powerrule,c2_prodquot,c2_chain,c2_trig,c2_diffcont,c2_problems]},
  {id:'c3',title:'Applications of the Derivative',sub:'Extrema, the Mean Value Theorem, optimization, related rates, L\u2019H\u00f4pital.',ready:true,
   outro:`The derivative's sign maps where a function rises and falls; its zeros locate the peaks and valleys; the second derivative reads concavity. The Mean Value Theorem ties average rate to instantaneous, and optimization, related rates, and L\u2019H\u00f4pital's rule are the payoff. Every result rode on the one limit from Module 3.`,
-  beats:[c3_recall,c3_intro,c3_critical,c3_firsttest,c3_concavity,c3_mvt,c3_optimization,c3_relatedrates,c3_lhopital,c3_problems,c3_recap]},
+  beats:[c3_recall,c3_intro,c3_critical,c3_firsttest,c3_concavity,c3_mvt,c3_optimization,c3_relatedrates,c3_lhopital,c3_problems]},
  {id:'c4',title:'Integration & the FTC',sub:'Riemann sums, the definite integral, and the Fundamental Theorem of Calculus.',ready:true,
   outro:`The definite integral is the limit of Riemann sums — accumulated signed area. The Fundamental Theorem ties it to differentiation: the area-so-far function has derivative $f$ (Part 1), so any antiderivative evaluates the integral by $F(b)-F(a)$ (Part 2). That let us define $\\ln x := \\int_1^x \\tfrac{dt}{t}$, fill the $n=-1$ gap in the power rule, and pin down $e$ and $e^x$ at last — rigorously, from area.`,
-  beats:[c4_recall,c4_intro,c4_riemann,c4_defint,c4_ftc1,c4_antideriv,c4_ftc2,c4_ln,c4_e,c4_problems,c4_recap]},
+  beats:[c4_recall,c4_intro,c4_riemann,c4_defint,c4_ftc1,c4_antideriv,c4_ftc2,c4_ln,c4_e,c4_problems]},
  {id:'c5',title:'Techniques & Applications of Integration',sub:'Substitution, parts, partial fractions, improper integrals; area, volume, arc length.',ready:true,
   outro:`Integration is a craft, and now you have the toolbox: substitution reverses the chain rule, parts reverses the product rule, partial fractions breaks a hard rational into easy pieces, and improper integrals extend the idea to infinite regions via limits. Then the payoff — area between curves, volumes of revolution, and arc length — is all one move: slice, express the piece as an integrand, and integrate.`,
-  beats:[c5_recall,c5_intro,c5_usub,c5_parts,c5_partialfrac,c5_improper,c5_area,c5_volume,c5_arclength,c5_problems,c5_recap]},
+  beats:[c5_recall,c5_intro,c5_usub,c5_parts,c5_partialfrac,c5_improper,c5_area,c5_volume,c5_arclength,c5_problems]},
  {id:'c6',title:'Sequences & Series',sub:'Convergence tests, power series, and Taylor/Maclaurin expansions.',ready:true,
   outro:`An infinite sum converges when its partial sums settle to a finite limit. The geometric series is the model; the nth-term, integral, and ratio tests decide the rest — echoing the improper-integral knife-edge. Power series are polynomials of infinite degree, and Taylor series rebuild $e^x$, $\\sin x$, and $\\cos x$ from their derivatives at a single point.`,
-  beats:[c6_recall,c6_intro,c6_sequences,c6_geometric,c6_nthterm,c6_integraltest,c6_ratiotest,c6_powerseries,c6_taylor,c6_problems,c6_recap]},
+  beats:[c6_recall,c6_intro,c6_sequences,c6_geometric,c6_nthterm,c6_integraltest,c6_ratiotest,c6_powerseries,c6_taylor,c6_problems]},
  {id:'c7',title:'Multivariable Differentiation',sub:'Surfaces and contour maps, partial derivatives, the tangent plane, the gradient, directional derivatives, and the multivariable chain rule.',ready:true,
   outro:`Several inputs, one idea at a time: a partial derivative is the slope of a slice, the tangent plane is the local flat approximation built from those slopes, the gradient packs them into the steepest-uphill vector perpendicular to the contours, the directional derivative reads the slope in any direction as $\\nabla f\\cdot\\mathbf u$, and the chain rule threads rates through a composition — the exact engine of backpropagation.`,
-  beats:[c7_recall,c7_intro,c7_partials,c7_tangentplane,c7_gradient,c7_directional,c7_chainrule,c7_problems,c7_recap]},
+  beats:[c7_recall,c7_intro,c7_partials,c7_tangentplane,c7_gradient,c7_directional,c7_chainrule,c7_problems]},
  {id:'c8',title:'Multivariable Optimization',sub:'Critical points and gradient descent, the local quadratic model and the Hessian, the second-derivative test, convexity, Newton’s method, and Lagrange multipliers.',ready:true,
   outro:`Optimization is calculus hunting for the best point: $\\nabla f=\\mathbf 0$ locates the flat spots, the Taylor quadratic model and its Hessian say whether each is a bowl, dome, or saddle, convexity guarantees a single global minimum, gradient descent and Newton’s method walk to it, and Lagrange multipliers handle a constraint. This is the mathematical core of training a model.`,
-  beats:[c8_recall,c7_critical,c7_graddescent,c7_taylor,c7_secondderiv,c7_convexity,c7_newton,c7_lagrange,c7_optproblems,c7_optrecap]},
+  beats:[c8_recall,c7_critical,c7_graddescent,c7_taylor,c7_secondderiv,c7_convexity,c7_newton,c7_lagrange,c7_optproblems]},
  {id:'c9',title:'Multiple Integrals',sub:'Double integrals as volume, iterated integrals and Fubini, polar coordinates, and change of variables via the Jacobian.',ready:true,
   outro:`A double integral accumulates a function over a 2-D region — volume under a surface — computed as iterated single integrals (Fubini). Polar coordinates and the general change of variables, with its Jacobian area factor, make round and warped regions tractable.`,
-  beats:[c7_recall10,c7_doubleint,c7_iterated,c7_polar,c7_jacobian,c7_intproblems,c7_intrecap]},
+  beats:[c7_recall10,c7_doubleint,c7_iterated,c7_polar,c7_jacobian,c7_intproblems]},
  {id:'c10',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:true,
   outro:`A vector field assigns an arrow to every point; the gradient was the first example. The rest of the subject measures a field along paths and over surfaces, and the Green, Stokes, and divergence theorems lift the Fundamental Theorem of Calculus into two and three dimensions.`,
   beats:[c10_recall,c10_fields,c10_line,c10_conservative,c10_green]},
@@ -164,7 +164,7 @@ function addReveal(html){const r=document.createElement('div');r.className='reve
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function scrollTop(){try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){}}
 function renderMath(el){try{if(window.renderMathInElement)renderMathInElement(el||stage,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}],throwOnError:false});}catch(e){}}
-const SAVE_KEY='calc_fp_v1';
+const SAVE_KEY='calc_fp_v2';
 function saveState(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({view,curM,beat,completed}));}catch(e){}}
 function loadState(){try{return JSON.parse(localStorage.getItem(SAVE_KEY));}catch(e){return null;}}
 /* URL-hash position (survives refresh even when storage is blocked) */
@@ -377,23 +377,23 @@ const RECALL={
  ]},
  c8:{title:'Module 9 — Multivariable Optimization', cues:[
    {q:"On a surface $z=f(x,y)$, what single vector equation locates every peak, valley, and mountain pass?",
-    a:"$\\nabla f=\\mathbf 0$ — every partial vanishes at once. It's Fermat's one-variable rule $f'(0)=0$ lifted: a flat spot in <em>all</em> directions. Each solution is a local max, local min, or saddle.", b:0},
+    a:"$\\nabla f=\\mathbf 0$ — every partial vanishes at once. It's Fermat's one-variable rule $f'(0)=0$ lifted: a flat spot in <em>all</em> directions. Each solution is a local max, local min, or saddle.", b:1},
    {q:"$\\nabla f=\\mathbf 0$ only says \"flat\" — so what tells a bowl from a dome from a saddle?",
-    a:"The local <b>quadratic model</b> $f(\\mathbf x+\\mathbf p)\\approx f(\\mathbf x)+\\nabla f\\cdot\\mathbf p+\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\mathbf p$. At a critical point $\\nabla f=\\mathbf 0$, so the curvature term $\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\mathbf p$ alone decides. $H$ is the <b>Hessian</b>, the symmetric matrix of second partials.", b:2},
+    a:"The local <b>quadratic model</b> $f(\\mathbf x+\\mathbf p)\\approx f(\\mathbf x)+\\nabla f\\cdot\\mathbf p+\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\mathbf p$. At a critical point $\\nabla f=\\mathbf 0$, so the curvature term $\\tfrac12\\,\\mathbf p^{\\mathsf T}H\\mathbf p$ alone decides. $H$ is the <b>Hessian</b>, the symmetric matrix of second partials.", b:3},
    {q:"Turn that curvature into a test you run on the second partials.",
-    a:"The discriminant $D=\\det H=f_{xx}f_{yy}-f_{xy}^2$. Then: $D&gt;0$ with $f_{xx}&gt;0$ is a min, $D&gt;0$ with $f_{xx}&lt;0$ a max, $D&lt;0$ a saddle, $D=0$ inconclusive. It's the 1-D sign-of-$f''$ test, upgraded to a determinant.", b:3},
+    a:"The discriminant $D=\\det H=f_{xx}f_{yy}-f_{xy}^2$. Then: $D&gt;0$ with $f_{xx}&gt;0$ is a min, $D&gt;0$ with $f_{xx}&lt;0$ a max, $D&lt;0$ a saddle, $D=0$ inconclusive. It's the 1-D sign-of-$f''$ test, upgraded to a determinant.", b:4},
    {q:"When is a single critical point guaranteed to be <em>the</em> global minimum, with no other valleys?",
-    a:"When $f$ is <b>convex</b> — its Hessian is positive-semidefinite everywhere, $\\mathbf p^{\\mathsf T}H\\mathbf p\\ge 0$ in every direction (never curves down). Then any $\\nabla f=\\mathbf 0$ is the global min. On non-convex high-dimensional surfaces, saddles vastly outnumber true minima.", b:4},
+    a:"When $f$ is <b>convex</b> — its Hessian is positive-semidefinite everywhere, $\\mathbf p^{\\mathsf T}H\\mathbf p\\ge 0$ in every direction (never curves down). Then any $\\nabla f=\\mathbf 0$ is the global min. On non-convex high-dimensional surfaces, saddles vastly outnumber true minima.", b:5},
    {q:"How do you actually walk downhill to a minimum using only the gradient?",
-    a:"<b>Gradient descent</b>: $\\mathbf x\\leftarrow\\mathbf x-\\alpha\\,\\nabla f$, stepping against the steepest-ascent direction. The learning rate $\\alpha$ is the whole game — too large overshoots, zigzags, or explodes; too small crawls. It's $x-\\alpha f'(x)$ with two directions instead of one.", b:1},
+    a:"<b>Gradient descent</b>: $\\mathbf x\\leftarrow\\mathbf x-\\alpha\\,\\nabla f$, stepping against the steepest-ascent direction. The learning rate $\\alpha$ is the whole game — too large overshoots, zigzags, or explodes; too small crawls. It's $x-\\alpha f'(x)$ with two directions instead of one.", b:2},
    {q:"If you also know the curvature, how do you reach the minimum faster?",
-    a:"<b>Newton's method</b>: $\\mathbf x\\leftarrow\\mathbf x-H^{-1}\\nabla f$, which jumps straight to the minimum of the quadratic model in a single step. Gradient descent uses slope only; Newton uses the Hessian to scale and rotate the step.", b:5},
+    a:"<b>Newton's method</b>: $\\mathbf x\\leftarrow\\mathbf x-H^{-1}\\nabla f$, which jumps straight to the minimum of the quadratic model in a single step. Gradient descent uses slope only; Newton uses the Hessian to scale and rotate the step.", b:6},
    {q:"How do you find the best point while <em>stuck on a constraint</em> $g=c$?",
-    a:"<b>Lagrange multipliers</b>: at the constrained optimum the objective's level curve is tangent to the constraint curve, so the gradients are parallel — $\\nabla f=\\lambda\\,\\nabla g$. Solve that together with $g(\\mathbf x)=c$. The scalar $\\lambda$ just matches their lengths.", b:6},
+    a:"<b>Lagrange multipliers</b>: at the constrained optimum the objective's level curve is tangent to the constraint curve, so the gradients are parallel — $\\nabla f=\\lambda\\,\\nabla g$. Solve that together with $g(\\mathbf x)=c$. The scalar $\\lambda$ just matches their lengths.", b:7},
    {q:"Derive — $g''(0)=\\mathbf p^{\\mathsf T}H\\mathbf p$ (the Hessian curvature) by the chain rule twice.",
-    a:"$g'(s)=\\nabla f\\cdot\\mathbf p$; differentiating again sends each of $f_x,f_y$ through the chain rule, giving $f_{xx}p_1^2+2f_{xy}p_1p_2+f_{yy}p_2^2=\\mathbf p^{\\mathsf T}H\\mathbf p$.", b:2},
+    a:"$g'(s)=\\nabla f\\cdot\\mathbf p$; differentiating again sends each of $f_x,f_y$ through the chain rule, giving $f_{xx}p_1^2+2f_{xy}p_1p_2+f_{yy}p_2^2=\\mathbf p^{\\mathsf T}H\\mathbf p$.", b:3},
    {q:"Derive — the Lagrange condition $\\nabla f=\\lambda\\nabla g$.",
-    a:"On the constraint you move only along its tangent $\\mathbf T$; at the optimum $\\tfrac{df}{ds}=\\nabla f\\cdot\\mathbf T=0$, so $\\nabla f\\perp\\mathbf T$. Since $\\nabla g\\perp\\mathbf T$ as well, the two are parallel: $\\nabla f=\\lambda\\nabla g$.", b:6}
+    a:"On the constraint you move only along its tangent $\\mathbf T$; at the optimum $\\tfrac{df}{ds}=\\nabla f\\cdot\\mathbf T=0$, so $\\nabla f\\perp\\mathbf T$. Since $\\nabla g\\perp\\mathbf T$ as well, the two are parallel: $\\nabla f=\\lambda\\nabla g$.", b:7}
  ]},
  c9:{title:'Module 10 — Multiple Integrals', cues:[
    {q:"What does the double integral $\\iint_R f\\,dA$ actually mean?",
@@ -579,30 +579,6 @@ function c0_problems(){
   </div>`;
   setHints([]);unlock();
 }
-function c0_recap(){
-  stage.innerHTML=`<div class="card"><h2>Rebuild it from scratch</h2>
-    <p>No summary this time — the real test is whether you can <b>rederive</b> the pieces, not just recognize them. Work each on paper, then unfold the derivation.</p>
-
-    <div class="prob"><span class="lvl">unit circle</span><div class="ph">Derive 1</div>
-    <p>From the definition $(\\cos\\theta,\\sin\\theta)$ = the point on the unit circle at angle $\\theta$, prove $\\cos^2\\theta+\\sin^2\\theta=1$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>The unit circle is the set of points with $x^2+y^2=1$. The point at angle $\\theta$ has coordinates $x=\\cos\\theta,\\ y=\\sin\\theta$ <em>by definition</em>. Substituting into the circle's equation gives $\\cos^2\\theta+\\sin^2\\theta=1$ immediately — it is just the Pythagorean theorem for the right triangle with hypotenuse $1$.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">powers</span><div class="ph">Derive 2</div>
-    <p>Show that $\\sqrt{x}$ and $\\tfrac1x$ are both power functions $x^k$, and say why that matters.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>A root is a fractional exponent: $\\sqrt{x}=x^{1/2}$ (since $(x^{1/2})^2=x^{1}=x$). A reciprocal is a negative exponent: $\\tfrac1x=x^{-1}$. Both are $x^k$ with $k=\\tfrac12$ and $k=-1$. That matters because the single power rule $\\tfrac{d}{dx}x^k=kx^{k-1}$ then covers roots and reciprocals with no special cases — one rule for an entire family.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">logs</span><div class="ph">Derive 3</div>
-    <p>From the exponent law $a^{m}a^{n}=a^{m+n}$, prove $\\log_a(xy)=\\log_a x+\\log_a y$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Write $x=a^{m}$ and $y=a^{n}$, so by definition $m=\\log_a x$ and $n=\\log_a y$. Then $xy=a^{m}a^{n}=a^{m+n}$, and taking $\\log_a$ of both sides, $\\log_a(xy)=m+n=\\log_a x+\\log_a y$. The log turns multiplication into addition because exponentials turn addition into multiplication — it is the inverse running the rule backward.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">composition</span><div class="ph">Derive 4</div>
-    <p>With $f(x)=\\sqrt{x}$ and $g(x)=1-x^2$, build $f\\circ g$ and find its domain.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>$(f\\circ g)(x)=f(g(x))=\\sqrt{1-x^2}$. The square root needs a non-negative argument: $1-x^2\\ge0\\Rightarrow x^2\\le1\\Rightarrow -1\\le x\\le1$. The inner function's output is fed to the outer function, and the outer function's domain restricts which inputs survive — this nesting is exactly the structure the chain rule will differentiate.</p></div></details></div>
-
-    <p><b>Next — Module 2:</b> the <b>limit</b>. Every function here is a static rule; the limit is the tool that lets us ask how a function <em>behaves as its input approaches</em> a value — the single idea that turns algebra into calculus.</p></div>`;
-  setHints([]);unlock();
-}
-
 /* ================= MODULE 1 — LIMITS & CONTINUITY ================= */
 function c1_intro(){
   stage.innerHTML=`<div class="card"><h2>Calculus is built on one idea: getting arbitrarily close</h2>
@@ -779,30 +755,6 @@ function c1_problems(){
   </div>`;
   setHints([]);unlock();
 }
-function c1_recap(){
-  stage.innerHTML=`<div class="card"><h2>Rebuild it from scratch</h2>
-    <p>Rederive the limit from its definition — each prompt rebuilds one load-bearing fact. Paper first; derivations fold open.</p>
-
-    <div class="prob"><span class="lvl">ε–δ in action</span><div class="ph">Derive 1</div>
-    <p>Using the $\\varepsilon$–$\\delta$ definition, prove $\\displaystyle\\lim_{x\\to2}(3x-1)=5$ by producing a $\\delta$ for each $\\varepsilon$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>We need: for every $\\varepsilon\\gt0$ there is $\\delta\\gt0$ with $0\\lt|x-2|\\lt\\delta\\Rightarrow|(3x-1)-5|\\lt\\varepsilon$. Work backward from the goal: $|(3x-1)-5|=|3x-6|=3|x-2|$. To force this $\\lt\\varepsilon$ we need $|x-2|\\lt\\varepsilon/3$. So choose $\\delta=\\varepsilon/3$: then $|x-2|\\lt\\delta$ gives $3|x-2|\\lt3\\delta=\\varepsilon$. The challenge-and-response is met for every $\\varepsilon$, so the limit is $5$.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">a limit law</span><div class="ph">Derive 2</div>
-    <p>Prove the sum law: if $\\lim f=L$ and $\\lim g=M$, then $\\lim(f+g)=L+M$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Given $\\varepsilon\\gt0$. Since $\\lim f=L$, there is $\\delta_1$ making $|f-L|\\lt\\varepsilon/2$; since $\\lim g=M$, there is $\\delta_2$ making $|g-M|\\lt\\varepsilon/2$. Take $\\delta=\\min(\\delta_1,\\delta_2)$. Then by the triangle inequality $|(f+g)-(L+M)|\\le|f-L|+|g-M|\\lt\\tfrac\\varepsilon2+\\tfrac\\varepsilon2=\\varepsilon$. Splitting the budget $\\varepsilon$ in half for each piece is the whole trick.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">0/0</span><div class="ph">Derive 3</div>
-    <p>Evaluate $\\displaystyle\\lim_{x\\to1}\\frac{x^2-1}{x-1}$, and explain why direct substitution fails.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Substituting $x=1$ gives $\\tfrac00$ — undefined, because the factor $x-1$ vanishes top and bottom. But the <em>limit</em> ignores the single point $x=1$, and there $\\frac{x^2-1}{x-1}=\\frac{(x-1)(x+1)}{x-1}=x+1$. So the limit is $1+1=2$. The function has a removable hole at $x=1$; cancelling the common factor exposes the value the function approaches.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">continuity ⇒ IVT</span><div class="ph">Derive 4</div>
-    <p>State what "continuous at $a$" means, then use the Intermediate Value Theorem to show $x^3+x-1=0$ has a root in $(0,1)$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Continuous at $a$ means $\\lim_{x\\to a}f(x)=f(a)$ — the limit exists and equals the actual value (no hole, jump, or blow-up). The IVT says a function continuous on $[a,b]$ hits every value between $f(a)$ and $f(b)$. Here $f(x)=x^3+x-1$ is a polynomial, hence continuous, with $f(0)=-1\\lt0$ and $f(1)=1\\gt0$. Since $0$ lies between $-1$ and $1$, some $c\\in(0,1)$ has $f(c)=0$.</p></div></details></div>
-
-    <p><b>Next — Module 2:</b> the <b>derivative</b>. It's not a new idea — it's a specific limit, the one from the very first beat: the slope of the secant <span class="mono">(f(x)−f(a))/(x−a)</span> as <span class="mono">x → a</span>. Every differentiation rule you'll refresh is that one limit, computed once and packaged.</p></div>`;
-  setHints([]);unlock();
-}
-
 /* ================= MODULE 2 — THE DERIVATIVE ================= */
 function c2_intro(){
   stage.innerHTML=`<div class="card"><h2>The derivative is one specific limit</h2>
@@ -983,30 +935,6 @@ function c2_problems(){
   </div>`;
   setHints([]);unlock();
 }
-function c2_recap(){
-  stage.innerHTML=`<div class="card"><h2>Rebuild it from scratch</h2>
-    <p>Every rule below comes from the one limit $f'(a)=\\lim_{h\\to0}\\frac{f(a+h)-f(a)}{h}$. Rederive them — paper first, then unfold.</p>
-
-    <div class="prob"><span class="lvl">power rule</span><div class="ph">Derive 1</div>
-    <p>From the limit definition, derive $(x^2)'=2x$, then $(x^n)'=n x^{n-1}$ via the binomial expansion.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>$(x^2)'=\\lim_{h\\to0}\\frac{(x+h)^2-x^2}{h}=\\lim_{h\\to0}\\frac{2xh+h^2}{h}=\\lim_{h\\to0}(2x+h)=2x.$ For general $n$, expand $(x+h)^n=x^n+nx^{n-1}h+\\binom{n}{2}x^{n-2}h^2+\\cdots$. Subtract $x^n$, divide by $h$: $nx^{n-1}+\\binom n2 x^{n-2}h+\\cdots$. Every term after the first still carries an $h$, so it dies as $h\\to0$, leaving $n x^{n-1}$.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">product rule</span><div class="ph">Derive 2</div>
-    <p>Derive $(fg)'=f'g+fg'$ from the difference quotient.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>$\\frac{f(x+h)g(x+h)-f(x)g(x)}{h}$. Add and subtract $f(x+h)g(x)$ in the numerator: $$\\frac{f(x+h)\\big[g(x+h)-g(x)\\big]+g(x)\\big[f(x+h)-f(x)\\big]}{h}.$$ Split into two fractions: the first $\\to f(x)\\,g'(x)$ (as $f(x+h)\\to f(x)$ and the bracket/$h\\to g'$), the second $\\to g(x)\\,f'(x)$. Sum: $f'g+fg'$. The add-subtract manufactures the two separate rates.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">sine</span><div class="ph">Derive 3</div>
-    <p>Using $\\lim_{h\\to0}\\frac{\\sin h}{h}=1$ and $\\lim_{h\\to0}\\frac{\\cos h-1}{h}=0$, derive $(\\sin x)'=\\cos x$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Angle addition: $\\sin(x+h)=\\sin x\\cos h+\\cos x\\sin h$. So $$\\frac{\\sin(x+h)-\\sin x}{h}=\\sin x\\cdot\\frac{\\cos h-1}{h}+\\cos x\\cdot\\frac{\\sin h}{h}.$$ As $h\\to0$ the first term $\\to\\sin x\\cdot0=0$ and the second $\\to\\cos x\\cdot1=\\cos x$. Hence $(\\sin x)'=\\cos x$. The two special limits are the load-bearing facts.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">a logical link</span><div class="ph">Derive 4</div>
-    <p>Prove: differentiable at $a$ $\\Rightarrow$ continuous at $a$. (And why not the reverse?)</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>$f(x)-f(a)=\\frac{f(x)-f(a)}{x-a}\\,(x-a)$. As $x\\to a$ the first factor $\\to f'(a)$ (finite, since $f$ is differentiable) and the second $\\to0$, so the product $\\to0$, i.e. $f(x)\\to f(a)$ — continuity. The converse fails: $|x|$ is continuous at $0$ but its secant slope is $-1$ from the left and $+1$ from the right, so no single derivative exists. A corner is continuous but not differentiable.</p></div></details></div>
-
-    <p><b>Next — Module 3:</b> what the derivative is <em>for</em>. A zero derivative marks flat spots (maxima, minima); its sign tells you where a function rises or falls; the Mean Value Theorem connects average and instantaneous rates; and setting up <b>optimization</b> problems is the payoff.</p></div>`;
-  setHints([]);unlock();
-}
-
 /* ================= MODULE 3 — APPLICATIONS OF THE DERIVATIVE ================= */
 function c3_recall(){recallFrom(`Module 4 puts the derivative to work — so first rebuild what it <em>is</em>, and the limit-and-function machinery beneath it. Every application below is just this toolkit, aimed at a question.`,['c0','c1','c2'],RECALL_HINT);}
 
@@ -1253,31 +1181,6 @@ function c3_problems(){
   </div>`;
   setHints([]);unlock();
 }
-
-function c3_recap(){
-  stage.innerHTML=`<div class="card"><h2>Rebuild it from scratch</h2>
-    <p>Rederive why the derivative answers each question — shape, extrema, average vs instantaneous. Paper first; derivations fold open.</p>
-
-    <div class="prob"><span class="lvl">Fermat</span><div class="ph">Derive 1</div>
-    <p>Prove that at an interior maximum or minimum of a differentiable $f$, $f'(c)=0$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Say $c$ is an interior maximum, so $f(c)\\ge f(x)$ nearby. Look at the one-sided difference quotients. From the right ($h\\gt0$): $\\frac{f(c+h)-f(c)}{h}\\le0$, so the limit $f'(c)\\le0$. From the left ($h\\lt0$): $\\frac{f(c+h)-f(c)}{h}\\ge0$, so $f'(c)\\ge0$. Both hold only if $f'(c)=0$. (A minimum is the same with signs flipped.) Flat-at-the-top is forced.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">MVT from Rolle</span><div class="ph">Derive 2</div>
-    <p>Granting Rolle's theorem (if $f(a)=f(b)$ then some $f'(c)=0$), derive the Mean Value Theorem $f'(c)=\\frac{f(b)-f(a)}{b-a}$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Tilt $f$ by subtracting the straight secant line. Let $h(x)=f(x)-\\big[f(a)+\\tfrac{f(b)-f(a)}{b-a}(x-a)\\big]$. Then $h(a)=0$ and $h(b)=0$, so Rolle gives a $c$ with $h'(c)=0$. But $h'(x)=f'(x)-\\tfrac{f(b)-f(a)}{b-a}$, so $f'(c)=\\tfrac{f(b)-f(a)}{b-a}$. Subtracting the secant turns the slanted MVT into the flat Rolle case.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">second-derivative test</span><div class="ph">Derive 3</div>
-    <p>At a critical point ($f'(c)=0$), explain why $f''(c)\\gt0$ means a local minimum.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Near $c$ the quadratic model is $f(x)\\approx f(c)+f'(c)(x-c)+\\tfrac12 f''(c)(x-c)^2$. With $f'(c)=0$ the linear term drops, leaving $f(x)\\approx f(c)+\\tfrac12 f''(c)(x-c)^2$. If $f''(c)\\gt0$ the $(x-c)^2$ term is positive on both sides, so $f(x)\\gt f(c)$ nearby — a cup-shaped minimum. $f''(c)\\lt0$ flips it to a cap (maximum); $f''(c)=0$ leaves the test silent.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">L'Hôpital</span><div class="ph">Derive 4</div>
-    <p>For a $\\tfrac00$ form at $a$, explain why $\\lim\\frac{f}{g}=\\frac{f'(a)}{g'(a)}$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>With $f(a)=g(a)=0$, replace each by its linear approximation near $a$: $f(x)\\approx f'(a)(x-a)$ and $g(x)\\approx g'(a)(x-a)$. Then $\\frac{f(x)}{g(x)}\\approx\\frac{f'(a)(x-a)}{g'(a)(x-a)}=\\frac{f'(a)}{g'(a)}$ — the common factor $(x-a)$ cancels. The ratio of the functions becomes the ratio of their slopes, because near a shared zero each function <em>is</em> its slope times $(x-a)$.</p></div></details></div>
-
-    <p><b>Next — Module 5:</b> the derivative's mirror image. Integration reverses differentiation and measures accumulated area; the <b>Fundamental Theorem of Calculus</b> is the bridge that makes the two operations inverses — and it's where $\\ln x := \\int_1^x \\tfrac{dt}{t}$ and $e^x$ finally arrive, rigorously.</p></div>`;
-  setHints([]);unlock();
-}
-
 /* ================= MODULE 5 — INTEGRATION & THE FTC ================= */
 function c4_recall(){recallFrom(`Module 5 introduces the derivative's mirror image — so first rebuild the whole toolkit, from the function library through limits, the derivative, and its applications. Integration will lean on all of it.`,['c0','c1','c2','c3'],RECALL_HINT);}
 
@@ -1532,31 +1435,6 @@ function c4_problems(){
   </div>`;
   setHints([]);unlock();
 }
-
-function c4_recap(){
-  stage.innerHTML=`<div class="card"><h2>Rebuild it from scratch</h2>
-    <p>Rederive the integral and the theorem that welds it to the derivative. Paper first; derivations fold open.</p>
-
-    <div class="prob"><span class="lvl">definition</span><div class="ph">Derive 1</div>
-    <p>Define $\\int_a^b f\\,dx$ as a limit of Riemann sums, then compute $\\int_0^1 x\\,dx$ directly from that limit.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Cut $[a,b]$ into $n$ strips of width $\\Delta x=\\tfrac{b-a}{n}$, sample a height $f(x_i)$ in each, and sum: $\\int_a^b f\\,dx=\\lim_{n\\to\\infty}\\sum_{i=1}^n f(x_i)\\,\\Delta x$. For $\\int_0^1 x\\,dx$ with right endpoints $x_i=\\tfrac in$, $\\Delta x=\\tfrac1n$: the sum is $\\sum_{i=1}^n \\tfrac in\\cdot\\tfrac1n=\\tfrac1{n^2}\\cdot\\tfrac{n(n+1)}2=\\tfrac12\\big(1+\\tfrac1n\\big)\\to\\tfrac12$. That matches the triangle of base and height $1$.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">FTC Part 1</span><div class="ph">Derive 2</div>
-    <p>Let $A(x)=\\int_a^x f(t)\\,dt$. Prove $A'(x)=f(x)$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>$A(x+h)-A(x)=\\int_x^{x+h} f(t)\\,dt$ — the area of a thin strip of width $h$ over $[x,x+h]$. For small $h$ that strip is almost a rectangle of height $f(x)$, so its area $\\approx f(x)\\,h$. Divide: $\\frac{A(x+h)-A(x)}{h}\\approx f(x)$, and as $h\\to0$ the approximation becomes exact (continuity of $f$), giving $A'(x)=f(x)$. The area-so-far function has the integrand as its slope.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">FTC Part 2</span><div class="ph">Derive 3</div>
-    <p>From Part 1, derive $\\int_a^b f=F(b)-F(a)$ for any antiderivative $F$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>$A(x)=\\int_a^x f$ is one antiderivative of $f$ (Part 1). Any other $F$ differs by a constant: $F(x)=A(x)+C$. Then $F(b)-F(a)=A(b)-A(a)=\\int_a^b f-\\int_a^a f=\\int_a^b f-0$. So the definite integral is just the net change of <em>any</em> antiderivative across $[a,b]$ — turning area into a two-point evaluation.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">closing the n = −1 gap</span><div class="ph">Derive 4</div>
-    <p>Define $\\ln x:=\\int_1^x\\frac{dt}{t}$ and derive $(\\ln x)'=\\tfrac1x$ and $(e^x)'=e^x$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>By FTC Part 1 applied to integrand $\\tfrac1t$, $(\\ln x)'=\\tfrac1x$ — this fills the one hole the power rule left ($\\int x^{-1}dx$). Define $e^x$ as the inverse of $\\ln$. Differentiating $\\ln(e^x)=x$ with the chain rule: $\\tfrac{1}{e^x}\\cdot(e^x)'=1$, so $(e^x)'=e^x$. Both transcendentals are now built from area, nothing assumed.</p></div></details></div>
-
-    <p><b>Next — Module 6:</b> the FTC turns integration into "guess the antiderivative," so the game becomes technique. <b>Substitution</b> reverses the chain rule, <b>integration by parts</b> reverses the product rule, and partial fractions and trig methods round out the toolkit — plus area, volume, and arc-length payoffs.</p></div>`;
-  setHints([]);unlock();
-}
-
 /* ================= MODULE 6 — TECHNIQUES & APPLICATIONS OF INTEGRATION ================= */
 function c5_recall(){recallFrom(`Module 6 is where you cash in the Fundamental Theorem — so rebuild the whole machine first, from functions and limits through the derivative, its applications, and the integral that ties them together.`,['c0','c1','c2','c3','c4'],RECALL_HINT);}
 
@@ -1752,31 +1630,6 @@ function c5_problems(){
   </div>`;
   setHints([]);unlock();
 }
-
-function c5_recap(){
-  stage.innerHTML=`<div class="card"><h2>Rebuild it from scratch</h2>
-    <p>Each technique is a differentiation rule run backward — rederive them. Paper first; derivations fold open.</p>
-
-    <div class="prob"><span class="lvl">substitution</span><div class="ph">Derive 1</div>
-    <p>Derive the substitution rule $\\int f(g(x))g'(x)\\,dx=\\int f(u)\\,du$ from the chain rule.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Let $F$ be an antiderivative of $f$. The chain rule gives $\\tfrac{d}{dx}F(g(x))=F'(g(x))g'(x)=f(g(x))g'(x)$. Integrating both sides, $\\int f(g(x))g'(x)\\,dx=F(g(x))+C$. Writing $u=g(x)$ this is $F(u)+C=\\int f(u)\\,du$. Substitution is the chain rule read right-to-left; $du=g'(x)\\,dx$ is the bookkeeping.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">by parts</span><div class="ph">Derive 2</div>
-    <p>Derive $\\int u\\,dv=uv-\\int v\\,du$ from the product rule.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Product rule: $(uv)'=u'v+uv'$. Integrate both sides over $x$: $uv=\\int u'v\\,dx+\\int uv'\\,dx$. Rearrange: $\\int uv'\\,dx=uv-\\int u'v\\,dx$, i.e. $\\int u\\,dv=uv-\\int v\\,du$. It trades one integral for another — useful when $\\int v\\,du$ is easier than $\\int u\\,dv$.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">partial fractions</span><div class="ph">Derive 3</div>
-    <p>Evaluate $\\displaystyle\\int\\frac{dx}{x^2-1}$ by splitting the fraction.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Factor and split: $\\frac{1}{(x-1)(x+1)}=\\frac{A}{x-1}+\\frac{B}{x+1}$. Clearing denominators, $1=A(x+1)+B(x-1)$; set $x=1\\Rightarrow A=\\tfrac12$, $x=-1\\Rightarrow B=-\\tfrac12$. So the integral is $\\tfrac12\\int\\frac{dx}{x-1}-\\tfrac12\\int\\frac{dx}{x+1}=\\tfrac12\\ln|x-1|-\\tfrac12\\ln|x+1|+C$. A hard rational became two easy logs.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">improper + p-test</span><div class="ph">Derive 4</div>
-    <p>Show $\\displaystyle\\int_1^\\infty x^{-p}\\,dx$ converges exactly when $p\\gt1$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>An improper integral is a limit: $\\int_1^\\infty x^{-p}dx=\\lim_{b\\to\\infty}\\int_1^b x^{-p}dx$. For $p\\ne1$, $\\int_1^b x^{-p}dx=\\big[\\tfrac{x^{1-p}}{1-p}\\big]_1^b=\\tfrac{b^{1-p}-1}{1-p}$. As $b\\to\\infty$, $b^{1-p}\\to0$ iff $1-p\\lt0$, i.e. $p\\gt1$ (then the value is $\\tfrac1{p-1}$); otherwise it blows up. At $p=1$, $\\int_1^b\\tfrac{dx}{x}=\\ln b\\to\\infty$. So convergence $\\iff p\\gt1$.</p></div></details></div>
-
-    <p><b>Next — Module 7:</b> what if you add up <em>infinitely many</em> terms? <b>Sequences and series</b> ask when an infinite sum settles to a finite value — the convergence tests echo the improper-integral knife-edge you just saw — and culminate in <b>Taylor series</b>, which rebuild functions like $e^x$, $\\sin x$, and $\\cos x$ as infinite polynomials.</p></div>`;
-  setHints([]);unlock();
-}
-
 /* ================= MODULE 7 — SEQUENCES & SERIES ================= */
 function c6_recall(){recallFrom(`Module 7 asks what happens when you add up <em>infinitely many</em> terms — so rebuild the whole machine first, especially the improper integrals whose convergence knife-edge these series will echo.`,['c0','c1','c2','c3','c4','c5'],RECALL_HINT);}
 
@@ -2030,31 +1883,6 @@ function c6_problems(){
   </div>`;
   setHints([]);unlock();
 }
-
-function c6_recap(){
-  stage.innerHTML=`<div class="card"><h2>Rebuild it from scratch</h2>
-    <p>Rederive the convergence machinery and the Taylor coefficients. Paper first; derivations fold open.</p>
-
-    <div class="prob"><span class="lvl">geometric series</span><div class="ph">Derive 1</div>
-    <p>Derive $\\displaystyle\\sum_{n=0}^{\\infty} r^n=\\frac{1}{1-r}$ for $|r|\\lt1$ from the partial sums.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Let $S_N=1+r+\\cdots+r^N$. Then $rS_N=r+r^2+\\cdots+r^{N+1}$, and subtracting telescopes: $S_N-rS_N=1-r^{N+1}$, so $S_N=\\frac{1-r^{N+1}}{1-r}$. If $|r|\\lt1$ then $r^{N+1}\\to0$, leaving $S_N\\to\\frac{1}{1-r}$. If $|r|\\ge1$ the term $r^{N+1}$ doesn't vanish and the sum diverges.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">nth-term test + harmonic</span><div class="ph">Derive 2</div>
-    <p>Prove: if $\\sum a_n$ converges then $a_n\\to0$. Then show the converse fails via $\\sum\\tfrac1n$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>If $\\sum a_n$ converges to $S$, then $a_n=S_n-S_{n-1}\\to S-S=0$. Contrapositive: $a_n\\not\\to0\\Rightarrow$ diverges. But $a_n\\to0$ is <em>not</em> enough: for the harmonic series group terms as $1+\\tfrac12+(\\tfrac13+\\tfrac14)+(\\tfrac15+\\cdots+\\tfrac18)+\\cdots$; each bracket is $\\ge\\tfrac12$ (e.g. $\\tfrac13+\\tfrac14\\gt\\tfrac14+\\tfrac14=\\tfrac12$), so the partial sums grow without bound even though $\\tfrac1n\\to0$.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">ratio test</span><div class="ph">Derive 3</div>
-    <p>Explain why $L=\\lim\\left|\\tfrac{a_{n+1}}{a_n}\\right|\\lt1$ forces convergence.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>If $L\\lt1$, pick $r$ with $L\\lt r\\lt1$. Past some point the ratio stays below $r$, so $|a_{n+1}|\\lt r|a_n|$, and the tail is dominated term-by-term by a geometric series with ratio $r\\lt1$: $|a_{N}|,\\,|a_N|r,\\,|a_N|r^2,\\dots$. A convergent geometric series caps the tail, so the series converges (absolutely). If $L\\gt1$ the terms grow and it diverges; $L=1$ is inconclusive.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">Taylor coefficients</span><div class="ph">Derive 4</div>
-    <p>Derive the coefficient formula $c_n=\\tfrac{f^{(n)}(0)}{n!}$ and use it to get the series for $e^x$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Assume $f(x)=\\sum c_n x^n$. Match derivatives at $0$: $f(0)=c_0$; $f'(x)=c_1+2c_2x+\\cdots$ so $f'(0)=c_1$; $f''(0)=2c_2$; in general the $n$-th derivative at $0$ pulls down $n!\\,c_n$, so $c_n=\\tfrac{f^{(n)}(0)}{n!}$. For $e^x$ every derivative is $e^x$, worth $1$ at $0$, so $c_n=\\tfrac1{n!}$ and $e^x=\\sum_{n\\ge0}\\tfrac{x^n}{n!}$.</p></div></details></div>
-
-    <p><b>Next — Module 8:</b> calculus in more than one variable. <b>Partial derivatives</b> measure change in one direction at a time, the <b>gradient</b> assembles them into the direction of steepest ascent, and multiple integrals accumulate over regions — the machinery underneath every optimization surface in machine learning.</p></div>`;
-  setHints([]);unlock();
-}
-
 /* ================= MODULE 8 — MULTIVARIABLE CALCULUS ================= */
 function c7_recall(){recallFrom(`Module 8 takes calculus into several variables at once — the terrain of every machine-learning loss surface. Everything here is built on the single-variable machine, so rebuild that first.`,['c0','c1','c2','c3','c4','c5','c6'],RECALL_HINT);}
 
@@ -3220,29 +3048,6 @@ function c7_jacobian(){
   numChk(stage.querySelector('.card'),6,()=>{addReveal(`<div class="rh">✓ 6</div><p>$|e_{1x}e_{2y}-e_{1y}e_{2x}|=|2\\cdot3-0\\cdot1|=6$. With $\\mathbf e_1$ flat along the $x$-axis, that's just base $2$ times height $3$ — and the determinant $ad-bc$ is exactly "base times perpendicular height" for edges pointing any direction. Slide $\\mathbf e_2$ down onto the axis and the area collapses to $0$: the cell is squashed flat, the determinant vanishes, and the map is degenerate there.</p>`);});
   setHints([`Area = |e1x·e2y − e1y·e2x| with e1=(2,0), e2=(1,3).`,`|2·3 − 0·1| = 6.`]);
 }
-function c7_optrecap(){
-  stage.innerHTML=`<div class="card"><h2>Rebuild it from scratch</h2>
-    <p>Rederive the optimization machinery — locate the best point, classify it, walk to it, constrain it. Paper first; derivations fold open.</p>
-
-    <div class="prob"><span class="lvl">the quadratic model</span><div class="ph">Derive 1</div>
-    <p>Walking from $P$ in direction $\\mathbf p$, let $g(s)=f(P+s\\mathbf p)$. Derive $g''(0)=\\mathbf p^{\\mathsf T}H\\mathbf p$ (the Hessian curvature term) by applying the chain rule twice.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>First application: $g'(s)=f_x p_1+f_y p_2=\\nabla f\\cdot\\mathbf p$. Differentiate again — $f_x,f_y$ are themselves functions of $(x,y)$ moving along the line, so each needs the chain rule: $\\tfrac{d}{ds}f_x=f_{xx}p_1+f_{xy}p_2$, $\\tfrac{d}{ds}f_y=f_{xy}p_1+f_{yy}p_2$. Then $g''=p_1(f_{xx}p_1+f_{xy}p_2)+p_2(f_{xy}p_1+f_{yy}p_2)=f_{xx}p_1^2+2f_{xy}p_1p_2+f_{yy}p_2^2=\\mathbf p^{\\mathsf T}H\\mathbf p$, with $H=\\begin{pmatrix}f_{xx}&f_{xy}\\\\f_{xy}&f_{yy}\\end{pmatrix}$.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">second-derivative test</span><div class="ph">Derive 2</div>
-    <p>At a critical point, explain why $D=\\det H=f_{xx}f_{yy}-f_{xy}^2$ classifies it, and state the rule.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>With $\\nabla f=\\mathbf 0$, the surface is locally $f(P)+\\tfrac12\\mathbf p^{\\mathsf T}H\\mathbf p$. The point is a min if that curvature is positive in every direction, a max if negative in every direction, a saddle if it's positive one way and negative another. The determinant detects the mixed case: $D\\lt0$ means the two curvatures disagree in sign — a saddle. $D\\gt0$ means they agree, and then $f_{xx}$'s sign says which: $f_{xx}\\gt0$ min, $f_{xx}\\lt0$ max. $D=0$ is inconclusive.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">descent + Newton</span><div class="ph">Derive 3</div>
-    <p>Justify the gradient-descent step $\\mathbf x\\leftarrow\\mathbf x-\\alpha\\nabla f$ and the Newton step $\\mathbf x\\leftarrow\\mathbf x-H^{-1}\\nabla f$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>$\\nabla f$ points steepest uphill, so $-\\nabla f$ points steepest downhill; stepping $-\\alpha\\nabla f$ descends, with the learning rate $\\alpha$ setting the stride (too big overshoots, too small crawls). Newton minimizes the local quadratic $f(P)+\\nabla f\\cdot\\mathbf p+\\tfrac12\\mathbf p^{\\mathsf T}H\\mathbf p$ exactly: set its gradient in $\\mathbf p$ to zero, $\\nabla f+H\\mathbf p=\\mathbf 0$, giving $\\mathbf p=-H^{-1}\\nabla f$. It uses curvature to pick both direction and length in one shot.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">Lagrange</span><div class="ph">Derive 4</div>
-    <p>Derive $\\nabla f=\\lambda\\nabla g$ as the condition for an optimum on the constraint $g=c$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Stuck on the curve, you can only move along it; parametrize by arc length $s$. The objective's rate is $\\tfrac{df}{ds}=\\nabla f\\cdot\\mathbf T$, where $\\mathbf T$ is the constraint's tangent. At an optimum this rate is $0$ (the single-variable rule on the allowed path), so $\\nabla f\\perp\\mathbf T$. But $\\nabla g\\perp\\mathbf T$ too, since the constraint is a level curve of $g$. Two vectors perpendicular to the same tangent are parallel: $\\nabla f=\\lambda\\nabla g$.</p></div></details></div>
-
-    <p><b>Next — Module 10: Multiple Integrals.</b> Optimization accumulated derivatives; now we accumulate <em>values</em> — the double integral as signed volume, computed by iterated single integrals (Fubini), with polar coordinates and the Jacobian handling round and warped regions.</p></div>`;
-  setHints([]);unlock();
-}
 function c7_intproblems(){
   stage.innerHTML=`<div class="card"><h2>Problem set</h2>
     <p>Double integrals as volume, Fubini and order-swapping, non-rectangular regions, polar coordinates, and the Jacobian. Paper first; solutions fold open.</p>
@@ -3279,29 +3084,6 @@ function c7_intproblems(){
     <p>Using the change of variables $x=au,\\ y=bv$, find the area of the ellipse $\\tfrac{x^2}{a^2}+\\tfrac{y^2}{b^2}\\le1$.</p>
     <details><summary>Show solution</summary><div class="sol"><p>The map sends the unit disk $u^2+v^2\\le1$ onto the ellipse. Its Jacobian is $\\det\\begin{pmatrix}a&0\\\\0&b\\end{pmatrix}=ab$, so $dx\\,dy=ab\\,du\\,dv$. Hence area $=\\iint_{\\text{ellipse}}dx\\,dy=ab\\iint_{\\text{unit disk}}du\\,dv=ab\\cdot\\pi=\\pi ab$. The Jacobian rescales the disk's area $\\pi$ by the stretch factor $ab$.</p></div></details></div>
   </div>`;
-  setHints([]);unlock();
-}
-function c7_intrecap(){
-  stage.innerHTML=`<div class="card"><h2>Rebuild it from scratch</h2>
-    <p>Rederive the whole pipeline — sum to volume, volume to iterated integrals, and the area factors for round and warped regions. Paper first; derivations fold open.</p>
-
-    <div class="prob"><span class="lvl">definition</span><div class="ph">Derive 1</div>
-    <p>Define $\\iint_R f\\,dA$ as a limit of a double sum, and say what each term means geometrically.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Tile $R$ into cells of area $\\Delta A=\\Delta x\\,\\Delta y$, sample a height $f(x_i,y_j)$ in each, and sum: $\\iint_R f\\,dA=\\lim_{\\Delta A\\to0}\\sum_i\\sum_j f(x_i,y_j)\\,\\Delta A$. Each term is a thin box — base $\\Delta A$, height $f$ — so a term is a sliver of volume, and the limit is the signed volume between the surface and $R$. It's the 1-D integral with strip→tile and area→volume.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">Fubini</span><div class="ph">Derive 2</div>
-    <p>Derive Fubini: $\\iint_R f\\,dA=\\int_c^d\\big(\\int_a^b f\\,dx\\big)dy$, by regrouping the double sum.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Add the boxes one row at a time: $\\sum_j\\big(\\sum_i f(x_i,y_j)\\,\\Delta x\\big)\\Delta y$. The inner sum is a 1-D Riemann sum along the row $y_j$, so in the limit it becomes $A(y)=\\int_a^b f(x,y)\\,dx$ — the cross-sectional slice area, a function of $y$ alone. The outer sum then stacks those slices: $\\int_c^d A(y)\\,dy$. A double integral is two nested single integrals; the inner one holds the outer variable constant.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">polar area element</span><div class="ph">Derive 3</div>
-    <p>Derive the polar area element $dA=r\\,dr\\,d\\theta$ from the shape of a polar cell.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>A polar cell spans radii $r$ to $r+dr$ and angles $\\theta$ to $\\theta+d\\theta$. Its radial sides have length $dr$; its arc sides subtend angle $d\\theta$ at radius $r$, so they have length $r\\,d\\theta$ (arc = radius × angle). For a thin cell it's nearly a rectangle: $dA\\approx dr\\cdot(r\\,d\\theta)=r\\,dr\\,d\\theta$. Same $dr,d\\theta$ but a longer arc farther out — the growing $r$ is the extra factor.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">the Jacobian</span><div class="ph">Derive 4</div>
-    <p>Derive $dx\\,dy=|\\det J|\\,du\\,dv$ for a general map, and recover the polar $r$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Stepping $du$ (holding $v$) moves the output by $\\big(\\tfrac{\\partial x}{\\partial u},\\tfrac{\\partial y}{\\partial u}\\big)du$; stepping $dv$ moves it by $\\big(\\tfrac{\\partial x}{\\partial v},\\tfrac{\\partial y}{\\partial v}\\big)dv$. These are the edges of the mapped cell, and a parallelogram's area is the absolute determinant of its edge vectors: $dx\\,dy=|\\det J|\\,du\\,dv$, $J=\\begin{pmatrix}x_u&x_v\\\\y_u&y_v\\end{pmatrix}$. For polar $x=r\\cos\\theta,y=r\\sin\\theta$: $\\det\\begin{pmatrix}\\cos\\theta&-r\\sin\\theta\\\\\\sin\\theta&r\\cos\\theta\\end{pmatrix}=r$, reproducing $r\\,dr\\,d\\theta$.</p></div></details></div>
-
-    <p><b>Next — Module 11: Vector Calculus.</b> So far a function returned a single number; next it returns a <em>vector</em> at every point — a vector field. Line and surface integrals accumulate along curves and over surfaces, and the Green / Stokes / divergence theorems are the grand multivariable generalizations of the Fundamental Theorem.</p></div>`;
   setHints([]);unlock();
 }
 function c10_recall(){recallFrom(`Module 11 promotes functions from returning a single <em>number</em> to returning a whole <em>vector</em> at every point — and its grand theorems tie together nearly everything you've built. Roll up the three pillars first: the Fundamental Theorem the big theorems generalize, the gradient (your first vector field), and the multiple integrals that line and surface integrals extend.`,['c4','c7','c9'],RECALL_HINT);}
@@ -3932,31 +3714,6 @@ function c7_problems(){
   </div>`;
   setHints([]);unlock();
 }
-
-function c7_recap(){
-  stage.innerHTML=`<div class="card"><h2>Rebuild it from scratch</h2>
-    <p>Rederive the multivariable toolkit — slope one direction at a time, then reassembled. Paper first; derivations fold open.</p>
-
-    <div class="prob"><span class="lvl">partial derivative</span><div class="ph">Derive 1</div>
-    <p>Define $\\partial f/\\partial x$ as a limit, and compute both partials of $f(x,y)=x^2y+\\sin y$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>$\\frac{\\partial f}{\\partial x}=\\lim_{h\\to0}\\frac{f(x+h,y)-f(x,y)}{h}$ — the ordinary derivative in $x$ with $y$ frozen. So treat $y$ as a constant: $f_x=2xy$ (the $\\sin y$ term is constant in $x$, contributing $0$). Freezing $x$ instead: $f_y=x^2+\\cos y$. One variable at a time is the whole move.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">directional derivative + gradient</span><div class="ph">Derive 2</div>
-    <p>Derive $D_{\\mathbf u}f=\\nabla f\\cdot\\mathbf u$, and from it explain why $\\nabla f$ is the steepest-ascent direction and is perpendicular to the contours.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Walk from $P$ in unit direction $\\mathbf u$: $g(s)=f(P+s\\mathbf u)$. The chain rule gives $g'(0)=f_x u_1+f_y u_2=\\nabla f\\cdot\\mathbf u$. Writing $\\nabla f\\cdot\\mathbf u=|\\nabla f|\\cos\\varphi$, it is largest when $\\varphi=0$ ($\\mathbf u$ points along $\\nabla f$) — steepest ascent — and zero when $\\varphi=90^\\circ$. Zero rate means $f$ is unchanging, i.e. you're moving along a contour; so $\\nabla f\\perp$ contours.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">tangent plane</span><div class="ph">Derive 3</div>
-    <p>Write the tangent-plane (linear) approximation of $f$ at $P$, and say what each term contributes.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>Each partial is a slope, and to first order the changes add: $f(P+\\Delta)\\approx f(P)+f_x\\,\\Delta x+f_y\\,\\Delta y$. The constant $f(P)$ is the base height; $f_x\\,\\Delta x$ is the rise from moving in $x$; $f_y\\,\\Delta y$ the rise from moving in $y$. It is the two-variable version of $f(a)+f'(a)\\Delta x$ — the flat sheet that best hugs the surface at $P$, and the local model every later result rests on.</p></div></details></div>
-
-    <div class="prob"><span class="lvl">chain rule</span><div class="ph">Derive 4</div>
-    <p>For $z=f(x,y)$ with $x=x(t),y=y(t)$, derive $\\frac{dz}{dt}=\\nabla f\\cdot(x',y')$.</p>
-    <details><summary>Show derivation</summary><div class="sol"><p>A nudge $dt$ changes $x$ by $x'\\,dt$ and $y$ by $y'\\,dt$. Feed those into the tangent-plane change $dz\\approx f_x\\,dx+f_y\\,dy$: $dz\\approx f_x x'\\,dt+f_y y'\\,dt$. Divide by $dt$: $\\frac{dz}{dt}=f_x x'+f_y y'=\\nabla f\\cdot(x',y')$. Multiply along each route ($x$ and $y$), add the routes — the same pattern that, run backward through a graph, is backpropagation.</p></div></details></div>
-
-    <p><b>Next — Module 9: Multivariable Optimization.</b> Now that you can measure slope in every direction, you can hunt for the best point: where $\\nabla f=\\mathbf 0$, whether it's a peak, valley, or saddle (the Hessian decides), how gradient descent and Newton's method walk downhill, and how Lagrange multipliers optimize under a constraint — the mathematical core of training a model. <b>Module 10</b> then turns to <b>multiple integrals</b>: accumulating a function over a region.</p></div>`;
-  setHints([]);unlock();
-}
-
 /* ================= boot ================= */
 window.onerror=function(m,s,l){console.error(m,l);};
 function bootRestore(){const s=loadState();
