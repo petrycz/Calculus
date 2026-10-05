@@ -154,7 +154,7 @@ const MODULES=[
   beats:[c7_recall10,c7_doubleint,c7_iterated,c7_polar,c7_jacobian,c7_intproblems,c7_intrecap]},
  {id:'c10',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:true,
   outro:`A vector field assigns an arrow to every point; the gradient was the first example. The rest of the subject measures a field along paths and over surfaces, and the Green, Stokes, and divergence theorems lift the Fundamental Theorem of Calculus into two and three dimensions.`,
-  beats:[c10_recall,c10_fields,c10_line,c10_conservative]},
+  beats:[c10_recall,c10_fields,c10_line,c10_conservative,c10_green]},
  {id:'c11',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:false},
 ];
 function setHints(a){hints=a||[];hintIdx=0;hintBtn.style.display=hints.length?'block':'none';}
@@ -3555,6 +3555,122 @@ function c10_conservative(){
   draw();
   numChk(stage.querySelector('.card'),7,()=>{addReveal(`<div class="rh">✓ work = 7</div><p>Conservative fields need no integral — just the endpoints: $f(B)-f(A)=(2^2+2^2)-(1^2+0^2)=8-1=7$. Straight, curved, or looping out and part way back, any path from $(1,0)$ to $(2,2)$ does the same $7$ units of work, because the field is the gradient of the height $f=x^2+y^2$.</p>`);});
   setHints([`F=∇f is conservative, so work = f(B) − f(A). Here f = x²+y².`,`f(2,2) − f(1,0) = 8 − 1 = 7.`]);
+}
+function c10_green(){
+  stage.innerHTML=`<div class="card"><h2>Green's theorem: swirl inside = circulation around</h2>
+    <p>The conservative beat left a number on the table: $Q_x-P_y$, the field's "swirl at a point." Green's theorem turns that local number into a global law — it says the total swirl bottled up <em>inside</em> a loop equals the circulation you measure going <em>around</em> the loop. It's the Fundamental Theorem again: an integral over a region equals an integral over its boundary.</p>
+
+    <p><b>Start with one tiny cell.</b> Walk counter-clockwise around a little box, bottom → right → top → left, adding $\\mathbf F\\cdot d\\mathbf r$ on each edge. The bottom and top nearly cancel, and the leftover is how much $P$ <em>changed</em> going up; likewise the sides leave how much $Q$ changed going across.</p>
+    <canvas id="cvcell" width="640" height="250"></canvas>
+    <div class="eqbox">$$\\oint_{\\text{cell}}\\mathbf F\\cdot d\\mathbf r=\\underbrace{\\big[Q(x{+}dx)-Q(x)\\big]}_{Q_x\\,dx}dy-\\underbrace{\\big[P(y{+}dy)-P(y)\\big]}_{P_y\\,dy}dx=\\big(Q_x-P_y\\big)\\,dx\\,dy.$$</div>
+    <p>So one tiny loop's circulation is the <b>curl</b> $Q_x-P_y$ times the cell's area — the swirl packed into that speck of region.</p>
+
+    <p><b>Now tile the whole region.</b> Give every cell its own counter-clockwise loop. Each <em>interior</em> edge is shared by two cells and gets walked once each way — so those contributions <b>cancel in pairs</b>. Only the outer edges, walked once, survive. <b>Flip the switch</b> to watch the interior erase itself down to the boundary.</p>
+    <div class="seg" id="segT"></div>
+    <canvas id="cvtile" width="640" height="300"></canvas>
+    <p class="small" id="obsT" style="margin-top:6px;color:#9fb0c4"></p>
+    <p>Adding the cell loops two ways: by cells it's $\\sum(Q_x-P_y)\\,dA\\to\\iint_R(Q_x-P_y)\\,dA$; by surviving edges it's the circulation $\\oint_C\\mathbf F\\cdot d\\mathbf r$ around the boundary. They're the same sum, so:</p>
+    <div class="eqbox">$$\\oint_C\\mathbf F\\cdot d\\mathbf r=\\iint_R\\Big(\\frac{\\partial Q}{\\partial x}-\\frac{\\partial P}{\\partial y}\\Big)\\,dA.$$</div>
+
+    <p><b>See the two sides agree.</b> The background shades the curl $Q_x-P_y$ (<span style="color:#d98f8f">red</span> swirls one way, <span style="color:#7ab8ff">blue</span> the other). <b>Drag the loop</b>: the readout compares the circulation measured around its edge to the curl totalled over its inside. Flip the field and watch both numbers move together.</p>
+    <div class="seg" id="segF"></div>
+    <canvas id="cv" width="640" height="430"></canvas>
+    <p class="small" id="obs" style="margin-top:6px;color:#9fb0c4"></p>
+    <div class="readout"><div class="rdc"><div class="k">circulation ∮ F·dr</div><div class="v" id="circ">—</div></div><div class="rdc"><div class="k">enclosed swirl ∬(Qₓ−Pᵧ)dA</div><div class="v" id="flux">—</div></div></div>
+
+    <div class="task"><b>Use the theorem</b>The swirl field $(-y,x)$ has curl $Q_x-P_y=2$. By Green's theorem, what is its circulation around the boundary of the unit square $[0,1]\\times[0,1]$? (curl $\\times$ area)</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>Where it sits.</b> This is the 2-D member of one family. The ordinary FTC turned a derivative integrated over an interval into values at the two endpoints; the gradient theorem turned $\\nabla f$ along a path into $f$ at the two ends; Green turns the curl over a flat region into circulation around its edge. It also closes the conservative loop cleanly: if the curl is $0$ everywhere, every $\\oint$ is $0$, which is exactly path-independence. Next the swirl $Q_x-P_y$ gets its proper name and partner — <b>curl and divergence</b> — and then the same region-equals-boundary idea lifts off the plane into <b>Stokes' and the divergence theorems</b> in 3-D.</p></div>`;
+
+  const arrow=(c,X0,Y0,X1,Y1,col,w)=>{if(!c)return;c.strokeStyle=col;c.lineWidth=w||2;c.beginPath();c.moveTo(X0,Y0);c.lineTo(X1,Y1);c.stroke();const a=Math.atan2(Y1-Y0,X1-X0),hl=Math.min(9,Math.hypot(X1-X0,Y1-Y0));c.fillStyle=col;c.beginPath();c.moveTo(X1,Y1);c.lineTo(X1-hl*Math.cos(a-0.4),Y1-hl*Math.sin(a-0.4));c.lineTo(X1-hl*Math.cos(a+0.4),Y1-hl*Math.sin(a+0.4));c.closePath();c.fill();};
+
+  // ===== picture 1: one cell =====
+  (function(){const c=document.getElementById('cvcell');const g=c&&c.getContext&&c.getContext('2d');if(!g)return;const Wc=c.width,Hc=c.height;
+    const x0=250,y0=60,L=130;  // cell top-left and size (screen)
+    g.clearRect(0,0,Wc,Hc);
+    g.fillStyle='rgba(122,184,255,0.10)';g.fillRect(x0,y0,L,L);g.strokeStyle='#3a4c66';g.lineWidth=1;g.strokeRect(x0,y0,L,L);
+    // CCW edges with arrows (screen y down, so CCW on screen is bottom→right? use visual CCW)
+    arrow(g,x0,y0+L,x0+L,y0+L,'#e8b84b',2.5);        // bottom L→R
+    arrow(g,x0+L,y0+L,x0+L,y0,'#e8b84b',2.5);        // right up
+    arrow(g,x0+L,y0,x0,y0,'#e8b84b',2.5);            // top R→L
+    arrow(g,x0,y0,x0,y0+L,'#e8b84b',2.5);            // left down
+    g.fillStyle='#caa64e';g.font='13px sans-serif';
+    g.fillText('+P dx',x0+30,y0+L+22);
+    g.fillText('+Q dy',x0+L+8,y0+L/2);
+    g.fillText('−P dx',x0+34,y0-10);
+    g.fillText('−Q dy',x0-62,y0+L/2);
+    g.fillStyle='#8095ab';g.font='12px sans-serif';
+    g.fillText('walk counter-clockwise', x0+8, y0+L/2-8);
+    g.fillText('one cell, size dx × dy', 30, 30);
+  })();
+
+  // ===== picture 2: tiling / cancellation =====
+  const ct=document.getElementById('cvtile');const tg=ct&&ct.getContext&&ct.getContext('2d');const Wt=ct.width,Ht=ct.height;
+  let tstate='cells';const TN=4, tx0=200, ty0=40, tL=55;
+  function ccwGlyph(cxp,cyp,r,col){if(!tg)return;tg.strokeStyle=col;tg.lineWidth=2;tg.beginPath();tg.arc(cxp,cyp,r,-0.3,Math.PI*1.5);tg.stroke();const a=Math.PI*1.5;const ex=cxp+r*Math.cos(a),ey=cyp+r*Math.sin(a);arrow(tg,ex+0.1,ey-6,ex,ey,col,2);}
+  function drawTile(){if(!tg)return;tg.clearRect(0,0,Wt,Ht);
+    if(tstate==='cells'){
+      for(let i=0;i<TN;i++)for(let j=0;j<TN;j++){tg.strokeStyle='#2b3a4f';tg.lineWidth=1;tg.strokeRect(tx0+i*tL,ty0+j*tL,tL,tL);ccwGlyph(tx0+i*tL+tL/2,ty0+j*tL+tL/2,tL*0.28,'#e8b84b');}
+      tg.fillStyle='#8095ab';tg.font='12px sans-serif';tg.fillText('every cell circulates counter-clockwise',tx0,ty0+TN*tL+26);
+    } else {
+      // faint grid
+      tg.strokeStyle='#1c2838';tg.lineWidth=1;for(let i=0;i<=TN;i++){tg.beginPath();tg.moveTo(tx0+i*tL,ty0);tg.lineTo(tx0+i*tL,ty0+TN*tL);tg.stroke();tg.beginPath();tg.moveTo(tx0,ty0+i*tL);tg.lineTo(tx0+TN*tL,ty0+i*tL);tg.stroke();}
+      // interior edges: opposing arrow pairs (muted) to show cancellation
+      for(let i=1;i<TN;i++)for(let j=0;j<TN;j++){const X=tx0+i*tL,Y=ty0+j*tL+tL/2;tg.strokeStyle='#3a4c66';tg.lineWidth=1;tg.beginPath();tg.moveTo(X-3,Y-10);tg.lineTo(X-3,Y+10);tg.moveTo(X+3,Y+10);tg.lineTo(X+3,Y-10);tg.stroke();}
+      // bold CCW boundary
+      const X0=tx0,Y0=ty0,SZ=TN*tL;
+      arrow(tg,X0,Y0+SZ,X0+SZ,Y0+SZ,'#e8b84b',3);arrow(tg,X0+SZ,Y0+SZ,X0+SZ,Y0,'#e8b84b',3);arrow(tg,X0+SZ,Y0,X0,Y0,'#e8b84b',3);arrow(tg,X0,Y0,X0,Y0+SZ,'#e8b84b',3);
+      tg.fillStyle='#8095ab';tg.font='12px sans-serif';tg.fillText('interior edges cancel in pairs — only the boundary loop survives',tx0-30,ty0+SZ+26);
+    }
+    const ob=document.getElementById('obsT');if(ob)ob.textContent=tstate==='cells'?'Each small loop measures the swirl in its own cell.':'Sum of all cell loops = circulation around the outer boundary.';}
+  function segT(){document.getElementById('segT').innerHTML=`<span class="segb ${tstate==='cells'?'on':''}" data-s="cells">every cell spins</span><span class="segb ${tstate==='cancel'?'on':''}" data-s="cancel">interior cancels</span>`;document.querySelectorAll('#segT .segb').forEach(b=>b.onclick=()=>{tstate=b.dataset.s;segT();drawTile();});}
+  segT();drawTile();
+
+  // ===== picture 3: Green equality, draggable loop over curl heatmap =====
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=80,cx=320,cy=215;
+  const px=x=>cx+x*S,py=y=>cy-y*S;
+  const FIELDS={
+    swirl:{F:(x,y)=>[-y,x],curl:()=>2,label:'swirl (−y, x)'},
+    source:{F:(x,y)=>[x,y],curl:()=>0,label:'source (x, y)'},
+    shear:{F:(x,y)=>[0,x*x],curl:(x)=>2*x,label:'shear (0, x²)'}
+  };
+  let fk='swirl';let C=[0.1,0.1];const hs=0.7;
+  function circulation(){const F=FIELDS[fk].F,N=200;let s=0;const a=[C[0]-hs,C[1]-hs],b=[C[0]+hs,C[1]+hs];
+    // CCW: bottom, right, top, left
+    for(let i=0;i<N;i++){const t=(i+0.5)/N;const x=a[0]+t*(b[0]-a[0]),y=a[1];s+=F(x,y)[0]*((b[0]-a[0])/N);}
+    for(let i=0;i<N;i++){const t=(i+0.5)/N;const x=b[0],y=a[1]+t*(b[1]-a[1]);s+=F(x,y)[1]*((b[1]-a[1])/N);}
+    for(let i=0;i<N;i++){const t=(i+0.5)/N;const x=b[0]-t*(b[0]-a[0]),y=b[1];s+=F(x,y)[0]*(-(b[0]-a[0])/N);}
+    for(let i=0;i<N;i++){const t=(i+0.5)/N;const x=a[0],y=b[1]-t*(b[1]-a[1]);s+=F(x,y)[1]*(-(b[1]-a[1])/N);}
+    return s;}
+  function enclosed(){const cu=FIELDS[fk].curl,N=60,d=2*hs/N;let s=0;for(let i=0;i<N;i++)for(let j=0;j<N;j++){const x=C[0]-hs+(i+0.5)*d,y=C[1]-hs+(j+0.5)*d;s+=cu(x,y)*d*d;}return s;}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);const F=FIELDS[fk].F,cu=FIELDS[fk].curl;
+    // curl heatmap
+    const step=0.2;for(let gx=-2;gx<2;gx+=step)for(let gy=-2;gy<2;gy+=step){const c=cu(gx+step/2,gy+step/2);const t=Math.max(-1,Math.min(1,c/4));const col=t>=0?'rgba(217,143,143,'+(0.06+0.5*t)+')':'rgba(122,184,255,'+(0.06+0.5*(-t))+')';ctx.fillStyle=col;ctx.fillRect(px(gx),py(gy+step),step*S,step*S);}
+    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=-2;g<=2;g++){ctx.beginPath();ctx.moveTo(px(g),py(-2));ctx.lineTo(px(g),py(2));ctx.stroke();ctx.beginPath();ctx.moveTo(px(-2),py(g));ctx.lineTo(px(2),py(g));ctx.stroke();}
+    // field arrows
+    for(let gx=-2;gx<=2;gx+=0.5)for(let gy=-2;gy<=2;gy+=0.5){const v=F(gx,gy),mag=Math.hypot(v[0],v[1]);if(mag<1e-9)continue;const L=Math.max(0.1,Math.min(0.32,mag*0.08));arrow(ctx,px(gx),py(gy),px(gx+v[0]/mag*L),py(gy+v[1]/mag*L),'#2b4258',1.1);}
+    // loop (CCW square) with direction arrows
+    const a=[C[0]-hs,C[1]-hs],b=[C[0]+hs,C[1]+hs];
+    ctx.strokeStyle='#e8b84b';ctx.lineWidth=2.5;ctx.strokeRect(px(a[0]),py(b[1]),2*hs*S,2*hs*S);
+    arrow(ctx,px(C[0]-0.2),py(a[1]),px(C[0]+0.2),py(a[1]),'#e8b84b',2);
+    arrow(ctx,px(b[0]),py(C[1]-0.2),px(b[0]),py(C[1]+0.2),'#e8b84b',2);
+    ctx.fillStyle='#dbe6f4';ctx.beginPath();ctx.arc(px(C[0]),py(C[1]),4,0,7);ctx.fill();
+    ctx.fillStyle='#9fb0c4';ctx.font='12px sans-serif';ctx.fillText('drag the loop',px(C[0])+8,py(C[1])-8);
+    const circ=circulation(),fx=enclosed();
+    document.getElementById('circ').textContent=circ.toFixed(3);
+    document.getElementById('flux').textContent=fx.toFixed(3);
+    const ob=document.getElementById('obs');if(ob)ob.textContent='Circulation around the loop ('+circ.toFixed(3)+') equals the curl totalled over its inside ('+fx.toFixed(3)+') — Green’s theorem, live.';}
+  function segF(){document.getElementById('segF').innerHTML=Object.keys(FIELDS).map(k=>`<span class="segb ${k===fk?'on':''}" data-k="${k}">${FIELDS[k].label}</span>`).join('');document.querySelectorAll('#segF .segb').forEach(b=>b.onclick=()=>{fk=b.dataset.k;segF();draw();});}
+  segF();
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));C=[Math.max(-1.3,Math.min(1.3,(X-cx)/S)),Math.max(-1.3,Math.min(1.3,(cy-Y)/S))];draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ circulation = 2</div><p>Green's theorem replaces the four-edge walk with one area integral: $\\oint\\mathbf F\\cdot d\\mathbf r=\\iint_R(Q_x-P_y)\\,dA$. The curl is the constant $2$ and the unit square has area $1$, so the circulation is $2\\cdot1=2$ — no line integral needed. (The swirl field spins everything at the same rate, so the answer just scales with the area you enclose.)</p>`);});
+  setHints([`Green's theorem: circulation = ∬ curl dA. Curl is constant 2, area of the unit square is 1.`,`2 × 1 = 2.`]);
 }
 function c7_doubleint(){
   stage.innerHTML=`<div class="card"><h2>Double integrals: adding up a solid</h2>
