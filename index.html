@@ -154,7 +154,7 @@ const MODULES=[
   beats:[c7_recall10,c7_doubleint,c7_iterated,c7_polar,c7_jacobian,c7_intproblems,c7_intrecap]},
  {id:'c10',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:true,
   outro:`A vector field assigns an arrow to every point; the gradient was the first example. The rest of the subject measures a field along paths and over surfaces, and the Green, Stokes, and divergence theorems lift the Fundamental Theorem of Calculus into two and three dimensions.`,
-  beats:[c10_recall,c10_fields,c10_line]},
+  beats:[c10_recall,c10_fields,c10_line,c10_conservative]},
  {id:'c11',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:false},
 ];
 function setHints(a){hints=a||[];hintIdx=0;hintBtn.style.display=hints.length?'block':'none';}
@@ -3489,6 +3489,72 @@ function c10_line(){
 
   numChk(stage.querySelector('.card'),5,()=>{addReveal(`<div class="rh">✓ work = 5</div><p>With $\\mathbf r(t)=(2t,t)$, $\\mathbf r'(t)=(2,1)$. The field along the path is $\\mathbf F(\\mathbf r(t))=(4t,2t)$. Dotting: $\\mathbf F\\cdot\\mathbf r'=4t\\cdot2+2t\\cdot1=10t$, so $\\int_0^1 10t\\,dt=[5t^2]_0^1=5$. Sweep the gold path to $B$ and "work so far" lands on $5.00$ — and the curved route gives $5$ too, because this field is a gradient.</p>`);});
   setHints([`Plug r(t)=(2t,t) into F=(2x,2y) to get (4t,2t); dot with r'(t)=(2,1); integrate over [0,1].`,`F·r' = 8t+2t = 10t, and ∫₀¹10t dt = 5.`]);
+}
+function c10_conservative(){
+  stage.innerHTML=`<div class="card"><h2>Conservative fields: when the route doesn't matter</h2>
+    <p>Last beat left a cliffhanger: for the swirling field the work depended on the path, but for the gradient field $\\mathbf F=\\nabla f$ every route gave the same total. That's not luck — it's the Fundamental Theorem, lifted from the number line to paths. This beat is about the special fields that are some scalar's gradient: the <b>conservative</b> ones.</p>
+
+    <p><b>See it first.</b> Below, $\\mathbf F=\\nabla f$ comes from the bowl $f(x,y)=x^2+y^2$ — think of $f$ as <b>elevation</b> and the field as the uphill arrows. Point $A$ is fixed; <b>drag $B$</b>. Two routes are drawn — a straight line and a bowed detour — and the readout shows the work each one does. Flip to the swirl field to see the contrast.</p>
+    <div class="seg" id="segF"></div>
+    <canvas id="cv" width="640" height="420"></canvas>
+    <p class="small" id="obs" style="margin-top:6px;color:#9fb0c4"></p>
+    <div class="readout"><div class="rdc"><div class="k">work · straight</div><div class="v" id="ws">—</div></div><div class="rdc"><div class="k">work · detour</div><div class="v" id="wa">—</div></div><div class="rdc"><div class="k">loop (out &amp; back)</div><div class="v" id="wl">—</div></div><div class="rdc"><div class="k">f(B) − f(A)</div><div class="v" id="wd">—</div></div></div>
+
+    <p style="margin-top:16px"><b>Why the route washes out.</b> Walk any path $\\mathbf r(t)$ from $A$ to $B$ and feed $\\mathbf F=\\nabla f$ into the line integral. The integrand is $\\nabla f\\cdot\\mathbf r'$ — and that is <em>exactly</em> the multivariable chain rule from Module 8, which says $\\nabla f\\cdot\\mathbf r'=\\dfrac{d}{dt}f(\\mathbf r(t))$. The messy field dotted with the velocity collapses into the plain time-derivative of your <em>height</em> $f$ along the walk:</p>
+    <div class="eqbox">$$\\int_C\\nabla f\\cdot d\\mathbf r=\\int_a^b \\nabla f\\cdot\\mathbf r'\\,dt=\\int_a^b \\frac{d}{dt}f(\\mathbf r(t))\\,dt.$$</div>
+    <p>Now the integrand is a pure derivative, so the <em>ordinary</em> Fundamental Theorem from Module 5 finishes the job — the inside only shows up at the two ends:</p>
+    <div class="eqbox">$$\\int_C\\nabla f\\cdot d\\mathbf r=f(\\mathbf r(b))-f(\\mathbf r(a))=f(B)-f(A).$$</div>
+    <p>It's the FTC with one swap: $\\displaystyle\\int_a^b f'(x)\\,dx=f(b)-f(a)$ becomes $\\displaystyle\\int_C\\nabla f\\cdot d\\mathbf r=f(B)-f(A)$, the single derivative $f'$ promoted to the gradient $\\nabla f$ and the interval to a path. The whole trip's work is just the <b>change in height</b> between the ends — so every route ties, and a <b>closed loop</b> ($B=A$) does zero net work. Climb a hill by any trail: your net elevation gain depends only on where you start and finish.</p>
+
+    <div class="task"><b>Use the shortcut</b>For $\\mathbf F=\\nabla f$ with $f=x^2+y^2$, what is the work from $A=(1,0)$ to $B=(2,2)$ along <em>any</em> path?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>Which fields are conservative?</b> Not all — the swirl $(-y,x)$ isn't, as the loop readout shows. There's a quick test. If $\\mathbf F=(P,Q)=\\nabla f$, then $P=f_x$ and $Q=f_y$, so $P_y=f_{xy}$ and $Q_x=f_{yx}$ — equal, because mixed partials agree (the Clairaut fact from the Hessian). So a conservative field must satisfy</p>
+    <div class="eqbox">$$\\frac{\\partial P}{\\partial y}=\\frac{\\partial Q}{\\partial x}.$$</div>
+    <p>Check the two fields: the gradient $(2x,2y)$ has $P_y=0=Q_x$ — it passes. The swirl $(-y,x)$ has $P_y=-1$ but $Q_x=+1$ — it fails, so no potential $f$ exists for it. That mismatch $Q_x-P_y$ is a number measuring the field's built-in "swirl" at a point, and in the next beat it gets a name — the <b>curl</b> — and a theorem (Green's) tying the swirl inside a loop to the circulation around it. (On a domain with no holes, passing the test is also enough to <em>be</em> conservative.)</p></div>`;
+
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=78,cx=320,cy=212;
+  const px=x=>cx+x*S,py=y=>cy-y*S;
+  const f=(x,y)=>x*x+y*y;
+  const FIELDS={grad:{F:(x,y)=>[2*x,2*y],label:'gradient ∇(x²+y²)',cons:true},swirl:{F:(x,y)=>[-y,x],label:'swirl (−y, x)',cons:false}};
+  let fk='grad';const A=[-1.3,-0.8];let B=[1.2,0.9];
+  function arrow(X0,Y0,X1,Y1,col,w){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=w||1.6;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();const a=Math.atan2(Y1-Y0,X1-X0),hl=Math.min(10,Math.hypot(X1-X0,Y1-Y0));ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-hl*Math.cos(a-0.4),Y1-hl*Math.sin(a-0.4));ctx.lineTo(X1-hl*Math.cos(a+0.4),Y1-hl*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
+  function pathPts(kind){const d=[B[0]-A[0],B[1]-A[1]],dm=Math.hypot(d[0],d[1])||1;const n=[-d[1]/dm,d[0]/dm],bow=0.5*dm;const pts=[];
+    for(let i=0;i<=60;i++){const t=i/60;let x,y;if(kind==='straight'){x=A[0]+t*d[0];y=A[1]+t*d[1];}else{x=A[0]+t*d[0]+bow*Math.sin(Math.PI*t)*n[0];y=A[1]+t*d[1]+bow*Math.sin(Math.PI*t)*n[1];}pts.push([x,y]);}return pts;}
+  function work(kind){const F=FIELDS[fk].F,d=[B[0]-A[0],B[1]-A[1]],dm=Math.hypot(d[0],d[1])||1;const n=[-d[1]/dm,d[0]/dm],bow=0.5*dm;const N=400;let s=0,dt=1/N;
+    for(let i=0;i<N;i++){const t=(i+0.5)*dt;let x,y,vx,vy;if(kind==='straight'){x=A[0]+t*d[0];y=A[1]+t*d[1];vx=d[0];vy=d[1];}else{x=A[0]+t*d[0]+bow*Math.sin(Math.PI*t)*n[0];y=A[1]+t*d[1]+bow*Math.sin(Math.PI*t)*n[1];vx=d[0]+bow*Math.PI*Math.cos(Math.PI*t)*n[0];vy=d[1]+bow*Math.PI*Math.cos(Math.PI*t)*n[1];}const Fv=F(x,y);s+=(Fv[0]*vx+Fv[1]*vy)*dt;}return s;}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);const F=FIELDS[fk].F,cons=FIELDS[fk].cons;
+    ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let g=-2;g<=2;g++){ctx.beginPath();ctx.moveTo(px(g),py(-2.1));ctx.lineTo(px(g),py(2.1));ctx.stroke();ctx.beginPath();ctx.moveTo(px(-2.1),py(g));ctx.lineTo(px(2.1),py(g));ctx.stroke();}
+    // contours of f (only meaningful for the gradient field = the potential)
+    if(cons){for(const k of [1,2,4,6]){const r=Math.sqrt(k);ctx.strokeStyle='#233042';ctx.lineWidth=1;ctx.beginPath();ctx.arc(px(0),py(0),r*S,0,7);ctx.stroke();ctx.fillStyle='#33465e';ctx.font='10px sans-serif';ctx.fillText('f='+k,px(0)+r*S*0.71+2,py(0)-r*S*0.71);}}
+    // field arrows
+    for(let gx=-2;gx<=2;gx+=0.5)for(let gy=-2;gy<=2;gy+=0.5){const v=F(gx,gy),mag=Math.hypot(v[0],v[1]);if(mag<1e-9)continue;const L=Math.max(0.1,Math.min(0.34,mag*0.08));arrow(px(gx),py(gy),px(gx+v[0]/mag*L),py(gy+v[1]/mag*L),'#243a52',1.2);}
+    // two paths
+    const ps=pathPts('straight'),pa=pathPts('arc');
+    ctx.strokeStyle='#e8b84b';ctx.lineWidth=3;ctx.beginPath();ps.forEach((p,i)=>i?ctx.lineTo(px(p[0]),py(p[1])):ctx.moveTo(px(p[0]),py(p[1])));ctx.stroke();
+    ctx.strokeStyle='#3fb98f';ctx.lineWidth=3;ctx.beginPath();pa.forEach((p,i)=>i?ctx.lineTo(px(p[0]),py(p[1])):ctx.moveTo(px(p[0]),py(p[1])));ctx.stroke();
+    // A and B
+    ctx.fillStyle='#dbe6f4';ctx.beginPath();ctx.arc(px(A[0]),py(A[1]),6,0,7);ctx.fill();ctx.beginPath();ctx.arc(px(B[0]),py(B[1]),6,0,7);ctx.fill();
+    ctx.fillStyle='#9fb0c4';ctx.font='13px sans-serif';ctx.fillText('A',px(A[0])-16,py(A[1])+5);ctx.fillText('B (drag)',px(B[0])+9,py(B[1])+5);
+    ctx.fillStyle='#caa64e';ctx.font='12px sans-serif';ctx.fillText('straight',px((A[0]+B[0])/2),py((A[1]+B[1])/2)-6);
+    const ws=work('straight'),wa=work('arc');
+    document.getElementById('ws').textContent=ws.toFixed(3);
+    document.getElementById('wa').textContent=wa.toFixed(3);
+    document.getElementById('wl').textContent=(ws-wa).toFixed(3);
+    document.getElementById('wd').textContent=cons?(f(B[0],B[1])-f(A[0],A[1])).toFixed(3):'—';
+    const ob=document.getElementById('obs');if(ob)ob.textContent=cons
+      ?'Conservative: both routes equal f(B)−f(A) = '+(f(B[0],B[1])-f(A[0],A[1])).toFixed(3)+', and the loop (out straight, back along the detour) is 0. Only the endpoints’ heights matter.'
+      :'Not conservative: the straight and detour totals differ, so the loop is nonzero — there is no height function f whose gradient is this field.';}
+  function segs(){document.getElementById('segF').innerHTML=Object.keys(FIELDS).map(k=>`<span class="segb ${k===fk?'on':''}" data-k="${k}">${FIELDS[k].label}</span>`).join('');document.querySelectorAll('#segF .segb').forEach(b=>b.onclick=()=>{fk=b.dataset.k;segs();draw();});}
+  segs();
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));B=[Math.max(-2,Math.min(2,(X-cx)/S)),Math.max(-2,Math.min(2,(cy-Y)/S))];draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),7,()=>{addReveal(`<div class="rh">✓ work = 7</div><p>Conservative fields need no integral — just the endpoints: $f(B)-f(A)=(2^2+2^2)-(1^2+0^2)=8-1=7$. Straight, curved, or looping out and part way back, any path from $(1,0)$ to $(2,2)$ does the same $7$ units of work, because the field is the gradient of the height $f=x^2+y^2$.</p>`);});
+  setHints([`F=∇f is conservative, so work = f(B) − f(A). Here f = x²+y².`,`f(2,2) − f(1,0) = 8 − 1 = 7.`]);
 }
 function c7_doubleint(){
   stage.innerHTML=`<div class="card"><h2>Double integrals: adding up a solid</h2>
