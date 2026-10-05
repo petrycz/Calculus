@@ -3369,16 +3369,25 @@ function c10_fields(){
 function c8_recall(){recallFrom(`Module 9 hunts for the best point on a surface — the multivariable generalization of finding a function's peaks and valleys. It stands on two legs: one-variable optimization (critical points where $f'=0$, and the second-derivative test) and the gradient you just built. Rederive both before we start the climb.`,['c3','c7'],RECALL_HINT);}
 function c10_line(){
   stage.innerHTML=`<div class="card"><h2>Line integrals: a field's push along a path</h2>
-    <p>A vector field pushes on things that move through it — wind on a sailboat, a force on a charge. Drag an object from $A$ to $B$ along some route and ask: how much <b>work</b> did the field do over the whole trip? That running total is the <b>line integral</b> $\\int_C\\mathbf F\\cdot d\\mathbf r$.</p>
+    <p>A vector field pushes on things that move through it — wind on a sailboat, a force on a charge. Drag an object from $A$ to $B$ along some route and ask: how much total <b>work</b> did the field do? That running total is the <b>line integral</b> $\\int_C\\mathbf F\\cdot d\\mathbf r$. We'll build it in three pictures: one step, many steps, then the whole smooth path.</p>
 
-    <p><b>Build it the usual way — chop, measure, add.</b> Break the path into tiny straight steps $d\\mathbf r$ (each a little displacement vector pointing the way you're going). Over one step the field $\\mathbf F$ is nearly constant, and the work it does is force-along-the-motion times distance — exactly the <b>dot product</b> $\\mathbf F\\cdot d\\mathbf r=|\\mathbf F|\\,|d\\mathbf r|\\cos\\varphi$. Only the part of $\\mathbf F$ lined up with your step counts; a sideways push does no work. Add the steps:</p>
+    <p><b>One step first.</b> Take a single tiny step $d\\mathbf r$ (a little displacement vector pointing the way you go). The field $\\mathbf F$ where you stand does work on that step — but only the part of $\\mathbf F$ that lines up with the step counts; a sideways push moves you along the step not at all. That "part along the step" is the <b>dot product</b> $\\mathbf F\\cdot d\\mathbf r=|\\mathbf F|\\,|d\\mathbf r|\\cos\\varphi$. <b>Drag the step</b> and watch the green projection — the work — grow, vanish at a right angle, and go negative when the field opposes you.</p>
+    <canvas id="cvdot" width="640" height="250"></canvas>
+    <p class="small" id="obsdot" style="margin-top:6px;color:#9fb0c4"></p>
+
+    <p><b>Now add up the steps.</b> Chop the whole path into many little $d\\mathbf r$ steps, take $\\mathbf F\\cdot d\\mathbf r$ on each, and sum. Refine the chopping and the sum settles on the line integral:</p>
     <div class="eqbox">$$\\int_C \\mathbf F\\cdot d\\mathbf r=\\lim\\sum \\mathbf F\\cdot d\\mathbf r.$$</div>
-    <p>This is the single-variable integral with one upgrade. There, $\\int f\\,dx$ summed height $\\times$ (a step $dx$ along the $x$-axis). Here the step $d\\mathbf r$ is a <em>vector</em> along a curve and $\\mathbf F$ is a vector, so plain multiplication becomes the dot product — keeping only the aligned component.</p>
+    <p>The steps below are coloured by sign: <span style="color:#3fb98f">green</span> where the field helps ($\\mathbf F\\cdot d\\mathbf r&gt;0$) and <span style="color:#d98f8f">red</span> where it fights ($\\mathbf F\\cdot d\\mathbf r&lt;0$). <b>Refine</b> the chopping and watch the running total converge.</p>
+    <div class="seg" id="segN"></div>
+    <canvas id="cvchop" width="640" height="300"></canvas>
+    <p class="small" id="obschop" style="margin-top:6px;color:#9fb0c4"></p>
 
-    <p><b>Make it computable — parametrize the path.</b> Describe the route by a moving point $\\mathbf r(t)=(x(t),y(t))$ for $t$ from $a$ to $b$. In a time step $dt$ the point moves by $d\\mathbf r=\\mathbf r'(t)\\,dt$ (velocity $\\times$ time — the tangent vector from the chain-rule beat). Substituting turns the line integral into an ordinary one-variable integral in $t$:</p>
+    <p>This is the single-variable integral with one upgrade. There, $\\int f\\,dx$ summed height $\\times$ a step $dx$ along the $x$-axis. Here the step $d\\mathbf r$ is a <em>vector</em> along a curve and $\\mathbf F$ is a vector, so plain multiplication becomes the dot product — keeping only the aligned component.</p>
+
+    <p><b>Make it computable — parametrize the path.</b> Describe the route by a moving point $\\mathbf r(t)=(x(t),y(t))$, $t$ from $a$ to $b$. In a time step $dt$ the point moves by $d\\mathbf r=\\mathbf r'(t)\\,dt$ (velocity $\\times$ time — the tangent vector from the chain-rule beat). Substituting turns the line integral into an ordinary one-variable integral in $t$:</p>
     <div class="eqbox">$$\\int_C \\mathbf F\\cdot d\\mathbf r=\\int_a^b \\mathbf F\\big(\\mathbf r(t)\\big)\\cdot \\mathbf r'(t)\\,dt.$$</div>
 
-    <p><b>Watch the work accumulate.</b> Here are two routes from $A=(0,0)$ to $B=(2,1)$ — a straight shot and a curved detour. <b>Drag to sweep</b> the traveler along the chosen path; the gold arrow is $\\mathbf F$ where it stands, and the running total is the work so far. Flip the field and the path and compare the totals.</p>
+    <p><b>Watch it accumulate along a whole path.</b> Two routes from $A=(0,0)$ to $B=(2,1)$ — a straight shot and a curved detour. <b>Drag to sweep</b> the traveller; the gold arrow is $\\mathbf F$ where it stands, the blue arrow the step direction, and the readout is the work so far. Flip the field and the path and compare the totals.</p>
     <div class="seg" id="segF"></div>
     <div class="seg" id="segP"></div>
     <canvas id="cv" width="640" height="400"></canvas>
@@ -3388,50 +3397,88 @@ function c10_line(){
     <div class="task"><b>Compute one by hand</b>Take the <b>gradient</b> field $\\mathbf F=\\nabla(x^2+y^2)=(2x,2y)$ along the <b>straight</b> path $\\mathbf r(t)=(2t,\\,t)$, $t\\in[0,1]$. Set up $\\int_0^1 \\mathbf F(\\mathbf r(t))\\cdot\\mathbf r'(t)\\,dt$ and evaluate.</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
 
-    <p style="margin-top:16px"><b>The thing to notice.</b> For the swirling field $(-y,x)$ the straight route and the curved route give <em>different</em> totals — the work depends on the path you take. For the gradient field $(2x,2y)$ they give the <em>same</em> total, every time. That is no accident: a field that is some scalar's gradient has a line integral that depends only on the endpoints, not the route — the next beat makes this precise (it's the Fundamental Theorem, lifted to paths) and explains why "conservative" fields are the ones that store energy.</p></div>`;
+    <p style="margin-top:16px"><b>The thing to notice.</b> For the swirling field $(-y,x)$ the straight route and the curved route give <em>different</em> totals — the work depends on the path. For the gradient field $(2x,2y)$ they give the <em>same</em> total, every time. No accident: a field that is some scalar's gradient has a line integral that depends only on the endpoints — the next beat makes this precise (the Fundamental Theorem, lifted to paths) and explains why "conservative" fields store energy.</p></div>`;
 
+  const arrow=(c,X0,Y0,X1,Y1,col,w)=>{if(!c)return;c.strokeStyle=col;c.lineWidth=w||2;c.beginPath();c.moveTo(X0,Y0);c.lineTo(X1,Y1);c.stroke();const a=Math.atan2(Y1-Y0,X1-X0),hl=Math.min(10,Math.hypot(X1-X0,Y1-Y0));c.fillStyle=col;c.beginPath();c.moveTo(X1,Y1);c.lineTo(X1-hl*Math.cos(a-0.4),Y1-hl*Math.sin(a-0.4));c.lineTo(X1-hl*Math.cos(a+0.4),Y1-hl*Math.sin(a+0.4));c.closePath();c.fill();};
+
+  // ===== picture 1: one-step dot product =====
+  const cd=document.getElementById('cvdot');const dx=cd&&cd.getContext&&cd.getContext('2d');const Wd=cd.width,Hd=cd.height;
+  const O=[230,135],DS=70;
+  const Fv=[2.1,1.0];let dr=[1.5,1.15];
+  const toX=v=>O[0]+v[0]*DS, toY=v=>O[1]-v[1]*DS;
+  function drawDot(){if(!dx)return;dx.clearRect(0,0,Wd,Hd);
+    dx.strokeStyle='#16202f';dx.lineWidth=1;for(let gx=-1;gx<=5;gx++){dx.beginPath();dx.moveTo(O[0]+gx*DS,10);dx.lineTo(O[0]+gx*DS,Hd-10);dx.stroke();}for(let gy=-1;gy<=1;gy++){dx.beginPath();dx.moveTo(10,O[1]-gy*DS);dx.lineTo(Wd-10,O[1]-gy*DS);dx.stroke();}
+    const dm=Math.hypot(dr[0],dr[1])||1,u=[dr[0]/dm,dr[1]/dm];
+    const proj=Fv[0]*u[0]+Fv[1]*u[1];const pv=[u[0]*proj,u[1]*proj];
+    // projection (green, the work)
+    dx.strokeStyle='#3fb98f';dx.lineWidth=7;dx.beginPath();dx.moveTo(toX([0,0]),toY([0,0]));dx.lineTo(toX(pv),toY(pv));dx.stroke();
+    // dashed perpendicular from F tip to the projection foot
+    dx.strokeStyle='rgba(159,176,196,0.7)';dx.lineWidth=1.3;dx.setLineDash([5,4]);dx.beginPath();dx.moveTo(toX(Fv),toY(Fv));dx.lineTo(toX(pv),toY(pv));dx.stroke();dx.setLineDash([]);
+    // step dr (blue) and field F (gold)
+    arrow(dx,toX([0,0]),toY([0,0]),toX(dr),toY(dr),'#7ab8ff',2.5);
+    arrow(dx,toX([0,0]),toY([0,0]),toX(Fv),toY(Fv),'#e8b84b',2.5);
+    dx.fillStyle='#dbe6f4';dx.beginPath();dx.arc(O[0],O[1],4,0,7);dx.fill();
+    dx.font='600 13px sans-serif';dx.fillStyle='#e8b84b';dx.fillText('F (field)',toX(Fv)+6,toY(Fv)-2);
+    dx.fillStyle='#7ab8ff';dx.fillText('dr (your step)',toX(dr)+6,toY(dr)+4);
+    dx.fillStyle='#3fb98f';dx.font='12px sans-serif';dx.fillText('F·dr',toX([pv[0]/2,pv[1]/2])[0]||0,toY([pv[0]/2,pv[1]/2])+16);
+    const phi=Math.acos(Math.max(-1,Math.min(1,proj/(Math.hypot(Fv[0],Fv[1])||1))))*180/Math.PI;
+    const dot=Fv[0]*dr[0]+Fv[1]*dr[1];
+    const ob=document.getElementById('obsdot');if(ob)ob.textContent='angle between F and your step ≈ '+phi.toFixed(0)+'°,  F·dr = '+dot.toFixed(2)+'  — '+(dot>0.05?'the field is helping (positive work)':(dot<-0.05?'the field is fighting you (negative work)':'perpendicular: no work'));}
+  cd.style.touchAction='none';let dd=false;
+  function setDot(e){const r=cd.getBoundingClientRect();const X=(e.clientX-r.left)*(Wd/Math.max(1,r.width)),Y=(e.clientY-r.top)*(Hd/Math.max(1,r.height));let v=[(X-O[0])/DS,(O[1]-Y)/DS];const m=Math.hypot(v[0],v[1]);if(m<0.3){v=[0.3*v[0]/(m||1),0.3*v[1]/(m||1)];}if(m>2.6){v=[2.6*v[0]/m,2.6*v[1]/m];}dr=v;drawDot();}
+  cd.addEventListener('pointerdown',e=>{dd=true;try{cd.setPointerCapture(e.pointerId);}catch(x){}setDot(e);e.preventDefault();});
+  cd.addEventListener('pointermove',e=>{if(dd){e.preventDefault();setDot(e);}});
+  const ed=()=>dd=false;cd.addEventListener('pointerup',ed);cd.addEventListener('pointercancel',ed);
+  drawDot();
+
+  // ===== picture 2: chop the path, colour by sign, sum =====
+  const Ffield=(x,y)=>[-y,x];
+  const rpath=t=>[2*t, t+1.1*Math.sin(Math.PI*t)];
+  const cc=document.getElementById('cvchop');const cx2=cc&&cc.getContext&&cc.getContext('2d');const Wc=cc.width,Hc=cc.height;
+  const cpx=x=>150+x*150, cpy=y=>265-y*150;
+  let Nseg=4;
+  function trueWork(){const N=3000;let s=0,dt=1/N;for(let i=0;i<N;i++){const t=(i+0.5)*dt;const p=rpath(t);const v=[2,1+1.1*Math.PI*Math.cos(Math.PI*t)];const f=Ffield(p[0],p[1]);s+=(f[0]*v[0]+f[1]*v[1])*dt;}return s;}
+  function drawChop(){if(!cx2)return;cx2.clearRect(0,0,Wc,Hc);
+    cx2.strokeStyle='#16202f';cx2.lineWidth=1;for(let gx=0;gx<=2;gx+=0.5){cx2.beginPath();cx2.moveTo(cpx(gx),cpy(-0.1));cx2.lineTo(cpx(gx),cpy(1.7));cx2.stroke();}for(let gy=0;gy<=1.5;gy+=0.5){cx2.beginPath();cx2.moveTo(cpx(-0.1),cpy(gy));cx2.lineTo(cpx(2.1),cpy(gy));cx2.stroke();}
+    // smooth path faint
+    cx2.strokeStyle='#2b3a4f';cx2.lineWidth=1;cx2.beginPath();for(let i=0;i<=120;i++){const p=rpath(i/120);const X=cpx(p[0]),Y=cpy(p[1]);i?cx2.lineTo(X,Y):cx2.moveTo(X,Y);}cx2.stroke();
+    let sum=0;
+    for(let i=0;i<Nseg;i++){const a=rpath(i/Nseg),b=rpath((i+1)/Nseg);const dseg=[b[0]-a[0],b[1]-a[1]];const mid=rpath((i+0.5)/Nseg);const f=Ffield(mid[0],mid[1]);const c=f[0]*dseg[0]+f[1]*dseg[1];sum+=c;
+      cx2.strokeStyle=c>0?'#3fb98f':'#d98f8f';cx2.lineWidth=4;cx2.beginPath();cx2.moveTo(cpx(a[0]),cpy(a[1]));cx2.lineTo(cpx(b[0]),cpy(b[1]));cx2.stroke();
+      const fm=Math.hypot(f[0],f[1])||1,L=0.26;arrow(cx2,cpx(mid[0]),cpy(mid[1]),cpx(mid[0]+f[0]/fm*L),cpy(mid[1]+f[1]/fm*L),'rgba(232,184,75,0.85)',1.6);
+      cx2.fillStyle='#8fb3d9';cx2.beginPath();cx2.arc(cpx(a[0]),cpy(a[1]),3,0,7);cx2.fill();}
+    const B=rpath(1);cx2.fillStyle='#8fb3d9';cx2.beginPath();cx2.arc(cpx(B[0]),cpy(B[1]),4,0,7);cx2.fill();
+    cx2.fillStyle='#9fb0c4';cx2.font='12px sans-serif';cx2.fillText('A',cpx(0)-16,cpy(0)+4);cx2.fillText('B',cpx(B[0])+8,cpy(B[1])+4);
+    cx2.fillStyle='#e8b84b';cx2.fillText('gold = field F at each step',cpx(0)-10,cpy(1.62));
+    const ob=document.getElementById('obschop');if(ob)ob.textContent=Nseg+' steps: running total Σ F·dr = '+sum.toFixed(3)+'   →   the true line integral is '+trueWork().toFixed(3)+'. Refine the steps and the sum closes in.';}
+  function buildN(){const el=document.getElementById('segN');if(!el)return;el.innerHTML=[4,8,16,32].map(n=>`<span class="segb ${n===Nseg?'on':''}" data-n="${n}">${n} steps</span>`).join('');el.querySelectorAll('.segb').forEach(b=>b.onclick=()=>{Nseg=parseInt(b.dataset.n);buildN();drawChop();});}
+  buildN();drawChop();
+
+  // ===== picture 3: sweep the whole path (field + path toggles) =====
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=100,ox=120,oy=320;
   const px=x=>ox+x*S,py=y=>oy-y*S;
   const FIELDS={rot:{f:(x,y)=>[-y,x],label:'rotation (−y, x)'},grad:{f:(x,y)=>[2*x,2*y],label:'gradient ∇(x²+y²)=(2x,2y)'}};
-  const PATHS={
-    straight:{r:t=>[2*t,t],rp:t=>[2,1],label:'straight'},
-    arc:{r:t=>[2*t, t+1.1*Math.sin(Math.PI*t)],rp:t=>[2, 1+1.1*Math.PI*Math.cos(Math.PI*t)],label:'curved detour'}
-  };
+  const PATHS={straight:{r:t=>[2*t,t],rp:t=>[2,1],label:'straight'},arc:{r:t=>[2*t,t+1.1*Math.sin(Math.PI*t)],rp:t=>[2,1+1.1*Math.PI*Math.cos(Math.PI*t)],label:'curved detour'}};
   let fk='rot', pk='straight', tcur=1;
-  function arrow(X0,Y0,X1,Y1,col,w){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=w||1.6;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();const a=Math.atan2(Y1-Y0,X1-X0),hl=Math.min(10,Math.hypot(X1-X0,Y1-Y0));ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-hl*Math.cos(a-0.4),Y1-hl*Math.sin(a-0.4));ctx.lineTo(X1-hl*Math.cos(a+0.4),Y1-hl*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
-  function workTo(fk,pk,T){const F=FIELDS[fk].f,r=PATHS[pk].r,rp=PATHS[pk].rp;const N=240;let s=0;const dt=T/N;
-    for(let i=0;i<N;i++){const t=(i+0.5)*dt;const p=r(t),v=rp(t),Fv=F(p[0],p[1]);s+=(Fv[0]*v[0]+Fv[1]*v[1])*dt;}return s;}
+  function workTo(fk,pk,T){const F=FIELDS[fk].f,r=PATHS[pk].r,rp=PATHS[pk].rp,N=240;let s=0,dt=T/N;for(let i=0;i<N;i++){const t=(i+0.5)*dt;const p=r(t),v=rp(t),f=F(p[0],p[1]);s+=(f[0]*v[0]+f[1]*v[1])*dt;}return s;}
   function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);const F=FIELDS[fk].f,r=PATHS[pk].r,rp=PATHS[pk].rp;
     ctx.strokeStyle='#16202f';ctx.lineWidth=1;for(let gx=0;gx<=2.6;gx+=0.5){ctx.beginPath();ctx.moveTo(px(gx),py(-0.4));ctx.lineTo(px(gx),py(2.5));ctx.stroke();}for(let gy=0;gy<=2.4;gy+=0.5){ctx.beginPath();ctx.moveTo(px(-0.3),py(gy));ctx.lineTo(px(2.7),py(gy));ctx.stroke();}
-    // faint field arrows
-    for(let gx=-0.0;gx<=2.6;gx+=0.4)for(let gy=0;gy<=2.3;gy+=0.4){const Fv=F(gx,gy),mag=Math.hypot(Fv[0],Fv[1]);if(mag<1e-9)continue;const L=Math.max(0.1,Math.min(0.3,mag*0.09));arrow(px(gx),py(gy),px(gx+Fv[0]/mag*L),py(gy+Fv[1]/mag*L),'#243a52',1.2);}
-    // full path (faint) + swept part (bold)
+    for(let gx=0;gx<=2.6;gx+=0.4)for(let gy=0;gy<=2.3;gy+=0.4){const f=F(gx,gy),mag=Math.hypot(f[0],f[1]);if(mag<1e-9)continue;const L=Math.max(0.1,Math.min(0.3,mag*0.09));arrow(ctx,px(gx),py(gy),px(gx+f[0]/mag*L),py(gy+f[1]/mag*L),'#243a52',1.2);}
     ctx.strokeStyle='#3a4c66';ctx.lineWidth=1.5;ctx.beginPath();for(let i=0;i<=100;i++){const p=r(i/100);const X=px(p[0]),Y=py(p[1]);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();
-    ctx.strokeStyle='#e8b84b';ctx.lineWidth=3;ctx.beginPath();for(let i=0;i<=100;i++){const tt=i/100*tcur;const p=r(tt);const X=px(p[0]),Y=py(p[1]);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();
-    // endpoints
+    ctx.strokeStyle='#e8b84b';ctx.lineWidth=3;ctx.beginPath();for(let i=0;i<=100;i++){const p=r(i/100*tcur);const X=px(p[0]),Y=py(p[1]);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y);}ctx.stroke();
     const A=r(0),B=r(1);ctx.fillStyle='#8fb3d9';ctx.beginPath();ctx.arc(px(A[0]),py(A[1]),5,0,7);ctx.fill();ctx.beginPath();ctx.arc(px(B[0]),py(B[1]),5,0,7);ctx.fill();
     ctx.fillStyle='#9fb0c4';ctx.font='12px sans-serif';ctx.fillText('A',px(A[0])-16,py(A[1])+4);ctx.fillText('B',px(B[0])+8,py(B[1])+4);
-    // marker + arrows
-    const p=r(tcur),v=rp(tcur),Fv=F(p[0],p[1]);const vm=Math.hypot(v[0],v[1])||1;const ut=[v[0]/vm,v[1]/vm];
-    const Fm=Math.hypot(Fv[0],Fv[1]);
-    if(Fm>1e-9){const L=Math.max(0.2,Math.min(0.6,Fm*0.1));arrow(px(p[0]),py(p[1]),px(p[0]+Fv[0]/Fm*L),py(p[1]+Fv[1]/Fm*L),'#e8b84b',3);}
-    arrow(px(p[0]),py(p[1]),px(p[0]+ut[0]*0.42),py(p[1]+ut[1]*0.42),'#7ab8ff',2);
+    const p=r(tcur),v=rp(tcur),f=F(p[0],p[1]);const vm=Math.hypot(v[0],v[1])||1,ut=[v[0]/vm,v[1]/vm],Fm=Math.hypot(f[0],f[1]);
+    if(Fm>1e-9){const L=Math.max(0.2,Math.min(0.6,Fm*0.1));arrow(ctx,px(p[0]),py(p[1]),px(p[0]+f[0]/Fm*L),py(p[1]+f[1]/Fm*L),'#e8b84b',3);}
+    arrow(ctx,px(p[0]),py(p[1]),px(p[0]+ut[0]*0.42),py(p[1]+ut[1]*0.42),'#7ab8ff',2);
     ctx.fillStyle='#dbe6f4';ctx.beginPath();ctx.arc(px(p[0]),py(p[1]),5,0,7);ctx.fill();
-    ctx.fillStyle='#7ab8ff';ctx.font='11px sans-serif';ctx.fillText('dr',px(p[0]+ut[0]*0.42)+3,py(p[1]+ut[1]*0.42));
-    ctx.fillStyle='#e8b84b';ctx.fillText('F',px(p[0]+Fv[0]/(Fm||1)*0.5)+3,py(p[1]+Fv[1]/(Fm||1)*0.5));
-    // readouts
-    const FdotT=Fv[0]*ut[0]+Fv[1]*ut[1];
+    const FdotT=f[0]*ut[0]+f[1]*ut[1];
     document.getElementById('dv').textContent=FdotT.toFixed(2);
     document.getElementById('wv').textContent=workTo(fk,pk,tcur).toFixed(2);
-    const tot=workTo(fk,pk,1), other=workTo(fk,pk==='straight'?'arc':'straight',1);
-    document.getElementById('tv').textContent=tot.toFixed(2);
-    const ob=document.getElementById('obs');if(ob){
-      if(fk==='grad')ob.textContent='Gradient field: straight total '+workTo('grad','straight',1).toFixed(2)+', curved total '+workTo('grad','arc',1).toFixed(2)+' — the same. The route doesn’t matter.';
-      else ob.textContent='Swirling field: straight total '+workTo('rot','straight',1).toFixed(2)+', curved total '+workTo('rot','arc',1).toFixed(2)+' — different. The route matters.';}}
-  function segs(){document.getElementById('segF').innerHTML=Object.keys(FIELDS).map(k=>`<span class="segb ${k===fk?'on':''}" data-k="${k}">${FIELDS[k].label}</span>`).join('');
-    document.getElementById('segP').innerHTML=Object.keys(PATHS).map(k=>`<span class="segb ${k===pk?'on':''}" data-k="${k}">${PATHS[k].label}</span>`).join('');
-    document.querySelectorAll('#segF .segb').forEach(b=>b.onclick=()=>{fk=b.dataset.k;segs();draw();});
-    document.querySelectorAll('#segP .segb').forEach(b=>b.onclick=()=>{pk=b.dataset.k;segs();draw();});}
+    document.getElementById('tv').textContent=workTo(fk,pk,1).toFixed(2);
+    const ob=document.getElementById('obs');if(ob){if(fk==='grad')ob.textContent='Gradient field: straight total '+workTo('grad','straight',1).toFixed(2)+', curved total '+workTo('grad','arc',1).toFixed(2)+' — the same. The route doesn’t matter.';else ob.textContent='Swirling field: straight total '+workTo('rot','straight',1).toFixed(2)+', curved total '+workTo('rot','arc',1).toFixed(2)+' — different. The route matters.';}}
+  function segs(){document.getElementById('segF').innerHTML=Object.keys(FIELDS).map(k=>`<span class="segb ${k===fk?'on':''}" data-k="${k}">${FIELDS[k].label}</span>`).join('');document.getElementById('segP').innerHTML=Object.keys(PATHS).map(k=>`<span class="segb ${k===pk?'on':''}" data-k="${k}">${PATHS[k].label}</span>`).join('');
+    document.querySelectorAll('#segF .segb').forEach(b=>b.onclick=()=>{fk=b.dataset.k;segs();draw();});document.querySelectorAll('#segP .segb').forEach(b=>b.onclick=()=>{pk=b.dataset.k;segs();draw();});}
   segs();
   cv.style.touchAction='none';let drg=false;
   function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));tcur=Math.max(0,Math.min(1,(X-40)/(W-80)));draw();}
@@ -3439,7 +3486,8 @@ function c10_line(){
   cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
   const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
   draw();
-  numChk(stage.querySelector('.card'),5,()=>{addReveal(`<div class="rh">✓ work = 5</div><p>With $\\mathbf r(t)=(2t,t)$, $\\mathbf r'(t)=(2,1)$. The field along the path is $\\mathbf F(\\mathbf r(t))=(2\\cdot2t,\\,2\\cdot t)=(4t,2t)$. Dotting: $\\mathbf F\\cdot\\mathbf r'=4t\\cdot2+2t\\cdot1=10t$. So $\\int_0^1 10t\\,dt=[5t^2]_0^1=5$. (Sweep the gold path to $B$ and the "work so far" lands on $5.00$ — and the curved route gives $5$ too, because this field is a gradient.)</p>`);});
+
+  numChk(stage.querySelector('.card'),5,()=>{addReveal(`<div class="rh">✓ work = 5</div><p>With $\\mathbf r(t)=(2t,t)$, $\\mathbf r'(t)=(2,1)$. The field along the path is $\\mathbf F(\\mathbf r(t))=(4t,2t)$. Dotting: $\\mathbf F\\cdot\\mathbf r'=4t\\cdot2+2t\\cdot1=10t$, so $\\int_0^1 10t\\,dt=[5t^2]_0^1=5$. Sweep the gold path to $B$ and "work so far" lands on $5.00$ — and the curved route gives $5$ too, because this field is a gradient.</p>`);});
   setHints([`Plug r(t)=(2t,t) into F=(2x,2y) to get (4t,2t); dot with r'(t)=(2,1); integrate over [0,1].`,`F·r' = 8t+2t = 10t, and ∫₀¹10t dt = 5.`]);
 }
 function c7_doubleint(){
