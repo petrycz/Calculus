@@ -154,7 +154,7 @@ const MODULES=[
   beats:[c7_recall10,c7_doubleint,c7_iterated,c7_polar,c7_jacobian,c7_intproblems]},
  {id:'c10',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:true,
   outro:`A vector field assigns an arrow to every point; the gradient was the first example. The rest of the subject measures a field along paths and over surfaces, and the Green, Stokes, and divergence theorems lift the Fundamental Theorem of Calculus into two and three dimensions.`,
-  beats:[c10_recall,c10_fields,c10_line,c10_conservative,c10_green,c10_divcurl]},
+  beats:[c10_recall,c10_fields,c10_line,c10_conservative,c10_green,c10_divcurl,c10_surface]},
  {id:'c11',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:false},
 ];
 function setHints(a){hints=a||[];hintIdx=0;hintBtn.style.display=hints.length?'block':'none';}
@@ -3518,6 +3518,81 @@ function c10_divcurl(){
   draw();
   numChk(stage.querySelector('.card'),2,()=>{addReveal(`<div class="rh">✓ divergence = 2</div><p>$P=x-y$ gives $P_x=1$; $Q=x+y$ gives $Q_y=1$; so $\\operatorname{div}\\mathbf F=1+1=2$ — the spiral is a source, its blob swells. (Its curl is $Q_x-P_y=1-(-1)=2$ too, so it also spins: swell and twist together.)</p>`);});
   setHints([`Divergence = P_x + Q_y. Here P = x−y (so P_x = 1) and Q = x+y (so Q_y = 1).`,`1 + 1 = 2.`]);
+}
+function c10_surface(){
+  stage.innerHTML=`<div class="card"><h2>Surface integrals: how much flows through</h2>
+    <p>A line integral measured a field's push <em>along a curve</em>. A <b>surface integral</b> (flux) measures how much a field flows <em>through a surface</em> — water through a net, wind through a window, field lines through a sheet. And the same lesson returns: only the part of the field that actually crosses the surface counts. Hold a net face-on to a river and it catches the full current; turn it edge-on and the water slips past, catching nothing.</p>
+
+    <p><b>One flat patch.</b> Flow streams in from the left (blue arrows). <b>Drag to tilt the panel.</b> Its <span style="color:#3fb98f">normal</span> $\\mathbf n$ is the direction it faces; the flux is the flow speed times the area times how squarely it faces the stream — the dot product $\\mathbf F\\cdot\\mathbf n$ times area.</p>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <p class="small" id="obs" style="margin-top:6px;color:#9fb0c4"></p>
+    <div class="readout"><div class="rdc"><div class="k">tilt from face-on</div><div class="v" id="th">—</div></div><div class="rdc"><div class="k">flux = (F·n)·area</div><div class="v" id="fx">—</div></div></div>
+    <div class="eqbox">$$\\text{flux through a patch}=\\mathbf F\\cdot\\mathbf n\\,\\,dS=|\\mathbf F|\\,\\cos\\theta\\;dS.$$</div>
+    <p>Face-on ($\\theta=0$, normal pointing straight into the flow) catches the most; edge-on ($\\theta=90^\\circ$) catches nothing, because then $\\mathbf F$ runs <em>along</em> the surface and never crosses it. It's the line-integral move turned sideways: there we dotted with the step direction to keep the push <em>along</em> the path; here we dot with the <b>normal</b> to keep the flow <em>through</em> the surface.</p>
+
+    <p><b>A whole surface is a quilt of patches.</b> Curve the surface and tile it into tiny patches; each has its own little area $dS$ and its own outward normal $\\mathbf n$, so each catches $\\mathbf F\\cdot\\mathbf n\\,dS$. Add them up. On the dome below in an upward flow, the top patches face the flow squarely (full flux, green) while the sides are edge-on (no flux, grey).</p>
+    <canvas id="cvs" width="640" height="300"></canvas>
+    <div class="eqbox">$$\\iint_S \\mathbf F\\cdot\\mathbf n\\,\\,dS=\\lim\\sum \\mathbf F\\cdot\\mathbf n\\,\\,dS.$$</div>
+
+    <p><b>Making it computable.</b> Describe the surface by two parameters, $\\mathbf r(u,v)$ (a sheet with its own grid). Stepping $du$ and $dv$ traces two edge vectors $\\mathbf r_u\\,du$ and $\\mathbf r_v\\,dv$; their <b>cross product</b> is perpendicular to both — the normal — and its length is the little patch's area. So the cross product delivers $\\mathbf n$ and $dS$ in one stroke (the 3-D cousin of the Jacobian's area factor):</p>
+    <div class="eqbox">$$\\iint_S \\mathbf F\\cdot\\mathbf n\\,\\,dS=\\iint \\mathbf F\\cdot(\\mathbf r_u\\times\\mathbf r_v)\\,\\,du\\,dv.$$</div>
+
+    <div class="task"><b>Tilt and compute</b>A flat panel of area $2$ sits in a flow of speed $|\\mathbf F|=1$, tilted $60^\\circ$ from face-on. What is the flux $|\\mathbf F|\\,(\\cos\\theta)\\,(\\text{area})$?</div>
+    <div class="entry"><input id="ni" inputmode="decimal" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>Where this is heading.</b> Two surfaces matter next. Wrap the surface into a <b>closed</b> bag around a volume and the total outward flux measures what the volume produces — the <b>divergence theorem</b>, $\\iint_{\\partial V}\\mathbf F\\cdot\\mathbf n\\,dS=\\iiint_V \\operatorname{div}\\mathbf F\\,dV$, the flux-form of Green lifted to 3-D. Or stretch a surface across a loop and push the field's <b>curl</b> through it — <b>Stokes' theorem</b>, $\\oint_{\\partial S}\\mathbf F\\cdot d\\mathbf r=\\iint_S(\\operatorname{curl}\\mathbf F)\\cdot\\mathbf n\\,dS$, the circulation-form of Green lifted to 3-D. Both are the one idea you've seen all chapter: what happens <em>inside</em> a region is bookkept by what crosses its <em>boundary</em>.</p></div>`;
+
+  const AX=58,AY=24,BX=-46,BY=26,CZ=52;
+  function mk(cvId,CY){const cv=document.getElementById(cvId);const ctx=cv&&cv.getContext&&cv.getContext('2d');return {cv,ctx,W:cv.width,H:cv.height,CX:cv.width/2,CY,P:(x,y,z)=>[cv.width/2+x*AX+y*BX, CY+x*AY+y*BY-z*CZ]};}
+  function arr(ctx,a,b,col,w){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=w||1.8;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();const an=Math.atan2(b[1]-a[1],b[0]-a[0]),hl=Math.min(10,Math.hypot(b[0]-a[0],b[1]-a[1]));ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(b[0],b[1]);ctx.lineTo(b[0]-hl*Math.cos(an-0.4),b[1]-hl*Math.sin(an-0.4));ctx.lineTo(b[0]-hl*Math.cos(an+0.4),b[1]-hl*Math.sin(an+0.4));ctx.closePath();ctx.fill();}
+
+  // ===== tilt panel =====
+  const A=mk('cv',235);const AREA=2,HALF=Math.sqrt(AREA)/2;
+  let th=0.5;  // tilt from face-on, radians
+  function drawPanel(){const {ctx,W,H,P}=A;if(!ctx)return;ctx.clearRect(0,0,W,H);
+    // flow arrows along +x
+    for(const y of [-0.7,0,0.7])for(const z of [-0.6,0.2,1.0]){arr(ctx,P(-1.7,y,z),P(-0.2,y,z),'rgba(122,184,255,0.55)',1.4);}
+    // panel: normal n=(cosθ,sinθ,0); tangent t=(−sinθ,cosθ,0); up=(0,0,1)
+    const n=[Math.cos(th),Math.sin(th),0],t=[-Math.sin(th),Math.cos(th),0];
+    // build the four corners in 3D (t spans horizontally, z spans vertically)
+    const c=(s1,s2)=>P(s1*HALF*t[0], s1*HALF*t[1], 0.4+s2*HALF);
+    const p1=c(1,1),p2=c(1,-1),p3=c(-1,-1),p4=c(-1,1);
+    ctx.fillStyle='rgba(232,184,75,0.22)';ctx.strokeStyle='#e8b84b';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p1[0],p1[1]);ctx.lineTo(p2[0],p2[1]);ctx.lineTo(p3[0],p3[1]);ctx.lineTo(p4[0],p4[1]);ctx.closePath();ctx.fill();ctx.stroke();
+    // normal arrow from panel center
+    const ctr=P(0,0,0.4);arr(ctx,ctr,P(n[0]*1.0,n[1]*1.0,0.4),'#3fb98f',2.6);
+    ctx.fillStyle='#3fb98f';ctx.font='13px sans-serif';const ne=P(n[0]*1.0,n[1]*1.0,0.4);ctx.fillText('n',ne[0]+6,ne[1]);
+    ctx.fillStyle='#8095ab';ctx.font='12px sans-serif';ctx.fillText('flow F →',P(-1.7,0,1.5)[0],P(-1.7,0,1.5)[1]);
+    const flux=AREA*Math.cos(th);
+    document.getElementById('th').textContent=(th*180/Math.PI).toFixed(0)+'°';
+    document.getElementById('fx').textContent=flux.toFixed(2);
+    const ob=document.getElementById('obs');if(ob)ob.textContent=th<0.08?'Face-on: the panel faces straight into the flow and catches all of it — flux = area = '+AREA.toFixed(2)+'.':(th>1.5?'Edge-on: the flow slides along the panel and crosses nothing — flux ≈ 0.':'Tilted '+(th*180/Math.PI).toFixed(0)+'°: it catches area × cos θ = '+flux.toFixed(2)+'.');}
+  A.cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=A.cv.getBoundingClientRect();const X=(e.clientX-r.left)*(A.W/Math.max(1,r.width));th=Math.max(0,Math.min(Math.PI/2,(X-60)/(A.W-120)*Math.PI/2));drawPanel();}
+  A.cv.addEventListener('pointerdown',e=>{drg=true;try{A.cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  A.cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;A.cv.addEventListener('pointerup',end);A.cv.addEventListener('pointercancel',end);
+  drawPanel();
+
+  // ===== dome of patches =====
+  (function(){const B=mk('cvs',250);const {ctx,W,H,P}=B;if(!ctx)return;ctx.clearRect(0,0,W,H);
+    // floor disk
+    ctx.strokeStyle='#1a2534';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<=60;i++){const a=i/60*2*Math.PI;const p=P(Math.cos(a),Math.sin(a),0);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}ctx.stroke();
+    // upward flow arrows (through the dome)
+    for(const x of [-0.6,0,0.6])for(const y of [-0.4,0.4]){arr(ctx,P(x,y,-0.1),P(x,y,1.5),'rgba(122,184,255,0.5)',1.3);}
+    // hemisphere wireframe: latitude circles
+    ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1;
+    for(const zz of [0.0,0.5,0.8,0.95]){const rr=Math.sqrt(Math.max(0,1-zz*zz));ctx.beginPath();for(let i=0;i<=60;i++){const a=i/60*2*Math.PI;const p=P(rr*Math.cos(a),rr*Math.sin(a),zz);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}ctx.stroke();}
+    // longitude arcs
+    for(let k=0;k<8;k++){const a=k*Math.PI/4;ctx.beginPath();for(let i=0;i<=30;i++){const ph=i/30*Math.PI/2;const p=P(Math.cos(ph)*Math.cos(a),Math.cos(ph)*Math.sin(a),Math.sin(ph));i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}ctx.stroke();}
+    // patch normals, coloured by F·n with F=(0,0,1) → n_z
+    const pts=[[0,0,1],[0.7,0,0.71],[0,0.7,0.71],[-0.7,0,0.71],[0,-0.7,0.71],[0.5,0.5,0.71],[-0.5,0.5,0.71]];
+    for(const q of pts){const n=q;const base=P(q[0],q[1],q[2]);const tip=P(q[0]+n[0]*0.4,q[1]+n[1]*0.4,q[2]+n[2]*0.4);const nz=n[2];const col=nz>0.5?'#3fb98f':(nz>0.2?'#c7b36a':'#6b7d92');arr(ctx,base,tip,col,2);}
+    ctx.fillStyle='#8095ab';ctx.font='12px sans-serif';ctx.fillText('upward flow through a dome — top patches catch it, sides are edge-on',14,H-10);
+    ctx.fillStyle='#3fb98f';ctx.fillText('green: F·n large (full flux)',14,20);
+  })();
+
+  numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ flux = 1</div><p>$|\\mathbf F|\\,(\\cos 60^\\circ)\\,(\\text{area})=1\\cdot\\tfrac12\\cdot2=1$. Tilting $60^\\circ$ from face-on halves the catch: the panel only presents its "shadow," area $\\times\\cos\\theta$, to the stream. At $0^\\circ$ it would catch the full $2$; at $90^\\circ$, nothing.</p>`);});
+  setHints([`flux = |F| · cosθ · area, with |F|=1, θ=60°, area=2.`,`cos 60° = 1/2, so 1·(1/2)·2 = 1.`]);
 }
 function c7_doubleint(){
   stage.innerHTML=`<div class="card"><h2>Double integrals: adding up a solid</h2>
