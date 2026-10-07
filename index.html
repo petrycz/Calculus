@@ -154,7 +154,7 @@ const MODULES=[
   beats:[c7_recall10,c7_doubleint,c7_iterated,c7_polar,c7_jacobian,c7_intproblems]},
  {id:'c10',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:true,
   outro:`A vector field assigns an arrow to every point; the gradient was the first example. The rest of the subject measures a field along paths and over surfaces, and the Green, Stokes, and divergence theorems lift the Fundamental Theorem of Calculus into two and three dimensions.`,
-  beats:[c10_recall,c10_fields,c10_line,c10_conservative,c10_green,c10_divcurl,c10_surface,c10_stokes,c10_divergence,c10_problems]},
+  beats:[c10_recall,c10_fields,c10_notation,c10_line,c10_conservative,c10_green,c10_divcurl,c10_surface,c10_stokes,c10_divergence,c10_problems]},
  {id:'c11',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:false},
 ];
 function setHints(a){hints=a||[];hintIdx=0;hintBtn.style.display=hints.length?'block':'none';}
@@ -3276,6 +3276,11 @@ function c10_conservative(){
   stage.innerHTML=`<div class="card"><h2>Conservative fields: when the route doesn't matter</h2>
     <p>Last beat left a cliffhanger: for the swirling field the work depended on the path, but for the gradient field $\\mathbf F=\\nabla f$ every route gave the same total. That's not luck — it's the Fundamental Theorem, lifted from the number line to paths. This beat is about the special fields that are some scalar's gradient: the <b>conservative</b> ones.</p>
 
+    <p><b>Start in one dimension — it's almost too simple, which is the point.</b> On a line you can only go one way or the other, so a "loop" is just walking out from $a$ to $b$ and straight back. <b>Drag the trip below</b>: the height is a potential $f(x)$, the ball is you, and the readout is the work done so far, $f(\\text{here})-f(a)$.</p>
+    <canvas id="cv1d" width="640" height="240"></canvas>
+    <p class="small" id="obs1" style="margin-top:6px;color:#9fb0c4"></p>
+    <p>Out to $b$ it reaches $f(b)-f(a)$; walking back, every step is reversed, so it unwinds to exactly $0$ — any round trip does zero net work. Two things to notice. In 1-D <em>every</em> field is conservative: $F$ is always the derivative of its own area function $f$, nothing else it could be. And there is only one route between two points, so "the path doesn't matter" is trivially true. Path-dependence needs room — only in 2-D can two routes enclose <em>area</em>, letting a field <b>swirl</b> around it and do net work on a loop. That swirl is the genuinely new thing, with no 1-D counterpart, and it is what the picture below is really about.</p>
+
     <p><b>See it first.</b> Below, $\\mathbf F=\\nabla f$ comes from the bowl $f(x,y)=x^2+y^2$. Picture $f$ as <b>elevation</b> — a height over each point — but note the field $\\nabla f=(2x,2y)$ is a <b>flat 2-D vector field on the input plane</b>, not arrows climbing a 3-D hillside. Each arrow lies on the map and points the compass direction that is steepest-uphill, longer where the ground is steeper — the "which way is up" of the landscape, drawn on the floor. (Right as you suspected: a gradient lives in the input plane, same dimensions in and out.) Point $A$ is fixed; <b>drag $B$</b>. Two routes are drawn — a straight line and a bowed detour — and the readout shows the work each does. Flip to the swirl field to see the contrast.</p>
     <div class="seg" id="segF"></div>
     <canvas id="cv" width="640" height="420"></canvas>
@@ -3295,6 +3300,35 @@ function c10_conservative(){
     <div class="eqbox">$$\\frac{\\partial P}{\\partial y}=\\frac{\\partial Q}{\\partial x}.$$</div>
     <p>Check the two fields: the gradient $(2x,2y)$ has $P_y=0=Q_x$ — it passes. The swirl $(-y,x)$ has $P_y=-1$ but $Q_x=+1$ — it fails, so no potential $f$ exists for it. That mismatch $Q_x-P_y$ is a number measuring the field's built-in "swirl" at a point, and in the next beat it gets a name — the <b>curl</b> — and a theorem (Green's) tying the swirl inside a loop to the circulation around it. (On a domain with no holes, passing the test is also enough to <em>be</em> conservative.)</p></div>`;
 
+  // ===== single-variable lead-in: out-and-back round trip =====
+  (function(){const c=document.getElementById('cv1d');const g=c&&c.getContext&&c.getContext('2d');if(!g)return;const Wd=c.width,Hd=c.height;
+    const f=x=>2-0.25*(x-2.5)*(x-2.5), fp=x=>-0.5*(x-2.5);
+    const aa=0.7,bb=3.5;const qx=x=>60+x*130, qy=v=>200-v*70;
+    let t=0.0; // 0..1 out, 1..2 back
+    function dr(a,b,col,w){g.strokeStyle=col;g.lineWidth=w||1.6;g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke();}
+    function draw(){g.clearRect(0,0,Wd,Hd);
+      // axis
+      g.strokeStyle='#2b3a4f';g.lineWidth=1.2;g.beginPath();g.moveTo(qx(0),qy(0));g.lineTo(qx(4.2),qy(0));g.stroke();
+      // field arrows F=f'(x) along the axis
+      for(let x=0.4;x<=4;x+=0.6){const d=fp(x);const L=Math.max(0.12,Math.min(0.5,Math.abs(d)*0.45))*Math.sign(d||1);g.strokeStyle="#2b4258";g.lineWidth=1.4;g.beginPath();g.moveTo(qx(x),qy(0));g.lineTo(qx(x+L*0.6),qy(0));g.stroke();}
+      // potential curve
+      g.strokeStyle='#7ab8ff';g.lineWidth=2.4;g.beginPath();for(let i=0;i<=120;i++){const x=i/120*4.2;const p=[qx(x),qy(f(x))];i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]);}g.stroke();
+      // endpoints a,b
+      for(const [x,lab] of [[aa,'a'],[bb,'b']]){g.fillStyle='#6b7d92';g.beginPath();g.arc(qx(x),qy(0),4,0,7);g.fill();g.fillStyle='#9fb0c4';g.font='12px sans-serif';g.fillText(lab,qx(x)-4,qy(0)+18);}
+      // ball
+      const pos=aa+(bb-aa)*(t<=1?t:2-t);
+      dr([qx(pos),qy(0)],[qx(pos),qy(f(pos))],'#2b3a4f',1);
+      g.fillStyle='#e8b84b';g.beginPath();g.arc(qx(pos),qy(f(pos)),6,0,7);g.fill();
+      const work=f(pos)-f(aa);
+      g.fillStyle='#caa64e';g.font='600 13px sans-serif';g.fillText('work so far = '+work.toFixed(2),qx(0),24);
+      const ob=document.getElementById('obs1');if(ob)ob.textContent=(t<0.02?'At a, start of the trip.':t<=1?'Walking out toward b — work so far f(x)−f(a) = '+work.toFixed(2)+'.':t<1.98?'Walking back toward a — the work unwinds, now '+work.toFixed(2)+'.':'Back at a: net work on the round trip = 0.');}
+    c.style.touchAction='none';let drg=false;
+    const setT=e=>{const r=c.getBoundingClientRect();const X=(e.clientX-r.left)*(Wd/Math.max(1,r.width));t=Math.max(0,Math.min(2,X/Wd*2));draw();};
+    c.addEventListener('pointerdown',e=>{drg=true;try{c.setPointerCapture(e.pointerId);}catch(x){}setT(e);e.preventDefault();});
+    c.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setT(e);}});
+    const en=()=>drg=false;c.addEventListener('pointerup',en);c.addEventListener('pointercancel',en);
+    draw();
+  })();
   const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height,S=78,cx=320,cy=212;
   const px=x=>cx+x*S,py=y=>cy-y*S;
   const f=(x,y)=>x*x+y*y;
@@ -3794,6 +3828,41 @@ function c10_problems(){
     <p>Find the outward flux of $\\mathbf F=(x,y,z)$ through the surface of a cube of side $2$ (volume $8$).</p>
     <details><summary>Show solution</summary><div class="sol"><p>$\\operatorname{div}\\mathbf F=1+1+1=3$. The divergence theorem replaces six face integrals with one volume integral: flux $=\\iiint_V 3\\,dV=3\\cdot8=24$.</p></div></details></div>
   </div>`;
+  setHints([]);unlock();
+}
+function c10_notation(){
+  stage.innerHTML=`<div class="card"><h2>Notation map: the layers at a glance</h2>
+    <p>Vector calculus stacks a lot of symbols — a parameter, a point, a path, a scalar field, a vector field, three kinds of derivative. Here's every one in a single place, with <b>what goes in, what comes out</b>, and what it means. Skim it now; come back whenever a layer blurs. The tag $\\mathbb R\\!\\to\\!\\mathbb R^2$ reads "takes one number, returns a 2-D point/arrow."</p>
+
+    <p style="margin-top:12px"><b>1 · Inputs</b></p>
+    <p style="margin:5px 0">$t$ &nbsp;<span class="mono" style="font-size:11px;color:#7f93a8">scalar</span> — one number. A clock, or distance travelled along a path: the knob you turn to move.</p>
+    <p style="margin:5px 0">$(x,y)$, $(x,y,z)$ &nbsp;<span class="mono" style="font-size:11px;color:#7f93a8">a point</span> — a location in the plane or in space, where everything else gets evaluated.</p>
+
+    <p style="margin-top:12px"><b>2 · Paths &amp; surfaces</b> <span class="small" style="color:#7f93a8">(a few knobs → a point)</span></p>
+    <p style="margin:5px 0">$\\mathbf r(t)=(x(t),y(t))$ &nbsp;<span class="mono" style="font-size:11px;color:#7f93a8">$\\mathbb R\\!\\to\\!\\mathbb R^2$</span> — a <b>curve</b>: one knob $t$ traces a path through the plane.</p>
+    <p style="margin:5px 0">$\\mathbf r'(t)$ &nbsp;<span class="mono" style="font-size:11px;color:#7f93a8">vector</span> — <b>velocity / tangent</b>: how the point moves as $t$ ticks. One little step along the curve is $d\\mathbf r=\\mathbf r'(t)\\,dt$.</p>
+    <p style="margin:5px 0">$\\mathbf r(u,v)$ &nbsp;<span class="mono" style="font-size:11px;color:#7f93a8">$\\mathbb R^2\\!\\to\\!\\mathbb R^3$</span> — a <b>surface</b>: two knobs sweep out a sheet in space.</p>
+
+    <p style="margin-top:12px"><b>3 · Scalar fields</b> <span class="small" style="color:#7f93a8">(a point → one number)</span></p>
+    <p style="margin:5px 0">$f(x,y)$ &nbsp;<span class="mono" style="font-size:11px;color:#7f93a8">$\\mathbb R^2\\!\\to\\!\\mathbb R$</span> — a <b>scalar field</b>: one number at each point (height, temperature, a potential). A landscape.</p>
+    <p style="margin:5px 0">$\\nabla f=(f_x,f_y)$ &nbsp;<span class="mono" style="font-size:11px;color:#7f93a8">$\\mathbb R^2\\!\\to\\!\\mathbb R^2$</span> — the <b>gradient</b>: the field of steepest-uphill arrows of $f$. This is what "the derivative of $f$" means in several variables.</p>
+
+    <p style="margin-top:12px"><b>4 · Vector fields</b> <span class="small" style="color:#7f93a8">(a point → an arrow)</span></p>
+    <p style="margin:5px 0">$\\mathbf F(x,y)=(P,Q)$ &nbsp;<span class="mono" style="font-size:11px;color:#7f93a8">$\\mathbb R^2\\!\\to\\!\\mathbb R^2$</span> — a <b>vector field</b>: an arrow at each point (a flow, a force). Its two components $P(x,y)$ and $Q(x,y)$ are each a <b>scalar field</b> — a formula returning one number at each point, not a constant — and together they <em>are</em> the field's rule: feed in $(x,y)$, out comes the arrow $(P,Q)$. (Swirl: $\\mathbf F=(-y,x)$ means $P=-y,\\ Q=x$; at $(3,4)$ the arrow is $(-4,3)$.)</p>
+    <p style="margin:5px 0">$\\mathbf F=\\nabla f$ &nbsp;<span class="mono" style="font-size:11px;color:#7f93a8">special case</span> — <b>conservative</b>: the field happens to <em>be</em> some scalar's gradient. Most fields are not; the swirl $(-y,x)$ is nobody's gradient.</p>
+
+    <p style="margin-top:12px"><b>5 · The three derivatives</b> <span class="small" style="color:#7f93a8">(all built from $\\nabla=(\\partial_x,\\partial_y)$)</span></p>
+    <p style="margin:5px 0">$\\nabla f$ &nbsp;<span class="mono" style="font-size:11px;color:#7f93a8">scalar → vector</span> — <b>gradient</b>, steepest ascent.</p>
+    <p style="margin:5px 0">$\\nabla\\cdot\\mathbf F=P_x+Q_y$ &nbsp;<span class="mono" style="font-size:11px;color:#7f93a8">vector → scalar</span> — <b>divergence</b>, net outflow at a point.</p>
+    <p style="margin:5px 0">$\\nabla\\times\\mathbf F$ &nbsp;<span class="mono" style="font-size:11px;color:#7f93a8">vector → scalar (2-D) / vector (3-D)</span> — <b>curl</b>, local spin; in 2-D its value is $Q_x-P_y$.</p>
+
+    <p style="margin-top:12px"><b>6 · What you integrate</b></p>
+    <p style="margin:5px 0">$\\displaystyle\\int_C \\mathbf F\\cdot d\\mathbf r$ — push <b>along</b> a curve (dot the field with the step $d\\mathbf r$).</p>
+    <p style="margin:5px 0">$\\displaystyle\\iint_S \\mathbf F\\cdot\\mathbf n\\,dS$ — flow <b>through</b> a surface (dot with the normal; $\\mathbf n\\,dS=(\\mathbf r_u\\times\\mathbf r_v)\\,du\\,dv$).</p>
+
+    <div class="eqbox">The layers nest: a knob $t$ names a point through $\\mathbf r(t)$; a field reads that point and returns a number $f(\\mathbf r(t))$ or an arrow $\\mathbf F(\\mathbf r(t))$. A line integral runs all three at once — $\\displaystyle\\int \\mathbf F(\\mathbf r(t))\\cdot \\mathbf r'(t)\\,dt$: the field <em>at the point</em>, dotted with the <em>step</em>, summed over $t$.</div>
+
+    <p><b>The one notation knot to untie:</b> in <em>one</em> variable the derivative is $f'$, a single slope. With several inputs that slope splits into one per direction, bundled into the gradient $\\nabla f$ — a <em>vector</em>, not a number. So wherever one-variable calculus writes $f'$, multivariable calculus writes $\\nabla f$. A vector field that equals some $\\nabla f$ is conservative (it's a "derivative" of a hidden landscape); a general $\\mathbf F$ is not anyone's gradient, and that's exactly when loops do net work.</p></div>`;
   setHints([]);unlock();
 }
 function c7_doubleint(){
