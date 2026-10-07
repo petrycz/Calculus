@@ -156,7 +156,7 @@ const MODULES=[
   outro:`A vector field assigns an arrow to every point; the gradient was the first example. The rest of the subject measures a field along paths and over surfaces, and the Green, Stokes, and divergence theorems lift the Fundamental Theorem of Calculus into two and three dimensions.`,
   beats:[c10_recall,c10_fields,c10_notation,c10_line,c10_conservative,c10_green,c10_divcurl,c10_surface,c10_stokes,c10_divergence,c10_problems]},
  {id:'c11',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:true,
-  beats:[c11_recall,c11_shapes]},
+  beats:[c11_recall,c11_shapes,c11_chain]},
 ];
 function setHints(a){hints=a||[];hintIdx=0;hintBtn.style.display=hints.length?'block':'none';}
 function unlock(){if(unlocked)return;unlocked=true;contBtn.disabled=false;}
@@ -3378,8 +3378,12 @@ function c10_green(){
   stage.innerHTML=`<div class="card"><h2>Green's theorem: swirl inside = circulation around</h2>
     <p>The conservative beat left a number on the table: $Q_x-P_y$, the field's "swirl at a point." Green's theorem turns that local number into a global law — it says the total swirl bottled up <em>inside</em> a loop equals the circulation you measure going <em>around</em> the loop. It's the Fundamental Theorem again: an integral over a region equals an integral over its boundary.</p>
 
-    <p><b>Start with one tiny cell.</b> Walk counter-clockwise around a little box, bottom → right → top → left, adding $\\mathbf F\\cdot d\\mathbf r$ on each edge. The bottom and top nearly cancel, and the leftover is how much $P$ <em>changed</em> going up; likewise the sides leave how much $Q$ changed going across.</p>
+    <p><b>Start with one tiny cell.</b> Take a little box with bottom-left corner $(x,y)$, width $dx$ and height $dy$, and walk its edge counter-clockwise: bottom → right → top → left. On each step add the field's push $\\mathbf F\\cdot d\\mathbf r=P\\,dx+Q\\,dy$. The two kinds of edge pick out different halves of that: along a <b>horizontal</b> step $d\\mathbf r=(dx,0)$, so only the $P\\,dx$ piece survives; along a <b>vertical</b> step $d\\mathbf r=(0,dy)$, so only $Q\\,dy$ survives. That is why the bottom and top edges carry $P$ and the two sides carry $Q$ — the labels on the box.</p>
     <canvas id="cvcell" width="640" height="250"></canvas>
+    <p><b>Now assemble the loop, letting the walking direction set each sign.</b> Going counter-clockwise, the <em>bottom</em> is walked rightward so its push is $+P\\,dx$, but the <em>top</em> is walked leftward, giving $-P\\,dx$; the <em>right</em> side goes up, $+Q\\,dy$, while the <em>left</em> goes down, $-Q\\,dy$. Add the four and group the matching pair on each axis:</p>
+    <p style="margin:4px 0 2px">&bull; the two <b>vertical</b> edges give $Q(x{+}dx)\\,dy-Q(x)\\,dy$ — the same $Q$ read one step $dx$ apart, a difference <em>across</em> $dx$;</p>
+    <p style="margin:2px 0 4px">&bull; the two <b>horizontal</b> edges give $P(x,y)\\,dx-P(x,y{+}dy)\\,dx$ — the same $P$ read one step $dy$ apart, and it lands <em>minus</em> because the top edge runs backwards.</p>
+    <p>Each pair is a single function's change over one small step, so it collapses by the linear approximation $\\text{change}\\approx\\text{rate}\\times\\text{step}$: $[Q(x{+}dx)-Q(x)]\\approx Q_x\\,dx$ and $[P(y{+}dy)-P(y)]\\approx P_y\\,dy$. Putting the four edges together — the vertical pair leaving $Q_x\\,dx\\,dy$, the horizontal pair $-P_y\\,dy\\,dx$:</p>
     <div class="eqbox">$$\\oint_{\\text{cell}}\\mathbf F\\cdot d\\mathbf r=\\underbrace{\\big[Q(x{+}dx)-Q(x)\\big]}_{Q_x\\,dx}dy-\\underbrace{\\big[P(y{+}dy)-P(y)\\big]}_{P_y\\,dy}dx=\\big(Q_x-P_y\\big)\\,dx\\,dy.$$</div>
     <p>So one tiny loop's circulation is the <b>curl</b> $Q_x-P_y$ times the cell's area — the swirl packed into that speck of region.</p>
 
@@ -3940,6 +3944,77 @@ function c11_shapes(){
   draw();
   numChk(stage.querySelector('.card'),12,()=>{addReveal(`<div class="rh">✓ 12</div><p>Three outputs, each needing one slope per input, and four inputs: $3\\times4=12$ partials. The grid is <b>3 rows</b> (one per output coordinate) by <b>4 columns</b> (one per input coordinate) — a $3\\times4$ Jacobian. It is rectangular, so there's no determinant to take; the whole matrix <em>is</em> the derivative, and the next beat multiplies matrices like this one to differentiate a stack of layers.</p>`);});
   setHints([`One partial for each (output, input) pair — so multiply the number of outputs by the number of inputs.`,`3 outputs × 4 inputs = 12.`]);
+}
+function c11_chain(){
+  stage.innerHTML=`<div class="card"><h2>The chain rule, in matrix form</h2>
+    <p>One map rarely stands alone. In a network the data flows through a <b>stack</b> of them: $\\mathbf x\\mapsto\\mathbf y=\\mathbf f(\\mathbf x)\\mapsto\\mathbf z=\\mathbf g(\\mathbf y)$. To train it you need the derivative of the <em>whole</em> composite, $\\mathbf z=\\mathbf g(\\mathbf f(\\mathbf x))$. The chain rule you already know gives it — and in several variables it wears the clothes of matrix multiplication.</p>
+
+    <p><b>Rebuild it from the two cases you have.</b> In one variable, composing multiplies slopes:</p>
+    <div class="eqbox">$$\\frac{dz}{dx}=\\frac{dz}{dy}\\cdot\\frac{dy}{dx}.$$</div>
+    <p>In Module 8, when a single output $z$ depended on several middle variables $y_k$ that each moved with $t$, you <em>added the routes</em> — one per middle variable:</p>
+    <div class="eqbox">$$\\frac{dz}{dt}=\\sum_{k}\\frac{\\partial z}{\\partial y_k}\\,\\frac{dy_k}{dt}=\\nabla z\\cdot\\mathbf y'(t).$$</div>
+    <p>The matrix chain rule is nothing more than doing that route-adding for <em>every</em> output-and-input pair at once. For one output $z_i$ and one input $x_j$, every route from $x_j$ to $z_i$ passes through exactly one middle coordinate $y_k$; a route's gain is $\\dfrac{\\partial z_i}{\\partial y_k}\\dfrac{\\partial y_k}{\\partial x_j}$, and you sum over all of them:</p>
+    <div class="eqbox">$$\\frac{\\partial z_i}{\\partial x_j}=\\sum_{k=1}^{m}\\frac{\\partial z_i}{\\partial y_k}\\,\\frac{\\partial y_k}{\\partial x_j}.$$</div>
+    <p>Look at that sum: it is <b>row $i$ of $J_g$ dotted with column $j$ of $J_f$</b> — the definition of an entry of a matrix product. So stacking all the entries, the composite's Jacobian is simply the two Jacobians multiplied:</p>
+    <div class="eqbox">$$J_{\\mathbf g\\circ\\mathbf f}(\\mathbf x)=\\underbrace{J_{\\mathbf g}\\big(\\mathbf f(\\mathbf x)\\big)}_{p\\times m}\\;\\underbrace{J_{\\mathbf f}(\\mathbf x)}_{m\\times n}\\;=\\;\\underbrace{\\ }_{p\\times n}.$$</div>
+    <p><b>The shapes must click together like links in a chain.</b> $J_g$ is $p\\times m$, $J_f$ is $m\\times n$: the inner $m$ — the size of the middle layer — appears on both and cancels, leaving a $p\\times n$ derivative from $n$ inputs to $p$ outputs. That shared $m$ is exactly the set of routes you sum over. (And the order is forced: $J_g$ first, then $J_f$, mirroring $(g\\circ f)'=g'\\,f'$ — but matrices don't commute, so "outer map first" is now a rule the dimensions enforce, not a convention.)</p>
+
+    <p><b>See the routes.</b> Below, $\\mathbf f:\\mathbb R^2\\to\\mathbb R^3$ then $\\mathbf g:\\mathbb R^3\\to\\mathbb R^2$. Each edge carries one partial (a $J_f$ entry on the left, a $J_g$ entry on the right). <b>Pick an output and an input</b>; the three routes between them light up, and the readout adds their products — that sum is one entry of $J_gJ_f$.</p>
+    <div class="seg" id="segi"></div>
+    <div class="seg" id="segj" style="margin-top:7px"></div>
+    <canvas id="cvc" width="640" height="360"></canvas>
+    <p class="small" id="obsc" style="margin-top:6px;color:#9fb0c4"></p>
+    <div class="readout"><div class="rdc"><div class="k">entry picked</div><div class="v" id="pk">—</div></div><div class="rdc"><div class="k">routes through y₁,y₂,y₃</div><div class="v" id="tm">—</div></div><div class="rdc"><div class="k">sum = entry of J&#8309;J&#8308;</div><div class="v" id="vl">—</div></div></div>
+
+    <p style="margin-top:14px">The two Jacobians at this point, and their product:</p>
+    <div class="eqbox">$$J_{\\mathbf g}=\\begin{pmatrix}1&0&2\\\\-1&1&1\\end{pmatrix},\\quad J_{\\mathbf f}=\\begin{pmatrix}2&1\\\\0&3\\\\1&-1\\end{pmatrix}\\ \\Rightarrow\\ J_{\\mathbf g}J_{\\mathbf f}=\\begin{pmatrix}4&-1\\\\-1&1\\end{pmatrix}.$$</div>
+
+    <div class="task"><b>Add the routes by hand</b>Using the edge values in the picture, compute $\\dfrac{\\partial z_1}{\\partial x_1}$ — sum over the three middle nodes $y_k$ of $\\dfrac{\\partial z_1}{\\partial y_k}\\dfrac{\\partial y_k}{\\partial x_1}$.</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>Why this is the whole of backpropagation.</b> A deep network is a long composition $\\mathbf f_L\\circ\\cdots\\circ\\mathbf f_1$, so its Jacobian is one long product $J_L\\,J_{L-1}\\cdots J_1$ — each layer contributes its own Jacobian, and training needs this product. Because the thing you ultimately differentiate is a <em>single</em> scalar loss ($p=1$), it pays to multiply the chain <em>right-to-left</em>, starting from that scalar end: every partial product stays a single row (a gradient) instead of a full matrix, which is cheap. That right-to-left sweep is <b>reverse-mode automatic differentiation</b> — backprop — and the next beat builds it on exactly this picture.</p></div>`;
+
+  const Jf=[[2,1],[0,3],[1,-1]];   // [k][j] = ∂y_k/∂x_j  (3×2)
+  const Jg=[[1,0,2],[-1,1,1]];     // [i][k] = ∂z_i/∂y_k  (2×3)
+  const SUB='₀₁₂₃₄₅₆₇₈₉';const sub=i=>String(i).split('').map(d=>SUB[+d]).join('');
+  let selI=0,selJ=0;
+  const cv=document.getElementById('cvc');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
+  const inX=92,hidX=325,outX=548;const inY=[150,230],hidY=[90,190,290],outY=[150,230];
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.font='12px '+getComputedStyle(document.body).fontFamily;
+    ctx.fillStyle='#7f93a8';ctx.fillText('inputs  x ∈ ℝ²',inX-30,34);ctx.fillText('y ∈ ℝ³',hidX-24,34);ctx.fillText('outputs  z ∈ ℝ²',outX-44,34);
+    ctx.fillStyle='#e0b45a';ctx.fillText('f  (Jf: 3×2)',(inX+hidX)/2-40,54);ctx.fillStyle='#7ea6d8';ctx.fillText('g  (Jg: 2×3)',(hidX+outX)/2-40,54);
+    // input -> hidden edges (Jf)
+    for(let j=0;j<2;j++)for(let k=0;k<3;k++){const hot=(j===selJ);
+      ctx.strokeStyle=hot?'rgba(232,184,75,0.95)':'#223349';ctx.lineWidth=hot?2.4:1;
+      ctx.beginPath();ctx.moveTo(inX+16,inY[j]);ctx.lineTo(hidX-16,hidY[k]);ctx.stroke();
+      if(hot){const mx=inX+16+(hidX-32-inX)*0.6,my=inY[j]+(hidY[k]-inY[j])*0.6;ctx.fillStyle='#efdca6';ctx.font='11px sans-serif';ctx.fillText(String(Jf[k][j]),mx,my-3);}}
+    // hidden -> output edges (Jg)
+    for(let k=0;k<3;k++)for(let i=0;i<2;i++){const hot=(i===selI);
+      ctx.strokeStyle=hot?'rgba(122,184,255,0.95)':'#223349';ctx.lineWidth=hot?2.4:1;
+      ctx.beginPath();ctx.moveTo(hidX+16,hidY[k]);ctx.lineTo(outX-16,outY[i]);ctx.stroke();
+      if(hot){const mx=hidX+16+(outX-32-hidX)*0.42,my=hidY[k]+(outY[i]-hidY[k])*0.42;ctx.fillStyle='#bcd6f4';ctx.font='11px sans-serif';ctx.fillText(String(Jg[i][k]),mx,my-3);}}
+    function node(x,y,lab,on,col){ctx.fillStyle=on?col:'#16222f';ctx.strokeStyle=on?col:'#3a4c66';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,16,0,7);ctx.fill();ctx.stroke();ctx.fillStyle=on?'#0a111b':'#9fb0c4';ctx.font='600 13px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(lab,x,y);ctx.textAlign='left';ctx.textBaseline='alphabetic';}
+    for(let j=0;j<2;j++)node(inX,inY[j],'x'+sub(j+1),j===selJ,'#e8b84b');
+    for(let k=0;k<3;k++)node(hidX,hidY[k],'y'+sub(k+1),false,'#6f86a6');
+    for(let i=0;i<2;i++)node(outX,outY[i],'z'+sub(i+1),i===selI,'#7ab8ff');
+    const terms=[0,1,2].map(k=>Jg[selI][k]+'·'+Jf[k][selJ]);
+    const vals=[0,1,2].map(k=>Jg[selI][k]*Jf[k][selJ]);
+    const sum=vals[0]+vals[1]+vals[2];
+    const pk=document.getElementById('pk');if(pk)pk.textContent='∂z'+sub(selI+1)+'/∂x'+sub(selJ+1);
+    const tm=document.getElementById('tm');if(tm)tm.textContent=terms.join(' + ')+' = '+vals.join(' + ');
+    const vln=document.getElementById('vl');if(vln)vln.textContent=String(sum);
+    const ob=document.getElementById('obsc');if(ob)ob.textContent='∂z'+sub(selI+1)+'/∂x'+sub(selJ+1)+' sums the three routes x'+sub(selJ+1)+'→y_k→z'+sub(selI+1)+': '+terms.join(' + ')+' = '+sum+'. Gold edges are ∂y_k/∂x'+sub(selJ+1)+' (from Jf), blue edges ∂z'+sub(selI+1)+'/∂y_k (from Jg).';
+  }
+  function seg(id,val,setter,labels,lbl){const el=document.getElementById(id);if(!el)return;
+    el.innerHTML='<span class="segb" style="pointer-events:none;background:none;border:none;color:#7f93a8">'+lbl+':</span>'+labels.map((t,k)=>`<span class="segb ${k===val()?'on':''}" data-k="${k}">${t}</span>`).join('');
+    el.querySelectorAll('.segb[data-k]').forEach(b=>b.onclick=()=>{setter(+b.dataset.k);
+      seg('segi',()=>selI,v=>selI=v,['z₁','z₂'],'output');seg('segj',()=>selJ,v=>selJ=v,['x₁','x₂'],'input');draw();});}
+  seg('segi',()=>selI,v=>selI=v,['z₁','z₂'],'output');
+  seg('segj',()=>selJ,v=>selJ=v,['x₁','x₂'],'input');
+  draw();
+  numChk(stage.querySelector('.card'),4,()=>{addReveal(`<div class="rh">✓ ∂z₁/∂x₁ = 4</div><p>The three routes from $x_1$ to $z_1$: through $y_1$ it's $1\\cdot2=2$, through $y_2$ it's $0\\cdot0=0$, through $y_3$ it's $2\\cdot1=2$ — total $4$. That is row $1$ of $J_g$ dotted with column $1$ of $J_f$, i.e. the $(1,1)$ entry of the product $J_gJ_f$. Running that same dot product over every (output, input) pair <em>is</em> the matrix multiplication — the chain rule, assembled.</p>`);});
+  setHints([`Add one term per middle node y_k: (∂z₁/∂y_k)·(∂y_k/∂x₁). Read the two edges on each route off the picture.`,`Through y₁: 1·2=2;  through y₂: 0·0=0;  through y₃: 2·1=2.  Sum = 4.`]);
 }
 function c7_doubleint(){
   stage.innerHTML=`<div class="card"><h2>Double integrals: adding up a solid</h2>
