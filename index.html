@@ -154,7 +154,7 @@ const MODULES=[
   beats:[c7_recall10,c7_doubleint,c7_iterated,c7_polar,c7_jacobian,c7_intproblems]},
  {id:'c10',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:true,
   outro:`A vector field assigns an arrow to every point; the gradient was the first example. The rest of the subject measures a field along paths and over surfaces, and the Green, Stokes, and divergence theorems lift the Fundamental Theorem of Calculus into two and three dimensions.`,
-  beats:[c10_recall,c10_fields,c10_line,c10_conservative,c10_green,c10_divcurl,c10_surface]},
+  beats:[c10_recall,c10_fields,c10_line,c10_conservative,c10_green,c10_divcurl,c10_surface,c10_stokes,c10_divergence,c10_problems]},
  {id:'c11',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:false},
 ];
 function setHints(a){hints=a||[];hintIdx=0;hintBtn.style.display=hints.length?'block':'none';}
@@ -3593,6 +3593,208 @@ function c10_surface(){
 
   numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ flux = 1</div><p>$|\\mathbf F|\\,(\\cos 60^\\circ)\\,(\\text{area})=1\\cdot\\tfrac12\\cdot2=1$. Tilting $60^\\circ$ from face-on halves the catch: the panel only presents its "shadow," area $\\times\\cos\\theta$, to the stream. At $0^\\circ$ it would catch the full $2$; at $90^\\circ$, nothing.</p>`);});
   setHints([`flux = |F| · cosθ · area, with |F|=1, θ=60°, area=2.`,`cos 60° = 1/2, so 1·(1/2)·2 = 1.`]);
+}
+function c10_stokes(){
+  stage.innerHTML=`<div class="card"><h2>Stokes' theorem: Green lifted off the plane</h2>
+    <p>Green's theorem tied the circulation around a flat loop to the curl totalled over the flat region it bounds. <b>Stokes' theorem</b> is the same statement with the floor removed: the loop can be a bent wire in space, the region a <em>curved surface</em> stretched across it, and the curl is now a <b>vector</b>. The circulation around the wire equals the flux of that curl vector through the surface.</p>
+    <div class="eqbox">$$\\oint_{\\partial S}\\mathbf F\\cdot d\\mathbf r=\\iint_S (\\operatorname{curl}\\mathbf F)\\cdot\\mathbf n\\,\\,dS.$$</div>
+    <p>In 3-D the curl is a vector, $\\operatorname{curl}\\mathbf F=(R_y-Q_z,\\;P_z-R_x,\\;Q_x-P_y)$ — it points along the axis the field spins around (right-hand rule), and its length is the spin rate. Its $k$-component $Q_x-P_y$ is exactly the flat curl from Green; Stokes just dots the whole vector with the surface's normal $\\mathbf n$, keeping the spin that pokes <em>through</em> the surface.</p>
+
+    <p><b>The surprise: the surface doesn't matter.</b> The loop below is a fixed wire (gold). The field $\\mathbf F=(-y,x,0)$ swirls counter-clockwise, so its curl is the constant upward vector $(0,0,2)$ (cyan). <b>Drag to bulge</b> the spanning surface from a flat disk into a tall dome — and the flux of curl through it never budges from the loop's circulation. Any surface with the same rim gives the same answer.</p>
+    <canvas id="cv" width="640" height="360"></canvas>
+    <p class="small" id="obs" style="margin-top:6px;color:#9fb0c4"></p>
+    <div class="readout"><div class="rdc"><div class="k">circulation ∮ F·dr (the rim)</div><div class="v" id="circ">—</div></div><div class="rdc"><div class="k">flux of curl ∬(curl F)·n dS</div><div class="v" id="flux">—</div></div><div class="rdc"><div class="k">bulge height</div><div class="v" id="hv">—</div></div></div>
+
+    <p><b>Why it holds — the same tiling proof.</b> Tile the surface into tiny patches. Each little patch, walked counter-clockwise, has circulation equal to the curl's component through it times the patch area, $(\\operatorname{curl}\\mathbf F)\\cdot\\mathbf n\\,dS$ — the micro-Stokes from the cell argument, now reading the curl through a tilted patch. Add all the patches: interior edges are shared by two and cancel in pairs, leaving only the rim. Sum of patch fluxes $=\\iint_S(\\operatorname{curl}\\mathbf F)\\cdot\\mathbf n\\,dS$; surviving edges $=\\oint_{\\partial S}\\mathbf F\\cdot d\\mathbf r$. Same sum.</p>
+    <canvas id="cvp" width="640" height="190"></canvas>
+
+    <p><b>And why the surface is free to move.</b> Two surfaces sharing a rim enclose a sealed volume between them; the curl has zero divergence everywhere ($\\operatorname{div}\\operatorname{curl}\\mathbf F=0$ always), so no curl-flux is created or lost inside — whatever flows through one surface flows through the other. It's a soap film on a loop of wire: blow it into any shape you like, the rim is unchanged, so the circulation is unchanged.</p>
+
+    <div class="task"><b>Use Stokes</b>$\\mathbf F=(-y,x,0)$ has curl $(0,0,2)$. A loop in the $xy$-plane encircles an area of $3$. By Stokes, its circulation — the flux of curl through the flat disk — is $(\\operatorname{curl}\\mathbf F\\cdot\\mathbf k)\\times\\text{area}$. What is it?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>The pattern, nearly complete.</b> Flat loop (Green) was the special case $\\mathbf n=\\mathbf k$ and a flat $S$. One theorem remains in the family: seal the surface into a closed bag around a <em>volume</em>, and the outward flux equals the <b>divergence</b> totalled inside — the <b>divergence theorem</b>, the flux-form of Green lifted the same way. That's the last beat.</p></div>`;
+
+  const AX=70,AY=30,BX=-55,BY=34,CZ=72,CX=320,CY=250;
+  const P=(x,y,z)=>[CX+x*AX+y*BX, CY+x*AY+y*BY-z*CZ];
+  function arr(ctx,a,b,col,w){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=w||1.8;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();const an=Math.atan2(b[1]-a[1],b[0]-a[0]),hl=Math.min(10,Math.hypot(b[0]-a[0],b[1]-a[1]));ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(b[0],b[1]);ctx.lineTo(b[0]-hl*Math.cos(an-0.4),b[1]-hl*Math.sin(an-0.4));ctx.lineTo(b[0]-hl*Math.cos(an+0.4),b[1]-hl*Math.sin(an+0.4));ctx.closePath();ctx.fill();}
+
+  // ===== main interactive: loop + deformable cap + curl flux =====
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
+  let hgt=0.0;  // bulge height
+  function capZ(r){return hgt*(1-r*r);}
+  function fluxCurl(){ // ∬ curl·(R_r×R_θ) dr dθ with curl=(0,0,2); integrand = 2r
+    const N=40;let s=0;for(let i=0;i<N;i++){const r=(i+0.5)/N;s+=2*r*(1/N)*2*Math.PI;}return s;}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    // faint floor disk (xy-plane) for reference
+    ctx.strokeStyle='#1a2534';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<=60;i++){const a=i/60*2*Math.PI;const p=P(Math.cos(a),Math.sin(a),0);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}ctx.stroke();
+    // cap wireframe: latitude circles + radial lines
+    ctx.strokeStyle='#2b4663';ctx.lineWidth=1;
+    for(const rr of [0.25,0.5,0.75,1]){ctx.beginPath();for(let i=0;i<=60;i++){const a=i/60*2*Math.PI;const p=P(rr*Math.cos(a),rr*Math.sin(a),capZ(rr));i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}ctx.stroke();}
+    for(let k=0;k<8;k++){const a=k*Math.PI/4;ctx.beginPath();for(let i=0;i<=20;i++){const r=i/20;const p=P(r*Math.cos(a),r*Math.sin(a),capZ(r));i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}ctx.stroke();}
+    // curl arrows (cyan, upward) through the cap at a few points
+    for(const [x,y] of [[0,0],[0.6,0],[-0.6,0],[0,0.6],[0,-0.6]]){const r=Math.hypot(x,y);const z0=capZ(r);arr(ctx,P(x,y,z0),P(x,y,z0+0.55),'#56c7d6',2);}
+    // the rim loop (gold) with CCW direction arrows
+    ctx.strokeStyle='#e8b84b';ctx.lineWidth=3;ctx.beginPath();for(let i=0;i<=60;i++){const a=i/60*2*Math.PI;const p=P(Math.cos(a),Math.sin(a),0);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}ctx.stroke();
+    for(const a of [0.3,2.4,4.5]){const p=P(Math.cos(a),Math.sin(a),0);const t=P(Math.cos(a+0.25),Math.sin(a+0.25),0);arr(ctx,p,t,'#e8b84b',2.5);}
+    ctx.fillStyle='#56c7d6';ctx.font='12px sans-serif';ctx.fillText('curl F = (0,0,2)',P(0,0,capZ(0)+0.62)[0]-30,P(0,0,capZ(0)+0.62)[1]-6);
+    ctx.fillStyle='#caa64e';ctx.fillText('rim: the wire loop ∂S',P(0,-1,0)[0]-40,P(0,-1,0)[1]+18);
+    const circ=2*Math.PI,fx=fluxCurl();
+    document.getElementById('circ').textContent=circ.toFixed(3);
+    document.getElementById('flux').textContent=fx.toFixed(3);
+    document.getElementById('hv').textContent=hgt.toFixed(2);
+    const ob=document.getElementById('obs');if(ob)ob.textContent=hgt<0.05?'Flat disk (bulge 0): here the surface lies in the plane and Stokes is exactly Green — curl·k over a flat region. Circulation = flux = 6.28.':'Bulged to '+hgt.toFixed(2)+': the surface is now a curved dome, yet the flux of curl through it is still 6.28 — equal to the rim’s circulation. The shape didn’t matter.';}
+  cv.style.touchAction='none';let drg=false;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width));hgt=Math.max(0,Math.min(1.5,(X-40)/(W-80)*1.5));draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+
+  // ===== static patch diagram =====
+  (function(){const c=document.getElementById('cvp');const g=c&&c.getContext&&c.getContext('2d');if(!g)return;const Wp=c.width,Hp=c.height;g.clearRect(0,0,Wp,Hp);
+    const cx=Wp/2,cy=120,s=70;
+    // a tilted patch (parallelogram)
+    const u=[s,24],v=[-40,-30];const o=[cx,cy];
+    const p1=[o[0]-u[0]/2-v[0]/2,o[1]-u[1]/2-v[1]/2],p2=[p1[0]+u[0],p1[1]+u[1]],p3=[p2[0]+v[0],p2[1]+v[1]],p4=[p1[0]+v[0],p1[1]+v[1]];
+    g.fillStyle='rgba(122,184,255,0.14)';g.strokeStyle='#3a4c66';g.lineWidth=1.5;g.beginPath();g.moveTo(p1[0],p1[1]);g.lineTo(p2[0],p2[1]);g.lineTo(p3[0],p3[1]);g.lineTo(p4[0],p4[1]);g.closePath();g.fill();g.stroke();
+    // CCW micro-loop arrows on the edges
+    arr(g,p1,p2,'#e8b84b',2);arr(g,p2,p3,'#e8b84b',2);arr(g,p3,p4,'#e8b84b',2);arr(g,p4,p1,'#e8b84b',2);
+    // normal + curl poking through
+    const nrm=[18,-40];arr(g,o,[o[0]+nrm[0],o[1]+nrm[1]],'#3fb98f',2.4);
+    arr(g,[o[0]-nrm[0]*0.4,o[1]-nrm[1]*0.4],[o[0]+nrm[0]*1.1,o[1]+nrm[1]*1.1],'#56c7d6',2);
+    g.fillStyle='#3fb98f';g.font='13px sans-serif';g.fillText('n',o[0]+nrm[0]+4,o[1]+nrm[1]);
+    g.fillStyle='#56c7d6';g.fillText('curl F',o[0]+nrm[0]*1.1+6,o[1]+nrm[1]*1.1+4);
+    g.fillStyle='#9fb0c4';g.font='12px sans-serif';g.fillText('one patch: circulation = (curl F · n) × area',cx-110,Hp-14);
+  })();
+
+  numChk(stage.querySelector('.card'),6,()=>{addReveal(`<div class="rh">✓ circulation = 6</div><p>The curl's component through the flat disk is $\\operatorname{curl}\\mathbf F\\cdot\\mathbf k=2$, and the area is $3$, so the flux of curl is $2\\times3=6$ — and by Stokes that equals the circulation around the loop, no matter which surface you stretch across it. (For the unit-circle loop in the picture, area $\\pi$ gives $2\\pi\\approx6.28$, the number both readouts show.)</p>`);});
+  setHints([`Stokes: circulation = flux of curl = (curl·k)·area. Curl·k = 2, area = 3.`,`2 × 3 = 6.`]);
+}
+function c10_divergence(){
+  stage.innerHTML=`<div class="card"><h2>The divergence theorem: outflow = sources inside</h2>
+    <p>Seal a surface into a closed bag around a chunk of space. The divergence theorem says the total flow leaking <em>out</em> through the bag equals all the little sources and sinks added up <em>inside</em>. It's the flux-form of Green's theorem — $\\oint\\mathbf F\\cdot\\mathbf n\\,ds=\\iint\\operatorname{div}\\mathbf F\\,dA$ — lifted from a flat region to a 3-D volume.</p>
+    <div class="eqbox">$$\\iint_{\\partial V}\\mathbf F\\cdot\\mathbf n\\,\\,dS=\\iiint_V (\\operatorname{div}\\mathbf F)\\,\\,dV.$$</div>
+
+    <p><b>See it on a box.</b> Each face of the box has an outward arrow: <span style="color:#d98f8f">red</span> where the field leaves, <span style="color:#7ab8ff">blue</span> where it enters. The net of all six is the total outflow — and it equals the divergence inside times the volume. <b>Drag the box</b>, and flip the field.</p>
+    <div class="seg" id="segF"></div>
+    <canvas id="cv" width="640" height="380"></canvas>
+    <p class="small" id="obs" style="margin-top:6px;color:#9fb0c4"></p>
+    <div class="readout"><div class="rdc"><div class="k">net outward flux (6 faces)</div><div class="v" id="flux">—</div></div><div class="rdc"><div class="k">(div F) × volume</div><div class="v" id="dv">—</div></div></div>
+
+    <p style="margin-top:16px"><b>Why — the tiling proof, one dimension up.</b> Chop the volume into tiny boxes. For one box, the outflow through its six faces is the net of how fast $P$ grows across $x$, $Q$ across $y$, $R$ across $z$ — that is $(\\,P_x+Q_y+R_z)\\,dV=(\\operatorname{div}\\mathbf F)\\,dV$, the divergence packed into that speck of volume. Stack the boxes: every interior face is shared by two neighbours with opposite outward normals, so those fluxes cancel in pairs, leaving only the outer skin. Sum by boxes $=\\iiint_V\\operatorname{div}\\mathbf F\\,dV$; by surviving faces $=\\iint_{\\partial V}\\mathbf F\\cdot\\mathbf n\\,dS$. The very same cancellation that proved Green and Stokes.</p>
+    <canvas id="cvb" width="640" height="190"></canvas>
+
+    <p><b>The whole family, in one line.</b> Every theorem this chapter has been one sentence: <em>a derivative summed over a region equals the plain function evaluated on its boundary.</em></p>
+    <div class="eqbox" style="line-height:2.1">FTC: $\\displaystyle\\int_a^b f'\\,dx=f(b)-f(a)$ &nbsp;(boundary = two endpoints)<br>gradient thm: $\\displaystyle\\int_C\\nabla f\\cdot d\\mathbf r=f(B)-f(A)$<br>Green / Stokes: $\\displaystyle\\oint_{\\partial S}\\mathbf F\\cdot d\\mathbf r=\\iint_S\\operatorname{curl}\\mathbf F\\cdot\\mathbf n\\,dS$<br>divergence: $\\displaystyle\\iint_{\\partial V}\\mathbf F\\cdot\\mathbf n\\,dS=\\iiint_V\\operatorname{div}\\mathbf F\\,dV$</div>
+    <p>They're all the generalized Stokes' theorem $\\int_{\\partial\\Omega}\\omega=\\int_\\Omega d\\omega$ — the Fundamental Theorem of Calculus, wearing different clothes in each dimension.</p>
+
+    <div class="task"><b>Use the theorem</b>The source field $\\mathbf F=(x,y,z)$ has divergence $P_x+Q_y+R_z=3$. What is the outward flux through a closed surface enclosing a volume of $2$?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>Where divergence resurfaces in ML.</b> $\\operatorname{div}\\mathbf F=P_x+Q_y+R_z$ is the <b>trace of the field's Jacobian</b>. That exact quantity runs continuous normalizing flows and Neural ODEs — the density a model assigns changes along the flow at rate $\\tfrac{d\\log p}{dt}=-\\nabla\\cdot\\mathbf f$ — and it appears in the score/diffusion models behind modern image generation. Of this chapter, divergence is the piece you're most likely to meet again in a paper.</p></div>`;
+
+  const AX=60,AY=26,BX=-48,BY=30,CZ=64,CX=320,CY=210;
+  const P3=(x,y,z)=>[CX+x*AX+y*BX, CY+x*AY+y*BY-z*CZ];
+  function arr(ctx,a,b,col,w){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=w||1.8;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();const an=Math.atan2(b[1]-a[1],b[0]-a[0]),hl=Math.min(9,Math.hypot(b[0]-a[0],b[1]-a[1]));ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(b[0],b[1]);ctx.lineTo(b[0]-hl*Math.cos(an-0.4),b[1]-hl*Math.sin(an-0.4));ctx.lineTo(b[0]-hl*Math.cos(an+0.4),b[1]-hl*Math.sin(an+0.4));ctx.closePath();ctx.fill();}
+
+  const cv=document.getElementById('cv');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
+  const FIELDS={
+    source:{F:(x,y,z)=>[x,y,z],div:()=>3,label:'source (x, y, z)'},
+    swirl:{F:(x,y,z)=>[-y,x,0],div:()=>0,label:'swirl (−y, x, 0)'},
+    sink:{F:(x,y,z)=>[-x,-y,-z],div:()=>-3,label:'sink (−x, −y, −z)'},
+    vary:{F:(x,y,z)=>[x*x,0,0],div:(x)=>2*x,label:'varying (x², 0, 0)'}
+  };
+  let fk='source';let C=[0.3,0.2,0.3];const a=0.6,vol=(2*a)**3;
+  const faces=[[[1,0,0]],[[-1,0,0]],[[0,1,0]],[[0,-1,0]],[[0,0,1]],[[0,0,-1]]];
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);const F=FIELDS[fk].F;
+    // faint field arrows on a coarse 3D lattice (z=0 slab)
+    for(let gx=-1.5;gx<=1.5;gx+=0.75)for(let gy=-1.5;gy<=1.5;gy+=0.75){const v=F(gx,gy,0),m=Math.hypot(v[0],v[1]);if(m<1e-9)continue;const L=Math.max(0.1,Math.min(0.3,m*0.07));arr(ctx,P3(gx,gy,0),P3(gx+v[0]/m*L,gy+v[1]/m*L,0),'#1d2c3f',1);}
+    // cube edges
+    const V=[];for(const sx of [-1,1])for(const sy of [-1,1])for(const sz of [-1,1])V.push([C[0]+sx*a,C[1]+sy*a,C[2]+sz*a]);
+    ctx.strokeStyle='#3a4c66';ctx.lineWidth=1.3;
+    for(let i=0;i<8;i++)for(let j=i+1;j<8;j++){let diff=0;for(let k=0;k<3;k++)if(Math.abs(V[i][k]-V[j][k])>1e-6)diff++;if(diff===1){const p=P3(...V[i]),q=P3(...V[j]);ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);ctx.stroke();}}
+    // face arrows coloured by F·n
+    let flux=0;const area=(2*a)**2;
+    for(const [n] of faces){const ctr=[C[0]+n[0]*a,C[1]+n[1]*a,C[2]+n[2]*a];const Fv=F(...ctr);const fn=Fv[0]*n[0]+Fv[1]*n[1]+Fv[2]*n[2];flux+=fn*area;
+      const L=Math.max(0.12,Math.min(0.5,Math.abs(fn)*0.14));const dir=fn>=0?1:-1;const tip=[ctr[0]+n[0]*L*dir,ctr[1]+n[1]*L*dir,ctr[2]+n[2]*L*dir];
+      arr(ctx,P3(...ctr),P3(...tip),fn>=0?'#d98f8f':'#7ab8ff',2.4);}
+    ctx.fillStyle='#dbe6f4';const cc=P3(...C);ctx.beginPath();ctx.arc(cc[0],cc[1],3,0,7);ctx.fill();
+    const dval=FIELDS[fk].div(C[0]);
+    document.getElementById('flux').textContent=flux.toFixed(3);
+    document.getElementById('dv').textContent=(dval*vol).toFixed(3);
+    const ob=document.getElementById('obs');if(ob)ob.textContent=
+      (Math.abs(flux)<0.05?'Balanced: as much enters as leaves — net flux 0, so the divergence inside is 0 (incompressible).':flux>0?'Net outward flow (flux '+flux.toFixed(2)+' > 0): the box contains a source, divergence > 0.':'Net inward flow (flux '+flux.toFixed(2)+' < 0): the box contains a sink, divergence < 0.')+
+      ' The two readouts always match — that is the theorem.';}
+  function segs(){document.getElementById('segF').innerHTML=Object.keys(FIELDS).map(k=>`<span class="segb ${k===fk?'on':''}" data-k="${k}">${FIELDS[k].label}</span>`).join('');document.querySelectorAll('#segF .segb').forEach(b=>b.onclick=()=>{fk=b.dataset.k;segs();draw();});}
+  segs();
+  cv.style.touchAction='none';let drg=false;
+  const det=AX*BY-BX*AY;
+  function setP(e){const r=cv.getBoundingClientRect();const X=(e.clientX-r.left)*(W/Math.max(1,r.width)),Y=(e.clientY-r.top)*(H/Math.max(1,r.height));
+    const sx=X-CX, sy=Y-CY+C[2]*CZ; let x=(BY*sx-BX*sy)/det, y=(-AY*sx+AX*sy)/det;
+    C=[Math.max(-1.3,Math.min(1.3,x)),Math.max(-1.3,Math.min(1.3,y)),C[2]];draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setP(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setP(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+
+  // ===== static micro-box diagram =====
+  (function(){const c=document.getElementById('cvb');const g=c&&c.getContext&&c.getContext('2d');if(!g)return;const Wp=c.width,Hp=c.height;g.clearRect(0,0,Wp,Hp);
+    const o=[Wp/2-30,110],s=70;const Q=(x,y,z)=>[o[0]+x*s-z*0.5*s, o[1]-y*s+z*0.5*s*0.6];
+    const V=[];for(const sx of [0,1])for(const sy of [0,1])for(const sz of [0,1])V.push([sx,sy,sz]);
+    g.strokeStyle='#3a4c66';g.lineWidth=1.3;
+    for(let i=0;i<8;i++)for(let j=i+1;j<8;j++){let d=0;for(let k=0;k<3;k++)if(Math.abs(V[i][k]-V[j][k])>1e-6)d++;if(d===1){const p=Q(...V[i]),q=Q(...V[j]);g.beginPath();g.moveTo(p[0],p[1]);g.lineTo(q[0],q[1]);g.stroke();}}
+    // outflow arrows on three visible faces
+    arr(g,Q(1,0.5,0.5),Q(1.5,0.5,0.5),'#d98f8f',2);
+    arr(g,Q(0.5,1,0.5),Q(0.5,1.5,0.5),'#d98f8f',2);
+    arr(g,Q(0.5,0.5,1),Q(0.5,0.5,1.7),'#d98f8f',2);
+    g.fillStyle='#caa64e';g.font='12px sans-serif';
+    g.fillText('∂P/∂x',Q(1.55,0.5,0.5)[0],Q(1.55,0.5,0.5)[1]+4);
+    g.fillText('∂Q/∂y',Q(0.5,1.55,0.5)[0]-10,Q(0.5,1.55,0.5)[1]-2);
+    g.fillText('∂R/∂z',Q(0.5,0.5,1.75)[0]-10,Q(0.5,0.5,1.75)[1]);
+    g.fillStyle='#9fb0c4';g.fillText('one box: net outflow = (Pₓ + Qᵧ + R_z) × volume',o[0]-70,Hp-14);
+  })();
+
+  numChk(stage.querySelector('.card'),6,()=>{addReveal(`<div class="rh">✓ flux = 6</div><p>No surface integral needed: the divergence theorem turns it into volume $\\times$ divergence $=2\\times3=6$. The source $(x,y,z)$ pumps out $3$ units of "stuff" per unit volume everywhere, so a region of volume $2$ leaks $6$ through its skin, whatever shape that skin takes.</p>`);});
+  setHints([`Divergence theorem: flux = ∭ div F dV = (div F)·volume for constant divergence. div F = 3, volume = 2.`,`3 × 2 = 6.`]);
+}
+function c10_problems(){
+  stage.innerHTML=`<div class="card"><h2>Problem set</h2>
+    <p>Vector fields, line and surface integrals, conservative fields, and the big three theorems. Paper first; solutions fold open.</p>
+
+    <div class="prob"><span class="lvl">divergence</span><div class="ph">Problem 1</div>
+    <p>Compute the divergence of $\\mathbf F=(3x,\\,2y,\\,-z)$.</p>
+    <details><summary>Show solution</summary><div class="sol"><p>$\\operatorname{div}\\mathbf F=P_x+Q_y+R_z=3+2+(-1)=4$ — a constant, so this field is a uniform source everywhere.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">curl (2-D)</span><div class="ph">Problem 2</div>
+    <p>Compute the (scalar) curl $Q_x-P_y$ of $\\mathbf F=(-3y,\\,2x)$.</p>
+    <details><summary>Show solution</summary><div class="sol"><p>$Q_x=\\tfrac{\\partial}{\\partial x}(2x)=2$ and $P_y=\\tfrac{\\partial}{\\partial y}(-3y)=-3$, so curl $=2-(-3)=5$ — spinning counter-clockwise everywhere.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">line integral</span><div class="ph">Problem 3</div>
+    <p>Evaluate $\\displaystyle\\int_C\\mathbf F\\cdot d\\mathbf r$ for $\\mathbf F=(y,x)$ along $\\mathbf r(t)=(t,t^2)$, $t\\in[0,1]$ — two ways.</p>
+    <details><summary>Show solution</summary><div class="sol"><p>Directly: $\\mathbf F(\\mathbf r(t))=(t^2,t)$, $\\mathbf r'(t)=(1,2t)$, dot $=t^2+2t^2=3t^2$, so $\\int_0^1 3t^2\\,dt=1$. Shortcut: $\\mathbf F=(y,x)=\\nabla(xy)$ is conservative, so the integral is $xy\\big|_{(0,0)}^{(1,1)}=1-0=1$. Same answer.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">conservative + potential</span><div class="ph">Problem 4</div>
+    <p>Show $\\mathbf F=(2xy,\\;x^2+2y)$ is conservative, find a potential $f$, and get the work from $(0,0)$ to $(1,2)$.</p>
+    <details><summary>Show solution</summary><div class="sol"><p>Test: $P_y=2x=Q_x$ ✓. Build $f$: $f_x=2xy\\Rightarrow f=x^2y+g(y)$; then $f_y=x^2+g'(y)=x^2+2y\\Rightarrow g'(y)=2y\\Rightarrow g=y^2$. So $f=x^2y+y^2$. Work $=f(1,2)-f(0,0)=(2+4)-0=6$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">Green's theorem</span><div class="ph">Problem 5</div>
+    <p>Find the circulation of $\\mathbf F=(-y,x)$ counter-clockwise around a triangle of area $5$.</p>
+    <details><summary>Show solution</summary><div class="sol"><p>Green: $\\oint\\mathbf F\\cdot d\\mathbf r=\\iint(Q_x-P_y)\\,dA$. Here $Q_x-P_y=1-(-1)=2$ (constant), so the circulation is $2\\times\\text{area}=2\\cdot5=10$ — no need to integrate around the three edges.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">flux through a surface</span><div class="ph">Problem 6</div>
+    <p>Find the flux of the constant field $\\mathbf F=(0,0,3)$ upward through a flat disk of radius $1$ lying in the $xy$-plane.</p>
+    <details><summary>Show solution</summary><div class="sol"><p>The disk's upward normal is $\\mathbf n=(0,0,1)$, so $\\mathbf F\\cdot\\mathbf n=3$ everywhere. Flux $=\\iint 3\\,dS=3\\cdot(\\text{area})=3\\pi$. (Face-on to the flow, it catches all of it.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">Stokes' theorem</span><div class="ph">Problem 7</div>
+    <p>$\\mathbf F=(-y,x,0)$ has curl $(0,0,2)$. Find the circulation around a loop that bounds a surface of projected area $4$.</p>
+    <details><summary>Show solution</summary><div class="sol"><p>Stokes: $\\oint\\mathbf F\\cdot d\\mathbf r=\\iint(\\operatorname{curl}\\mathbf F)\\cdot\\mathbf n\\,dS=(\\,(0,0,2)\\cdot(0,0,1)\\,)\\times\\text{area}=2\\cdot4=8$ — any surface with that rim gives the same $8$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">divergence theorem</span><div class="ph">Problem 8</div>
+    <p>Find the outward flux of $\\mathbf F=(x,y,z)$ through the surface of a cube of side $2$ (volume $8$).</p>
+    <details><summary>Show solution</summary><div class="sol"><p>$\\operatorname{div}\\mathbf F=1+1+1=3$. The divergence theorem replaces six face integrals with one volume integral: flux $=\\iiint_V 3\\,dV=3\\cdot8=24$.</p></div></details></div>
+  </div>`;
+  setHints([]);unlock();
 }
 function c7_doubleint(){
   stage.innerHTML=`<div class="card"><h2>Double integrals: adding up a solid</h2>
