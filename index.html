@@ -156,7 +156,7 @@ const MODULES=[
   outro:`A vector field assigns an arrow to every point; the gradient was the first example. The rest of the subject measures a field along paths and over surfaces, and the Green, Stokes, and divergence theorems lift the Fundamental Theorem of Calculus into two and three dimensions.`,
   beats:[c10_recall,c10_fields,c10_notation,c10_line,c10_conservative,c10_green,c10_divcurl,c10_surface,c10_stokes,c10_divergence,c10_problems]},
  {id:'c11',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:true,
-  beats:[c11_recall,c11_shapes,c11_chain]},
+  beats:[c11_recall,c11_shapes,c11_chain,c11_identities]},
 ];
 function setHints(a){hints=a||[];hintIdx=0;hintBtn.style.display=hints.length?'block':'none';}
 function unlock(){if(unlocked)return;unlocked=true;contBtn.disabled=false;}
@@ -2909,11 +2909,11 @@ function c7_polar(){
 
 function c7_jacobian(){
   stage.innerHTML=`<div class="card"><h2>The Jacobian: the area factor for <em>any</em> change of variables</h2>
-    <p>Polar handed us the factor $r$ by looking at one cell. But polar is one map among many — you might stretch coordinates to fit an ellipse, shear them, or invent coordinates $(u,v)$ tailored to a region (that's all $u,v$ are: <em>your</em> chosen replacements for $x,y$). Each change rescales area by its own factor, and one formula delivers it every time. The one-variable case already shows the shape of the answer.</p>
+    <p>Polar handed us the factor $r$ by looking at one cell. But polar is just one map among many — you might stretch coordinates to fit an ellipse, shear them, or invent coordinates $(u,v)$ tailored to a region (that's all $u,v$ are: <em>your</em> chosen replacements for $x,y$). Every such change bends straight grid lines into curves, and curved maps are hard to work with head-on. Calculus gets around that the way it always does — by <b>zooming in</b>. Shrink your attention to a microscopic patch around one point and the bending flattens out: on that scale the map looks like a single <b>linear</b> transformation — a plain matrix that carries a small input displacement to a small output displacement. That matrix is the <b>Jacobian</b>, a local linear stand-in for the curved map, and this beat builds it, reads its geometry, and extracts the one number integration needs: the factor by which it rescales area. The one-variable case already shows the shape of the answer.</p>
     <div class="eqbox">$$\\int f(x)\\,dx=\\int f(g(u))\\,\\underbrace{|g'(u)|}_{\\text{length stretch}}\\,du.$$</div>
-    <p>That's $u$-substitution from Module 6. Substituting $x=g(u)$ turns $dx$ into $|g'(u)|\\,du$: a step $du$ becomes a step $g'(u)\\,du$ in $x$, so lengths are rescaled by $|g'(u)|$. In two variables we're rescaling <b>area</b>, not length — so we need the factor by which a tiny patch of area grows under the map. Build it in two moves: first the area of a parallelogram, then where the parallelogram comes from.</p>
+    <p>That's $u$-substitution from Module 6, and it already carries the whole idea in miniature. Substituting $x=g(u)$ turns $dx$ into $|g'(u)|\\,du$: zoom into one point and the map is just "multiply by the number $g'(u)$," so a length $du$ is rescaled by $|g'(u)|$. In two variables the local multiplier can't be a single number — two inputs feed two outputs — so it grows into a <b>matrix</b>, and "rescaled length" becomes "rescaled <b>area</b>." Build it in two moves: first a geometric fact about area, then the matrix itself.</p>
 
-    <p><b>Move 1 — a parallelogram's area is a determinant.</b> Forget curvy maps for a moment. If a little cell's two edges are the vectors $\\mathbf e_1$ and $\\mathbf e_2$, what area do they enclose? Drag the tip of $\\mathbf e_2$ and watch.</p>
+    <p><b>Move 1 — the area a cell maps to is a determinant.</b> Set the curved maps aside for a moment for one pure geometry fact we'll need. If a little cell's two edges are the vectors $\\mathbf e_1$ and $\\mathbf e_2$, what area do they enclose? Drag the tip of $\\mathbf e_2$ and watch.</p>
     <canvas id="cv" width="640" height="360"></canvas>
     <div class="readout"><div class="rdc"><div class="k">e&#8321;</div><div class="v" id="e1v">(2, 0)</div></div><div class="rdc"><div class="k">e&#8322;</div><div class="v" id="e2v">—</div></div><div class="rdc"><div class="k">area = |e&#8321;&#8339;e&#8322;&#7527; &#8722; e&#8321;&#7527;e&#8322;&#8339;|</div><div class="v" id="arv">—</div></div></div>
     <div class="task"><b>Read off the area rule</b>With edges $\\mathbf e_1=(2,0)$ and $\\mathbf e_2=(1,3)$, what area do they span? (Drag to check, or compute $|e_{1x}e_{2y}-e_{1y}e_{2x}|$.)</div>
@@ -2921,26 +2921,27 @@ function c7_jacobian(){
     <p style="margin-top:14px">The parallelogram from $\\mathbf e_1=(a,b)$ and $\\mathbf e_2=(c,d)$ has area $|ad-bc|$ — largest when the edges are perpendicular, shrinking to $0$ as they line up (a flattened, degenerate cell). That combination is the <b>$2\\times2$ determinant</b>:</p>
     <div class="eqbox">$$\\text{area}=\\Big|\\det\\begin{pmatrix}a&c\\\\ b&d\\end{pmatrix}\\Big|=|ad-bc|.$$</div>
 
-    <p><b>Move 2 — where the edge vectors come from.</b> First, a word on what just became a function of what. Before the swap, $x$ and $y$ were the two <em>independent</em> variables you integrated over. A change of variables demotes them: each becomes a <em>scalar function</em> of the new coordinates — an $x$-formula $x(u,v)$ and a $y$-formula $y(u,v)$, each an ordinary function that eats the pair $(u,v)$ and returns one number. So the genuinely free variables are now $(u,v)$ — <b>two</b> of them, the same count as before, since renaming the plane can't change its dimension — and $x,y$ ride along as outputs. (The path in the vector-calculus module is the tighter cousin: there a <em>single</em> knob $t$ drives both $x(t)$ and $y(t)$ — just <b>one</b> free variable, which is why a line integral collapses to one $\\int\\,dt$. Here there are two free knobs, so we sweep an area, not a curve.) The only question left: take one small step along a $u$- or $v$-grid line, and where does the output point $(x,y)$ go?</p>
-    <p><b>Step in $u$ only.</b> Hold $v$ fixed and raise $u$ by a small amount $du$. How far does each output coordinate shift? With $v$ pinned, $x$ depends on the single variable $u$, so the plain linear approximation behind the derivative — $\\text{change}\\approx\\text{rate}\\times\\text{step}$ — applies to the $x$-formula, and the same to the $y$-formula:</p>
-    <div class="eqbox">$$\\Delta x\\approx\\frac{\\partial x}{\\partial u}\\,du,\\qquad \\Delta y\\approx\\frac{\\partial y}{\\partial u}\\,du.$$</div>
-    <p>$\\partial x/\\partial u$ is just the rate the $x$-output climbs per unit of $u$ (with $v$ held still), so across a step $du$ the $x$-output moves by that rate times $du$; same for $y$. The point started at $(x,y)$ and now sits at $(x+\\Delta x,\\ y+\\Delta y)$. Draw the little arrow from the old spot to the new one — the <b>displacement</b> — and it is</p>
-    <div class="eqbox">$$\\mathbf e_1=\\Big(\\frac{\\partial x}{\\partial u},\\ \\frac{\\partial y}{\\partial u}\\Big)\\,du.$$</div>
-    <p>One component is how far the point slid sideways, the other how far up. (For polar, a step in $r$ works out to $(\\cos\\theta,\\sin\\theta)\\,dr$ — a short move straight out along the radius, which is exactly what raising $r$ does.)</p>
-    <p><b>Step in $v$ only.</b> Now pin $u$ and nudge $v$ by $dv$ instead; the identical reasoning gives the other edge,</p>
-    <div class="eqbox">$$\\mathbf e_2=\\Big(\\frac{\\partial x}{\\partial v},\\ \\frac{\\partial y}{\\partial v}\\Big)\\,dv.$$</div>
-    <p>Those two arrows $\\mathbf e_1$ and $\\mathbf e_2$ are the sides of the little parallelogram the grid square turns into. Place the gold cell in the input grid on the left and watch where it lands on the right — the two arrows are exactly these edges.</p>
+    <p><b>Move 2 — the matrix, from total differentials.</b> First, a word on what just became a function of what. Before the swap, $x$ and $y$ were the two <em>independent</em> variables you integrated over; a change of variables demotes them to <em>outputs</em> — each is now a scalar function of the new coordinates, $x(u,v)$ and $y(u,v)$, that eats the pair $(u,v)$ and returns one number. So the genuinely free variables are now $(u,v)$ — <b>two</b> of them, the same count as before, since renaming the plane can't change its dimension — and $x,y$ ride along. (The path in the vector-calculus module is the tighter cousin: a single knob $t$ drives both $x(t)$ and $y(t)$ — just <b>one</b> free variable, which is why a line integral collapses to one $\\int\\,dt$. Here there are two, so we sweep an area.)</p>
+    <p>Now <b>zoom in</b> around one point and nudge the inputs by microscopic amounts $\\Delta u$ and $\\Delta v$. How far does each output move? On this flattened scale the outputs respond linearly, and each input acts <em>independently</em>, so the total change in an output is the sum of the two separate contributions — each a rate (a partial derivative) times a step:</p>
+    <div class="eqbox">$$\\Delta x\\approx\\frac{\\partial x}{\\partial u}\\,\\Delta u+\\frac{\\partial x}{\\partial v}\\,\\Delta v,\\qquad \\Delta y\\approx\\frac{\\partial y}{\\partial u}\\,\\Delta u+\\frac{\\partial y}{\\partial v}\\,\\Delta v.$$</div>
+    <p>Each coefficient, like $\\partial x/\\partial u$, is just the rate the $x$-output climbs per unit of $u$ with $v$ held still — the ordinary one-input linear approximation, change $\\approx$ rate $\\times$ step, applied one output at a time. Those two lines are a linear system; pulling the coefficients out front repackages them as a single <b>matrix</b> times the input-displacement vector:</p>
+    <div class="eqbox">$$\\begin{pmatrix}\\Delta x\\\\ \\Delta y\\end{pmatrix}\\approx\\underbrace{\\begin{pmatrix}\\dfrac{\\partial x}{\\partial u}&\\dfrac{\\partial x}{\\partial v}\\\\[6pt]\\dfrac{\\partial y}{\\partial u}&\\dfrac{\\partial y}{\\partial v}\\end{pmatrix}}_{J}\\begin{pmatrix}\\Delta u\\\\ \\Delta v\\end{pmatrix},\\qquad \\Delta\\mathbf y\\approx J\\,\\Delta\\mathbf u.$$</div>
+    <p>That matrix of first partials <em>is</em> the <b>Jacobian</b> $J$: the local linear map that carries an input displacement to the matching output displacement, the flat stand-in for the curved map near this point. (It holds only <em>first</em> derivatives — the rates of this map — so don't confuse it with the Hessian from Module 9, which collects <em>second</em> derivatives to measure the curvature of a single scalar field.)</p>
+    <p><b>Its columns are the edges a grid cell maps to.</b> Freeze $v$ and move along $u$ alone (set $\\Delta v=0$): only the first column survives, so the displacement is $\\big(\\tfrac{\\partial x}{\\partial u},\\tfrac{\\partial y}{\\partial u}\\big)\\,du$ — the little arrow the $u$-grid line turns into. Freezing $u$ and moving along $v$ gives the second column. Writing the infinitesimal steps as $du,dv$, the two edge vectors are</p>
+    <div class="eqbox">$$\\mathbf e_1=\\Big(\\frac{\\partial x}{\\partial u},\\ \\frac{\\partial y}{\\partial u}\\Big)\\,du,\\qquad \\mathbf e_2=\\Big(\\frac{\\partial x}{\\partial v},\\ \\frac{\\partial y}{\\partial v}\\Big)\\,dv.$$</div>
+    <p>They are the two columns of $J$ (each scaled by its step), and the sides of the little parallelogram a grid square becomes. Place the gold cell in the input grid on the left and watch where it lands on the right — the two arrows are exactly these edges. (For polar, stepping $r$ gives $(\\cos\\theta,\\sin\\theta)\\,dr$, a short move straight out along the radius — just what raising $r$ does.)</p>
     <div class="seg" id="segm"></div>
     <canvas id="cvm" width="640" height="360"></canvas>
     <p class="small" id="obsm" style="margin-top:6px;color:#9fb0c4"></p>
     <div class="readout"><div class="rdc"><div class="k">u-edge ∂(x,y)/∂u · du</div><div class="v" id="juv">—</div></div><div class="rdc"><div class="k">v-edge ∂(x,y)/∂v · dv</div><div class="v" id="jvv">—</div></div><div class="rdc"><div class="k">area factor |det J|</div><div class="v" id="detv">—</div></div></div>
 
-    <p style="margin-top:16px"><b>Assemble it.</b> The two edge vectors are the columns of a matrix of partial derivatives — the <b>Jacobian</b> — and Move 1 says the cell's area is the absolute determinant of that matrix, times $du\\,dv$:</p>
+    <p style="margin-top:16px"><b>Assemble it.</b> Move 2 built the Jacobian $J$ and showed its two columns are the edge vectors a grid cell maps to; Move 1 says the area those edges enclose is the absolute determinant. Put them together and a cell of area $du\\,dv$ becomes a patch of area $|\\det J|\\,du\\,dv$:</p>
     <div class="eqbox">$$dx\\,dy=|\\det J|\\,du\\,dv,\\qquad J=\\begin{pmatrix}\\tfrac{\\partial x}{\\partial u}&\\tfrac{\\partial x}{\\partial v}\\\\[3pt]\\tfrac{\\partial y}{\\partial u}&\\tfrac{\\partial y}{\\partial v}\\end{pmatrix}.$$</div>
     <p>It's the exact 2-D version of the 1-D line: $|g'(u)|$ rescaled length, $|\\det J|$ rescales area. The columns are the two edge arrows in the picture; the determinant turns them into the area they enclose.</p>
 
     <p><b>A frame change, seen locally.</b> If you've met a <b>basis change</b> in linear algebra, this is its cousin. A basis change is one fixed linear map: it sends the whole plane through a single matrix whose columns are the new basis vectors, and it always pins the origin. A change of variables is looser — it can be <em>curved</em> (polar bends straight grid lines into circles) and it need not fix the origin (a shift like $x=u+3$ slides everything over). But zoom into one tiny cell and all that curving and shifting is invisible: locally the map looks like a single linear transformation, whose matrix is the Jacobian $J$ and whose columns $\\mathbf e_1,\\mathbf e_2$ are the local basis vectors the grid lines turn into. So $J$ is the basis change the map performs <em>at that point</em>, and $|\\det J|$ is how much that local basis inflates or shrinks area — exactly the role $|\\det|$ plays for an honest linear map. A linear change of variables is the special case where that local picture is the same everywhere.</p>
 
+    <p><b>What the determinant means — a local area tax.</b> Because the map is curved, these rates aren't fixed numbers; they depend on where you stand, so $|\\det J|$ is a <em>local</em> quantity — the factor by which a tiny patch of area is stretched, sheared, or squeezed as it crosses between the two coordinate systems. Polar makes the position-dependence vivid: swing the angle $\\theta$ by a sliver and your physical point is flung a long way out if you're far from the origin, but barely stirs near the center — so cells at large $r$ balloon while cells near the middle stay small. That is exactly why integration needs the factor: it taxes each cell by how much the coordinates stretch it there.</p>
     <p><b>Check it against polar.</b> For $x=r\\cos\\theta,\\ y=r\\sin\\theta$ (so $u=r,\\ v=\\theta$), the two edge vectors are exactly the arrows you dragged: stepping $r$ gives $(\\cos\\theta,\\sin\\theta)$ — a unit radial step — and stepping $\\theta$ gives $(-r\\sin\\theta,\\ r\\cos\\theta)$ — a sideways step of length $r$. They're perpendicular, so the area is base $\\times$ height $=1\\cdot r$, and the determinant agrees:</p>
     <div class="eqbox">$$\\det J=\\cos\\theta\\,(r\\cos\\theta)-(-r\\sin\\theta)\\,\\sin\\theta=r(\\cos^2\\theta+\\sin^2\\theta)=r.$$</div>
     <p>That's the same $r$ the polar beat found by measuring the arc — now you can see why: the sideways edge <em>is</em> the arc $r\\,d\\theta$, and it grows with $r$ while the radial edge stays fixed. The formula reproduces it, and will hand you the factor for a stretch, a shear, or any coordinates you cook up.</p>
@@ -4015,6 +4016,84 @@ function c11_chain(){
   draw();
   numChk(stage.querySelector('.card'),4,()=>{addReveal(`<div class="rh">✓ ∂z₁/∂x₁ = 4</div><p>The three routes from $x_1$ to $z_1$: through $y_1$ it's $1\\cdot2=2$, through $y_2$ it's $0\\cdot0=0$, through $y_3$ it's $2\\cdot1=2$ — total $4$. That is row $1$ of $J_g$ dotted with column $1$ of $J_f$, i.e. the $(1,1)$ entry of the product $J_gJ_f$. Running that same dot product over every (output, input) pair <em>is</em> the matrix multiplication — the chain rule, assembled.</p>`);});
   setHints([`Add one term per middle node y_k: (∂z₁/∂y_k)·(∂y_k/∂x₁). Read the two edges on each route off the picture.`,`Through y₁: 1·2=2;  through y₂: 0·0=0;  through y₃: 2·1=2.  Sum = 4.`]);
+}
+function c11_identities(){
+  stage.innerHTML=`<div class="card"><h2>Reading the matrix: layout and the core identities</h2>
+    <p>Two practical things stand between the chain rule and actually differentiating a network: <b>which way up</b> you write the grid of partials (the convention that trips up every paper-reader), and a short <b>table of derivatives</b> you'll reuse constantly so you never rebuild them from scratch. Both fall straight out of the one definition you already have — the Jacobian is the grid whose $(i,j)$ entry is $\\dfrac{\\partial y_i}{\\partial x_j}$.</p>
+
+    <p><b>Layout conventions.</b> We've put <em>outputs on the rows and inputs on the columns</em>: entry $(i,j)=\\partial y_i/\\partial x_j$. That's <b>numerator layout</b> (the rows follow the "numerator" $\\mathbf y$), and a scalar's gradient comes out as a <em>row</em>. Flip it and you get <b>denominator layout</b>, which writes the very same derivative <em>transposed</em> — inputs on rows — so a gradient becomes a <em>column</em>. Neither is more correct; they are bookkeeping. But papers use both, often without saying which, and that single choice is the most common source of a stray transpose when you try to reproduce a result. This course stays in numerator layout throughout. The reliable guide, whichever a text uses: in a chain-rule product the <em>inner</em> matrix dimensions must agree, so if a transpose is needed to make the shapes meet, that is the layout telling you where it goes.</p>
+
+    <p><b>See the simplest derivative of all: a linear map.</b> Take $\\mathbf y=A\\mathbf x$. <b>Drag $\\mathbf x$</b> in the left plane and watch its image $\\mathbf y$ in the right. Toggle the layout to see $\\partial\\mathbf y/\\partial\\mathbf x$ written as $A$ or as its transpose.</p>
+    <div class="seg" id="seglay"></div>
+    <canvas id="cvl" width="640" height="340"></canvas>
+    <p class="small" id="obsl" style="margin-top:6px;color:#9fb0c4"></p>
+    <div class="readout"><div class="rdc"><div class="k">input x</div><div class="v" id="xl">—</div></div><div class="rdc"><div class="k">output y = Ax</div><div class="v" id="yl">—</div></div><div class="rdc"><div class="k">∂y/∂x</div><div class="v" id="jl">—</div></div></div>
+
+    <p><b>Why its derivative is $A$.</b> Each output is a weighted sum of the inputs, $y_i=\\sum_k a_{ik}x_k$, so differentiating in $x_j$ keeps only the one term with $k=j$: $\\dfrac{\\partial y_i}{\\partial x_j}=a_{ij}$. Every Jacobian entry is just the matching matrix entry, so the whole grid <em>is</em> $A$ — the matrix analog of $(cx)'=c$. And $A$ carries no $\\mathbf x$ in it, so this Jacobian is the <em>same at every point</em> (unlike the polar map, whose Jacobian changed with position). This one identity is why each layer hands its weight matrix straight to the chain-rule product.</p>
+
+    <p><b>The four you'll reuse.</b> Each is the same "collect $\\partial y_i/\\partial x_j$" worked once so you don't repeat it:</p>
+    <div class="eqbox">$$\\begin{aligned}
+\\mathbf y=A\\mathbf x\\ &\\Rightarrow\\ \\tfrac{\\partial\\mathbf y}{\\partial\\mathbf x}=A &&\\text{linear map — its own derivative}\\\\[2pt]
+s=\\mathbf a^{\\mathsf T}\\mathbf x\\ &\\Rightarrow\\ \\nabla s=\\mathbf a^{\\mathsf T} &&\\text{gradient of a linear form}\\\\[2pt]
+s=\\mathbf x^{\\mathsf T}A\\mathbf x\\ &\\Rightarrow\\ \\nabla s=\\mathbf x^{\\mathsf T}(A+A^{\\mathsf T}) &&\\text{quadratic form}\\\\[2pt]
+\\mathbf y=\\sigma(\\mathbf x)\\ &\\Rightarrow\\ \\tfrac{\\partial\\mathbf y}{\\partial\\mathbf x}=\\operatorname{diag}\\big(\\sigma'(x_i)\\big) &&\\text{elementwise}\\Rightarrow\\text{diagonal}
+\\end{aligned}$$</div>
+    <p>Two of these deserve a line. The <b>quadratic form</b> $s=\\mathbf x^{\\mathsf T}A\\mathbf x=\\sum_{i,k}x_i a_{ik}x_k$ has $x_j$ appearing <em>twice</em> — once as a row index, once as a column index — so differentiating gives two terms, $\\sum_k a_{jk}x_k+\\sum_i x_i a_{ij}=(A\\mathbf x)_j+(A^{\\mathsf T}\\mathbf x)_j$; hence $\\nabla s=\\mathbf x^{\\mathsf T}(A+A^{\\mathsf T})$, which for symmetric $A$ is $2\\mathbf x^{\\mathsf T}A$ and for $s=\\mathbf x^{\\mathsf T}\\mathbf x=\\lVert\\mathbf x\\rVert^2$ is $2\\mathbf x^{\\mathsf T}$ — the vector echo of $(x^2)'=2x$, and the gradient behind every least-squares loss. The <b>elementwise</b> map applies one scalar function $\\sigma$ to each coordinate, so $y_i=\\sigma(x_i)$ depends on $x_i$ alone; every off-diagonal $\\partial y_i/\\partial x_j$ ($i\\neq j$) is zero, leaving a diagonal Jacobian — this is how an activation function enters backprop.</p>
+
+    <div class="task"><b>Read a linear layer's Jacobian</b>A layer is $\\mathbf y=W\\mathbf x$ with $W=\\left[\\begin{smallmatrix}2&1\\\\0&3\\end{smallmatrix}\\right]$. In numerator layout $\\partial\\mathbf y/\\partial\\mathbf x$ is just $W$. What is its $(1,2)$ entry, $\\partial y_1/\\partial x_2$?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px"><b>Next:</b> with the chain rule and these four identities in hand, the last beat differentiates a whole little network end to end — the forward pass, then the reverse-mode sweep that is backpropagation.</p></div>`;
+
+  const A=[[2,1],[0,3]];                 // y1=2x1+x2, y2=3x2
+  const map=(a,b)=>[A[0][0]*a+A[0][1]*b, A[1][0]*a+A[1][1]*b];
+  let X=[1,0.5], lay='num';
+  const cv=document.getElementById('cvl');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
+  const Lcx=135,Lcy=172,LS=42,Rcx=470,Rcy=172,RS=21;
+  const lx=u=>Lcx+u*LS, ly=v=>Lcy-v*LS, rx=p=>Rcx+p*RS, ry=q=>Rcy-q*RS;
+  function arrow(X0,Y0,X1,Y1,col,w){if(!ctx)return;ctx.strokeStyle=col;ctx.lineWidth=w||2.4;ctx.beginPath();ctx.moveTo(X0,Y0);ctx.lineTo(X1,Y1);ctx.stroke();const a=Math.atan2(Y1-Y0,X1-X0),hl=Math.min(10,Math.hypot(X1-X0,Y1-Y0));ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(X1,Y1);ctx.lineTo(X1-hl*Math.cos(a-0.4),Y1-hl*Math.sin(a-0.4));ctx.lineTo(X1-hl*Math.cos(a+0.4),Y1-hl*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.font='12px '+getComputedStyle(document.body).fontFamily;
+    ctx.fillStyle='#5d7186';ctx.fillText('input  x-plane',Lcx-120,26);ctx.fillText('output  y = Ax',Rcx-40,26);
+    ctx.fillStyle='#8095ab';ctx.font='20px sans-serif';ctx.fillText('↦',(Lcx+Rcx)/2-8,H/2);
+    // input grid + axes
+    ctx.strokeStyle='#172432';ctx.lineWidth=1;for(let g=-2;g<=2;g++){ctx.beginPath();ctx.moveTo(lx(g),ly(-2.3));ctx.lineTo(lx(g),ly(2.3));ctx.stroke();ctx.beginPath();ctx.moveTo(lx(-2.3),ly(g));ctx.lineTo(lx(2.3),ly(g));ctx.stroke();}
+    ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(lx(-2.3),ly(0));ctx.lineTo(lx(2.3),ly(0));ctx.moveTo(lx(0),ly(-2.3));ctx.lineTo(lx(0),ly(2.3));ctx.stroke();
+    // input basis
+    arrow(lx(0),ly(0),lx(1),ly(0),'#e8b84b',2.4);arrow(lx(0),ly(0),lx(0),ly(1),'#7ab8ff',2.4);
+    ctx.fillStyle='#e0b45a';ctx.font='600 12px sans-serif';ctx.fillText('e₁',lx(1)+4,ly(0)+14);ctx.fillStyle='#8fb6e4';ctx.fillText('e₂',lx(0)+6,ly(1)-4);
+    // input x
+    arrow(lx(0),ly(0),lx(X[0]),ly(X[1]),'#dbe6f4',2);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(lx(X[0]),ly(X[1]),4,0,7);ctx.fill();
+    // output grid (image of lines) + axes
+    ctx.strokeStyle='#17283a';ctx.lineWidth=1;for(let g=-2;g<=2;g++){let p=map(g,-2.3),q=map(g,2.3);ctx.beginPath();ctx.moveTo(rx(p[0]),ry(p[1]));ctx.lineTo(rx(q[0]),ry(q[1]));ctx.stroke();p=map(-2.3,g);q=map(2.3,g);ctx.beginPath();ctx.moveTo(rx(p[0]),ry(p[1]));ctx.lineTo(rx(q[0]),ry(q[1]));ctx.stroke();}
+    ctx.strokeStyle='#2b3a4f';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(rx(-6.5),ry(0));ctx.lineTo(rx(6.5),ry(0));ctx.moveTo(rx(0),ry(-6.5));ctx.lineTo(rx(0),ry(6.5));ctx.stroke();
+    // output basis images = columns of A
+    const c1=map(1,0),c2=map(0,1);
+    arrow(rx(0),ry(0),rx(c1[0]),ry(c1[1]),'#e8b84b',2.4);arrow(rx(0),ry(0),rx(c2[0]),ry(c2[1]),'#7ab8ff',2.4);
+    ctx.fillStyle='#e0b45a';ctx.font='600 11px sans-serif';ctx.fillText('Ae₁ = col 1',rx(c1[0])+4,ry(c1[1])+14);ctx.fillStyle='#8fb6e4';ctx.fillText('Ae₂ = col 2',rx(c2[0])+4,ry(c2[1])-4);
+    // output y
+    const Y=map(X[0],X[1]);
+    arrow(rx(0),ry(0),rx(Y[0]),ry(Y[1]),'#dbe6f4',2);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(rx(Y[0]),ry(Y[1]),4,0,7);ctx.fill();
+    // readouts
+    const xl=document.getElementById('xl');if(xl)xl.textContent='('+X[0].toFixed(2)+', '+X[1].toFixed(2)+')';
+    const yl=document.getElementById('yl');if(yl)yl.textContent='('+Y[0].toFixed(2)+', '+Y[1].toFixed(2)+')';
+    const jl=document.getElementById('jl');if(jl)jl.textContent=(lay==='num'?'[[2, 1], [0, 3]] = A':'[[2, 0], [1, 3]] = Aᵀ');
+    const ob=document.getElementById('obsl');if(ob)ob.textContent='Drag x: y moves, but ∂y/∂x stays '+(lay==='num'?'A':'Aᵀ')+' — a linear map is its own derivative, the same at every point. The columns of A are exactly where the basis arrows e₁, e₂ land. ('+(lay==='num'?'Numerator layout: outputs on rows.':'Denominator layout: the transpose, inputs on rows.')+')';
+  }
+  function buildSeg(){const el=document.getElementById('seglay');if(!el)return;
+    el.innerHTML='<span class="segb" style="pointer-events:none;background:none;border:none;color:#7f93a8">layout:</span>'+[['num','numerator (∂y/∂x = A)'],['den','denominator (= Aᵀ)']].map(([k,l])=>`<span class="segb ${k===lay?'on':''}" data-k="${k}">${l}</span>`).join('');
+    el.querySelectorAll('.segb[data-k]').forEach(b=>b.onclick=()=>{lay=b.dataset.k;buildSeg();draw();});}
+  buildSeg();
+  cv.style.touchAction='none';let drg=false;
+  function setX(e){const r=cv.getBoundingClientRect();const Xp=(e.clientX-r.left)*(W/Math.max(1,r.width)),Yp=(e.clientY-r.top)*(H/Math.max(1,r.height));
+    if(Xp>Rcx-80)return;   // only the left pane drives x
+    X=[Math.max(-2,Math.min(2,(Xp-Lcx)/LS)),Math.max(-2,Math.min(2,(Lcy-Yp)/LS))];draw();}
+  cv.addEventListener('pointerdown',e=>{drg=true;try{cv.setPointerCapture(e.pointerId);}catch(x){}setX(e);e.preventDefault();});
+  cv.addEventListener('pointermove',e=>{if(drg){e.preventDefault();setX(e);}});
+  const end=()=>drg=false;cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  draw();
+  numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ ∂y₁/∂x₂ = 1</div><p>The first output is $y_1=2x_1+1\\cdot x_2$, so $\\partial y_1/\\partial x_2=1$ — exactly $W_{12}$. For a linear map every Jacobian entry is just the matching matrix entry: $\\partial(W\\mathbf x)/\\partial\\mathbf x=W$, the matrix analog of $(cx)'=c$. That's why, in the chain-rule product, a linear layer simply contributes its weight matrix.</p>`);});
+  setHints([`The first output is y₁ = 2x₁ + 1·x₂. Differentiate it with respect to x₂.`,`∂y₁/∂x₂ = 1 = W₁₂.`]);
 }
 function c7_doubleint(){
   stage.innerHTML=`<div class="card"><h2>Double integrals: adding up a solid</h2>
