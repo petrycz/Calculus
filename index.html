@@ -155,7 +155,8 @@ const MODULES=[
  {id:'c10',title:'Vector Calculus',sub:'Vector fields, line & surface integrals, and the Green/Stokes/divergence theorems.',ready:true,
   outro:`A vector field assigns an arrow to every point; the gradient was the first example. The rest of the subject measures a field along paths and over surfaces, and the Green, Stokes, and divergence theorems lift the Fundamental Theorem of Calculus into two and three dimensions.`,
   beats:[c10_recall,c10_fields,c10_notation,c10_line,c10_conservative,c10_green,c10_divcurl,c10_surface,c10_stokes,c10_divergence,c10_problems]},
- {id:'c11',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:false},
+ {id:'c11',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:true,
+  beats:[c11_recall,c11_shapes]},
 ];
 function setHints(a){hints=a||[];hintIdx=0;hintBtn.style.display=hints.length?'block':'none';}
 function unlock(){if(unlocked)return;unlocked=true;contBtn.disabled=false;}
@@ -2920,7 +2921,7 @@ function c7_jacobian(){
     <p style="margin-top:14px">The parallelogram from $\\mathbf e_1=(a,b)$ and $\\mathbf e_2=(c,d)$ has area $|ad-bc|$ — largest when the edges are perpendicular, shrinking to $0$ as they line up (a flattened, degenerate cell). That combination is the <b>$2\\times2$ determinant</b>:</p>
     <div class="eqbox">$$\\text{area}=\\Big|\\det\\begin{pmatrix}a&c\\\\ b&d\\end{pmatrix}\\Big|=|ad-bc|.$$</div>
 
-    <p><b>Move 2 — where the edge vectors come from.</b> A change of variables is a <b>map</b> with two output formulas: an $x$-formula $x(u,v)$ and a $y$-formula $y(u,v)$. Each is an ordinary function — give it $u$ and $v$, get a number back. The only question is: take one small step along a grid line, and where does the output point go?</p>
+    <p><b>Move 2 — where the edge vectors come from.</b> First, a word on what just became a function of what. Before the swap, $x$ and $y$ were the two <em>independent</em> variables you integrated over. A change of variables demotes them: each becomes a <em>scalar function</em> of the new coordinates — an $x$-formula $x(u,v)$ and a $y$-formula $y(u,v)$, each an ordinary function that eats the pair $(u,v)$ and returns one number. So the genuinely free variables are now $(u,v)$ — <b>two</b> of them, the same count as before, since renaming the plane can't change its dimension — and $x,y$ ride along as outputs. (The path in the vector-calculus module is the tighter cousin: there a <em>single</em> knob $t$ drives both $x(t)$ and $y(t)$ — just <b>one</b> free variable, which is why a line integral collapses to one $\\int\\,dt$. Here there are two free knobs, so we sweep an area, not a curve.) The only question left: take one small step along a $u$- or $v$-grid line, and where does the output point $(x,y)$ go?</p>
     <p><b>Step in $u$ only.</b> Hold $v$ fixed and raise $u$ by a small amount $du$. How far does each output coordinate shift? With $v$ pinned, $x$ depends on the single variable $u$, so the plain linear approximation behind the derivative — $\\text{change}\\approx\\text{rate}\\times\\text{step}$ — applies to the $x$-formula, and the same to the $y$-formula:</p>
     <div class="eqbox">$$\\Delta x\\approx\\frac{\\partial x}{\\partial u}\\,du,\\qquad \\Delta y\\approx\\frac{\\partial y}{\\partial u}\\,du.$$</div>
     <p>$\\partial x/\\partial u$ is just the rate the $x$-output climbs per unit of $u$ (with $v$ held still), so across a step $du$ the $x$-output moves by that rate times $du$; same for $y$. The point started at $(x,y)$ and now sits at $(x+\\Delta x,\\ y+\\Delta y)$. Draw the little arrow from the old spot to the new one — the <b>displacement</b> — and it is</p>
@@ -3296,9 +3297,10 @@ function c10_conservative(){
     <div class="task"><b>Use the shortcut</b>For $\\mathbf F=\\nabla f$ with $f=x^2+y^2$, what is the work from $A=(1,0)$ to $B=(2,2)$ along <em>any</em> path?</div>
     <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
 
-    <p style="margin-top:16px"><b>Which fields are conservative?</b> Not all — the swirl $(-y,x)$ isn't, as the loop readout shows. There's a quick test. Name the field's two components $\\mathbf F=(P,Q)$ — so $P(x,y)$ is its $x$-part and $Q(x,y)$ its $y$-part (the same $P,Q$ we'll use throughout vector calculus). If this field is a gradient, $\\mathbf F=\\nabla f=(f_x,f_y)$, then matching components gives $P=f_x$ and $Q=f_y$. Differentiate once more: $P_y=f_{xy}$ and $Q_x=f_{yx}$ — and these are equal, because mixed partials agree (the Clairaut fact from the Hessian). So a conservative field must satisfy</p>
+    <p style="margin-top:16px"><b>Which fields are conservative — and how do you recover the potential?</b> Not all are: the swirl $(-y,x)$ isn't, as the loop readout shows. Being a gradient says something strong about the two components $\\mathbf F=(P,Q)$ (with $P(x,y)$ the $x$-part, $Q(x,y)$ the $y$-part — the same $P,Q$ used throughout vector calculus): they aren't two independent functions but <em>two faces of one</em> scalar, since $\\mathbf F=\\nabla f=(f_x,f_y)$ forces $P=f_x$ and $Q=f_y$. That shared parent leaves a fingerprint. Differentiate <em>crosswise</em>: $P_y=f_{xy}$ and $Q_x=f_{yx}$, which are equal because the mixed partials of $f$ agree (the Clairaut fact from the Hessian). So every conservative field satisfies</p>
     <div class="eqbox">$$\\frac{\\partial P}{\\partial y}=\\frac{\\partial Q}{\\partial x}.$$</div>
-    <p>Check the two fields: the gradient $(2x,2y)$ has $P_y=0=Q_x$ — it passes. The swirl $(-y,x)$ has $P_y=-1$ but $Q_x=+1$ — it fails, so no potential $f$ exists for it. That mismatch $Q_x-P_y$ is a number measuring the field's built-in "swirl" at a point, and in the next beat it gets a name — the <b>curl</b> — and a theorem (Green's) tying the swirl inside a loop to the circulation around it. (On a domain with no holes, passing the test is also enough to <em>be</em> conservative.)</p></div>`;
+    <p>The test differentiates <em>across</em> the components ($P_y$ against $Q_x$); rebuilding the hidden $f$ runs the other way — <em>integrate</em> each component against the variable it was differentiated by: $f=\\int P\\,dx$ (plus an unknown function of $y$) and $f=\\int Q\\,dy$ (plus an unknown function of $x$). Both must rebuild the <em>same</em> $f$, so forcing them to agree pins down the leftover piece — the whole recipe for a potential (Problem 4 runs it end to end). Integrating the <em>wrong</em> way, $P$ by $y$ or $Q$ by $x$, rebuilds nothing: that pairing is the crosswise derivative, the test, not the undo. The slogan: <b>cross-differentiate to test, straight-integrate to build.</b></p>
+    <p>Check the two fields: the gradient $(2x,2y)$ has $P_y=0=Q_x$ — it passes, and a potential exists ($f=x^2+y^2$). The swirl $(-y,x)$ has $P_y=-1$ but $Q_x=+1$ — it fails, so no $f$ can exist, and the two half-built potentials refuse to agree. That mismatch $Q_x-P_y$ measures the field's built-in <em>swirl</em> at a point; in the next beat it gets a name — the <b>curl</b> — and a theorem (Green's) tying the swirl inside a loop to the circulation around it. (On a domain with no holes, passing the test is also enough to <em>be</em> conservative.)</p></div>`;
 
   // ===== single-variable lead-in: out-and-back round trip =====
   (function(){const c=document.getElementById('cv1d');const g=c&&c.getContext&&c.getContext('2d');if(!g)return;const Wd=c.width,Hd=c.height;
@@ -3862,8 +3864,82 @@ function c10_notation(){
 
     <div class="eqbox">The layers nest: a knob $t$ names a point through $\\mathbf r(t)$; a field reads that point and returns a number $f(\\mathbf r(t))$ or an arrow $\\mathbf F(\\mathbf r(t))$. A line integral runs all three at once — $\\displaystyle\\int \\mathbf F(\\mathbf r(t))\\cdot \\mathbf r'(t)\\,dt$: the field <em>at the point</em>, dotted with the <em>step</em>, summed over $t$.</div>
 
+    <p style="margin-top:12px"><b>How many variables are really free?</b> Count the knobs you can turn, not the letters on the page. Along a <b>path</b> there is just <b>one</b> — $t$ — and $x,y$ are slaved to it through $\\mathbf r(t)$, which is exactly why a line integral collapses to a single $\\int\\,dt$. On a <b>surface</b> $\\mathbf r(u,v)$, or under a <b>change of variables</b>, there are <b>two</b>, namely $(u,v)$, with $x,y$ as their outputs. A scalar or vector <b>field</b> has as many free variables as the space it sits on — a planar field reads the <b>two</b> coordinates of its input point $(x,y)$. Every other symbol is a dependent riding on those few free knobs.</p>
+
     <p><b>The one notation knot to untie:</b> in <em>one</em> variable the derivative is $f'$, a single slope. With several inputs that slope splits into one per direction, bundled into the gradient $\\nabla f$ — a <em>vector</em>, not a number. So wherever one-variable calculus writes $f'$, multivariable calculus writes $\\nabla f$. A vector field that equals some $\\nabla f$ is conservative (it's a "derivative" of a hidden landscape); a general $\\mathbf F$ is not anyone's gradient, and that's exactly when loops do net work.</p></div>`;
   setHints([]);unlock();
+}
+function c11_recall(){recallFrom(`Module 12 gathers <em>all</em> the first derivatives of a vector-valued map into one rectangular grid — the Jacobian matrix — and runs the chain rule straight through it. It rests on three things already built: the <b>gradient</b> (the partials of a scalar, packed into a vector), the <b>multivariable chain rule</b> (rates threaded through a composition — the seed of backpropagation), and the <b>Jacobian</b> (the grid of partials whose determinant was the change-of-variables area factor). Rederive each before we assemble them into the language ML papers are written in.`,['c7','c8','c9'],RECALL_HINT);}
+function c11_shapes(){
+  stage.innerHTML=`<div class="card"><h2>What is a derivative, when both sides are vectors?</h2>
+    <p>In <em>one</em> variable the derivative $f'(x)$ is a single <b>number</b> — one slope. In Module 8 the input grew into several numbers while the output stayed a single number, and that one slope split into one partial per input direction, bundled into the <b>gradient</b> $\\nabla f=(f_{x_1},\\dots,f_{x_n})$ — a whole <em>vector</em> of slopes.</p>
+    <p>Now take the last step. Let the <b>output</b> be a vector too. This is the shape of almost everything in machine learning: a layer takes $n$ numbers in and returns $m$ numbers out,</p>
+    <div class="eqbox">$$\\mathbf y=\\mathbf f(\\mathbf x),\\qquad \\mathbf x\\in\\mathbb R^{n}\\ \\longrightarrow\\ \\mathbf y\\in\\mathbb R^{m}.$$</div>
+    <p>What is <em>its</em> derivative? The honest answer is the simplest one: list <b>every</b> first partial. Each output coordinate $y_i$ has its own slope with respect to each input coordinate $x_j$, written $\\dfrac{\\partial y_i}{\\partial x_j}$. There is one such number for every pairing of an output with an input — $m$ outputs $\\times\\ n$ inputs — so they fill an $m\\times n$ <b>grid of numbers</b>. That grid is the <b>Jacobian matrix</b>.</p>
+    <p><b>Set the input count $n$ and the output count $m$ below</b> and watch the grid of partials take shape. Read each cell as a question: <em>row $i$, column $j$</em> asks "if I wiggle input $x_j$, how does output $y_i$ move?"</p>
+    <div class="seg" id="segn"></div>
+    <div class="seg" id="segm" style="margin-top:7px"></div>
+    <canvas id="cvs" width="640" height="340"></canvas>
+    <p class="small" id="shp" style="margin-top:6px;color:#9fb0c4;min-height:34px"></p>
+    <div class="readout"><div class="rdc"><div class="k">output × input</div><div class="v" id="dim">—</div></div><div class="rdc"><div class="k">partials in the grid</div><div class="v" id="cnt">—</div></div><div class="rdc"><div class="k">name</div><div class="v" id="nm">—</div></div></div>
+
+    <p style="margin-top:16px"><b>The four shapes are all the same idea — a table of partials — seen at four sizes.</b></p>
+    <p>&bull; <b>scalar → scalar</b> ($n=1,m=1$): a $1\\times1$ grid, the ordinary $f'(x)$. One input, one output, one slope.</p>
+    <p>&bull; <b>vector → scalar</b> ($n\\gt1,m=1$): a single <em>row</em> of $n$ partials — the <b>gradient</b> $\\nabla f$. (A scalar out of many inputs: the loss of a network is exactly this shape.)</p>
+    <p>&bull; <b>scalar → vector</b> ($n=1,m\\gt1$): a single <em>column</em> of $m$ partials — a tangent/velocity vector, the $\\mathbf r'(t)$ you met in the last module.</p>
+    <p>&bull; <b>vector → vector</b> ($n\\gt1,m\\gt1$): the full $m\\times n$ <b>Jacobian</b>. Stack its rows and each one is a gradient — the gradient of a single output. So the Jacobian is just "a gradient per output," filed into a matrix.</p>
+    <div class="eqbox">$$J=\\frac{\\partial\\mathbf y}{\\partial\\mathbf x}=\\begin{pmatrix}\\dfrac{\\partial y_1}{\\partial x_1}&\\cdots&\\dfrac{\\partial y_1}{\\partial x_n}\\\\[6pt]\\vdots&\\ddots&\\vdots\\\\[4pt]\\dfrac{\\partial y_m}{\\partial x_1}&\\cdots&\\dfrac{\\partial y_m}{\\partial x_n}\\end{pmatrix}\\ \\ (m\\times n)$$</div>
+
+    <p><b>You have already met this matrix.</b> In Module 10 the change-of-variables map $(u,v)\\mapsto(x,y)$ carried a Jacobian — there it was <em>square</em>, $2\\times2$, and you took its <b>determinant</b> to get the local area-stretch factor. Same table of partials. The one new thing here is that a map's input and output counts need not match ($\\mathbb R^n\\to\\mathbb R^m$), so the Jacobian is usually <em>rectangular</em> — and a rectangular matrix has no determinant. We keep the whole matrix instead and <em>multiply</em> Jacobians together; that product is the chain rule, and it is the next beat. (The Hessian from Module 9 is a special case: the Jacobian of a gradient map $\\nabla f:\\mathbb R^n\\to\\mathbb R^n$ is the square grid of second partials $\\partial^2 f/\\partial x_i\\,\\partial x_j$ — the Hessian — and it is <em>symmetric</em>, since mixed partials agree. In the plane that symmetry is exactly the conservative test $P_y=Q_x$ from the last module: the off-diagonal entries matching <em>is</em> the field being some scalar's gradient.)</p>
+
+    <div class="task"><b>Count the slopes</b>A neural-network layer maps a vector in $\\mathbb R^{4}$ to a vector in $\\mathbb R^{3}$. Its derivative is the Jacobian — one partial $\\dfrac{\\partial y_i}{\\partial x_j}$ for every (output, input) pair. How many numbers does that grid hold?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div></div>`;
+
+  const cv=document.getElementById('cvs');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
+  const SUB='₀₁₂₃₄₅₆₇₈₉';const sub=i=>String(i).split('').map(d=>SUB[+d]).join('');
+  let n=3,m=2;
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    const cw=112,ch=52,lab=58,top=38;const gw=n*cw,gh=m*ch;
+    const ox=Math.round((W-(lab+gw))/2),oy=Math.round((H-(top+gh))/2)+4;
+    const gx0=ox+lab,gy0=oy+top;const sq=(n===m);
+    ctx.font='12px '+getComputedStyle(document.body).fontFamily;
+    // column headers (inputs)
+    ctx.fillStyle='#7ea6d8';ctx.textAlign='center';ctx.textBaseline='middle';
+    for(let j=0;j<n;j++){const xn=(n===1?'x':'x'+sub(j+1));ctx.fillText('input '+xn,gx0+j*cw+cw/2,oy+top-13);}
+    // row headers (outputs)
+    ctx.fillStyle='#e0b45a';ctx.textAlign='right';
+    for(let i=0;i<m;i++){const yn=(m===1?'y':'y'+sub(i+1));ctx.fillText('out '+yn,gx0-10,gy0+i*ch+ch/2);}
+    // cells
+    for(let i=0;i<m;i++)for(let j=0;j<n;j++){
+      const X=gx0+j*cw+3,Y=gy0+i*ch+3,w=cw-6,h=ch-6;const diag=(sq&&i===j);
+      ctx.fillStyle=diag?'#2a2310':'#12243a';ctx.strokeStyle=diag?'#8a6d22':'#2f6ea5';ctx.lineWidth=1.4;
+      ctx.beginPath();ctx.rect(X,Y,w,h);ctx.fill();ctx.stroke();
+      const yn=(m===1?'y':'y'+sub(i+1)),xn=(n===1?'x':'x'+sub(j+1));
+      ctx.fillStyle=diag?'#f0d79a':'#d3e4f6';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.font='14px '+getComputedStyle(document.body).fontFamily;
+      ctx.fillText('∂'+yn+' / ∂'+xn,X+w/2,Y+h/2);
+      ctx.font='12px '+getComputedStyle(document.body).fontFamily;
+    }
+    // shape label
+    const shp=document.getElementById('shp');
+    let msg,name;
+    if(n===1&&m===1){msg='1 × 1 — a single number: the ordinary derivative f′(x). One input, one output, one slope.';name="f ′(x)";}
+    else if(m===1){msg='1 × '+n+' — one row of '+n+' partials: the gradient ∇f, written as a row. A scalar out of several inputs — the shape of a loss.';name='gradient ∇f';}
+    else if(n===1){msg=m+' × 1 — one column of '+m+' partials: a tangent/velocity vector, like r′(t). One input drives several outputs.';name="column r ′(t)";}
+    else{msg=m+' × '+n+' — a matrix of '+(m*n)+' partials: the Jacobian. Each row is the gradient of one output; each column is how one input pushes every output.'+(n===m?' Square, so it also has a determinant (the local volume factor).':'');name='Jacobian J';}
+    if(shp)shp.textContent=msg;
+    const dd=document.getElementById('dim');if(dd)dd.textContent=m+' × '+n;
+    const cc=document.getElementById('cnt');if(cc)cc.textContent=String(m*n);
+    const nn=document.getElementById('nm');if(nn)nn.textContent=name;
+  }
+  function seg(id,val,setter){const el=document.getElementById(id);if(!el)return;
+    const lbltxt=(id==='segn')?'inputs n':'outputs m';
+    el.innerHTML='<span class="segb" style="pointer-events:none;background:none;border:none;color:#7f93a8">'+lbltxt+':</span>'+[1,2,3,4].map(k=>`<span class="segb ${k===val()?'on':''}" data-k="${k}">${k}</span>`).join('');
+    el.querySelectorAll('.segb[data-k]').forEach(b=>b.onclick=()=>{setter(+b.dataset.k);seg('segn',()=>n,v=>n=v);seg('segm',()=>m,v=>m=v);draw();});}
+  seg('segn',()=>n,v=>n=v);seg('segm',()=>m,v=>m=v);
+  draw();
+  numChk(stage.querySelector('.card'),12,()=>{addReveal(`<div class="rh">✓ 12</div><p>Three outputs, each needing one slope per input, and four inputs: $3\\times4=12$ partials. The grid is <b>3 rows</b> (one per output coordinate) by <b>4 columns</b> (one per input coordinate) — a $3\\times4$ Jacobian. It is rectangular, so there's no determinant to take; the whole matrix <em>is</em> the derivative, and the next beat multiplies matrices like this one to differentiate a stack of layers.</p>`);});
+  setHints([`One partial for each (output, input) pair — so multiply the number of outputs by the number of inputs.`,`3 outputs × 4 inputs = 12.`]);
 }
 function c7_doubleint(){
   stage.innerHTML=`<div class="card"><h2>Double integrals: adding up a solid</h2>
