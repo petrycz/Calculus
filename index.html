@@ -156,7 +156,8 @@ const MODULES=[
   outro:`A vector field assigns an arrow to every point; the gradient was the first example. The rest of the subject measures a field along paths and over surfaces, and the Green, Stokes, and divergence theorems lift the Fundamental Theorem of Calculus into two and three dimensions.`,
   beats:[c10_recall,c10_fields,c10_notation,c10_line,c10_conservative,c10_green,c10_divcurl,c10_surface,c10_stokes,c10_divergence,c10_problems]},
  {id:'c11',title:'Matrix Calculus',sub:'Derivatives of scalar-by-vector and vector-by-vector — gradients, Jacobians, and the chain rule in matrix form: the bridge to machine learning.',ready:true,
-  beats:[c11_recall,c11_shapes,c11_chain,c11_identities]},
+  outro:`The derivative of a vector-valued map is the Jacobian — the grid of every partial $\\partial y_i/\\partial x_j$ — with the gradient (scalar out) and the plain $f'$ as its small cases. Composing maps multiplies Jacobians, inner dimensions meeting like links in a chain; a short table of identities ($\\partial(Ax)/\\partial x=A$, quadratic forms, elementwise $\\Rightarrow$ diagonal) covers the pieces; and backpropagation is that product swept right-to-left from a scalar loss — one multiply of upstream gradient by local derivative at every node. This is the language machine-learning papers are written in.`,
+  beats:[c11_recall,c11_shapes,c11_chain,c11_identities,c11_backprop,c11_problems]},
 ];
 function setHints(a){hints=a||[];hintIdx=0;hintBtn.style.display=hints.length?'block':'none';}
 function unlock(){if(unlocked)return;unlocked=true;contBtn.disabled=false;}
@@ -4094,6 +4095,118 @@ s=\\mathbf x^{\\mathsf T}A\\mathbf x\\ &\\Rightarrow\\ \\nabla s=\\mathbf x^{\\m
   draw();
   numChk(stage.querySelector('.card'),1,()=>{addReveal(`<div class="rh">✓ ∂y₁/∂x₂ = 1</div><p>The first output is $y_1=2x_1+1\\cdot x_2$, so $\\partial y_1/\\partial x_2=1$ — exactly $W_{12}$. For a linear map every Jacobian entry is just the matching matrix entry: $\\partial(W\\mathbf x)/\\partial\\mathbf x=W$, the matrix analog of $(cx)'=c$. That's why, in the chain-rule product, a linear layer simply contributes its weight matrix.</p>`);});
   setHints([`The first output is y₁ = 2x₁ + 1·x₂. Differentiate it with respect to x₂.`,`∂y₁/∂x₂ = 1 = W₁₂.`]);
+}
+function c11_backprop(){
+  stage.innerHTML=`<div class="card"><h2>Backpropagation: the chain rule, swept backward</h2>
+    <p>Everything in this module now pays off. A network is a long composition, and training it means finding $\\partial L/\\partial(\\text{each parameter})$ for a single scalar loss $L$. The chain-rule beat said the whole derivative is a product of Jacobians and that, because the end is one scalar, you multiply <em>right-to-left</em>. <b>Backpropagation is exactly that sweep</b>, run on the computation itself: one <b>forward pass</b> to compute and cache every value, then one <b>backward pass</b> that carries a gradient from the loss back to every input and weight.</p>
+
+    <p><b>Work a tiny network by hand.</b> One neuron: inputs $x$, weight $w$, bias $b$; pre-activation $z=w\\,x+b$; activation $y=\\operatorname{ReLU}(z)$; squared loss $L=(y-t)^2$ against a target $t$. <b>Step through the stages below</b> — stage 0 is the forward pass; each later stage takes one step left, computing a node's gradient as <em>(the gradient arriving from its right) × (its own local derivative)</em>.</p>
+    <div class="seg" id="segbp"></div>
+    <canvas id="cvbp" width="640" height="380"></canvas>
+    <p class="small" id="obsbp" style="margin-top:6px;color:#9fb0c4"></p>
+    <div class="readout"><div class="rdc"><div class="k">∂L/∂w</div><div class="v" id="gw">—</div></div><div class="rdc"><div class="k">∂L/∂b</div><div class="v" id="gb">—</div></div><div class="rdc"><div class="k">∂L/∂x</div><div class="v" id="gx">—</div></div></div>
+
+    <p><b>The rule at every node is the same.</b> A node's gradient is the gradient flowing back into it, times its own local derivative — and each local derivative is an identity from the last beat: the sum node passes gradient through unchanged ($\\partial z/\\partial b=1$), the product gives $\\partial(wx)/\\partial w=x$ and $\\partial(wx)/\\partial x=w$, the ReLU contributes its $0$-or-$1$ slope (a diagonal Jacobian, here open because $z>0$), and the squared loss contributes $2(y-t)$. Multiply along each route and sum where routes meet — the chain rule, bookkept node by node.</p>
+
+    <p><b>Why backward, not forward?</b> You could instead push derivatives <em>forward</em> — but then you'd need one full pass per input to learn how each one moves the output. The loss is a single scalar, so seeding $\\partial L/\\partial L=1$ at the end and sweeping <em>backward</em> delivers the gradient with respect to <em>every</em> parameter in one pass. For a network with millions of weights and one loss, that asymmetry is decisive — it is the whole reason the algorithm runs in reverse.</p>
+
+    <p><b>The matrix picture underneath.</b> The backward pass carries a running <b>upstream gradient</b> — the row $\\partial L/\\partial(\\text{layer output})$ — and pushes it through each layer by multiplying by that layer's local Jacobian. A linear layer $\\mathbf z=W\\mathbf a$ sends the gradient to its input by $\\partial L/\\partial\\mathbf a=\\big(\\partial L/\\partial\\mathbf z\\big)\\,W$ and reads its weight gradient off the cached input; an activation multiplies by its diagonal $\\operatorname{diag}(\\sigma')$. It is the product $J_L\\cdots J_1$ from the chain-rule beat, evaluated right-to-left so each partial product stays a cheap row instead of a full matrix.</p>
+
+    <div class="task"><b>Finish the sweep</b>From the backward pass, the gradient arriving at the product node is $\\partial L/\\partial(wx)=-6$, and $\\partial(wx)/\\partial w=x=2$. What is $\\partial L/\\partial w$?</div>
+    <div class="entry"><input id="ni" inputmode="numeric" placeholder="?"><button class="btn primary" style="flex:0 0 auto;padding:12px 18px">Check</button></div><div class="miniout"></div>
+
+    <p style="margin-top:16px">That multiply — upstream gradient times local derivative — is every line of a framework's <span class="mono">.backward()</span>. A deep net just has thousands of these nodes; the sweep is identical.</p></div>`;
+
+  const SUB='₀₁₂₃₄₅₆₇₈₉';
+  const N={
+    w:{x:64,y:68,wd:46,lab:'w',val:'3',g:'−12',gr:4},
+    x:{x:64,y:150,wd:46,lab:'x',val:'2',g:'−18',gr:4},
+    b:{x:64,y:250,wd:46,lab:'b',val:'1',g:'−6',gr:3},
+    t:{x:64,y:330,wd:46,lab:'t',val:'10',g:null,gr:99},
+    mul:{x:210,y:110,wd:104,lab:'× : w·x',val:'6',g:'−6',gr:3},
+    plus:{x:342,y:188,wd:104,lab:'+ : z',val:'7',g:'−6',gr:2},
+    relu:{x:470,y:188,wd:112,lab:'ReLU : y',val:'7',g:'−6',gr:1},
+    loss:{x:582,y:250,wd:52,lab:'L',val:'9',g:'1',gr:1}
+  };
+  const E=[['w','mul','∂=x=2',4],['x','mul','∂=w=3',4],['mul','plus','∂=1',3],['b','plus','∂=1',3],['plus','relu','∂=1',2],['relu','loss','∂=2(y−t)=−6',1],['t','loss',null,99]];
+  let step=0;
+  const cv=document.getElementById('cvbp');const ctx=cv.getContext&&cv.getContext('2d');const W=cv.width,H=cv.height;
+  function nodeBox(n){return {l:n.x-n.wd/2,r:n.x+n.wd/2,t:n.y-20,b:n.y+20};}
+  function draw(){if(!ctx)return;ctx.clearRect(0,0,W,H);
+    ctx.textAlign='left';ctx.textBaseline='alphabetic';
+    // edges
+    for(const [a,c,lab,es] of E){const na=N[a],nc=N[c];const x0=na.x+na.wd/2,y0=na.y,x1=nc.x-nc.wd/2,y1=nc.y;
+      const frontier=(step>=1&&es===step);const seen=(step>=1&&es<=step);
+      ctx.strokeStyle=frontier?'#e8b84b':(seen?'#3f5570':'#1f2e40');ctx.lineWidth=frontier?2.6:1.3;
+      ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
+      if(lab&&seen){const mx=(x0+x1)/2,my=(y0+y1)/2;ctx.fillStyle=frontier?'#efdca6':'#6f86a6';ctx.font='10px sans-serif';ctx.fillText(lab,mx-18,my-4);}
+    }
+    // nodes
+    for(const k in N){const n=N[k];const bx=nodeBox(n);const showG=(step>=1&&n.g!=null&&n.gr<=step);
+      ctx.fillStyle='#111d2b';ctx.strokeStyle=showG?'#e8b84b':'#33485f';ctx.lineWidth=1.6;
+      ctx.beginPath();ctx.moveTo(bx.l+6,bx.t);ctx.arcTo(bx.r,bx.t,bx.r,bx.b,6);ctx.arcTo(bx.r,bx.b,bx.l,bx.b,6);ctx.arcTo(bx.l,bx.b,bx.l,bx.t,6);ctx.arcTo(bx.l,bx.t,bx.r,bx.t,6);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.textAlign='center';
+      ctx.fillStyle='#8aa0b8';ctx.font='10px sans-serif';ctx.fillText(n.lab,n.x,n.y-7);
+      ctx.fillStyle='#7ab8ff';ctx.font='600 13px sans-serif';ctx.fillText(n.val,n.x,n.y+9);
+      if(showG){ctx.fillStyle='#e8b84b';ctx.font='600 11px sans-serif';ctx.fillText('g '+n.g,n.x,n.y+32);}
+      ctx.textAlign='left';
+    }
+    // readouts + obs
+    const gw=document.getElementById('gw'),gb=document.getElementById('gb'),gx=document.getElementById('gx');
+    if(gw)gw.textContent=step>=4?'−12':'—';if(gb)gb.textContent=step>=3?'−6':'—';if(gx)gx.textContent=step>=4?'−18':'—';
+    const msgs=[
+      'Forward pass: each node computes and caches its value. x=2, w=3, b=1 → w·x=6 → z=w·x+b=7 → y=ReLU(z)=7 → L=(y−t)²=9. Now seed the gradient at L and sweep back.',
+      'Seed ∂L/∂L=1 at the output, then one step left: ∂L/∂y = 2(y−t) = 2(7−10) = −6 — the local derivative of the loss.',
+      'Through ReLU: ∂L/∂z = ∂L/∂y · ReLU′(z). Here z=7>0 so ReLU′=1, giving −6. (If z were negative, ReLU′=0 and the gradient would be blocked — the gate shuts.)',
+      'Through the sum z=w·x+b: both local derivatives are 1, so −6 passes straight to w·x and to b. So ∂L/∂b = −6.',
+      'Through the product w·x: ∂(w·x)/∂w=x=2 and ∂(w·x)/∂x=w=3, so ∂L/∂w=−6·2=−12 and ∂L/∂x=−6·3=−18. One backward sweep produced every gradient.'
+    ];
+    const ob=document.getElementById('obsbp');if(ob)ob.textContent=msgs[step];
+  }
+  function buildSeg(){const el=document.getElementById('segbp');if(!el)return;
+    el.innerHTML=['forward','back ①','back ②','back ③','back ④'].map((l,k)=>`<span class="segb ${k===step?'on':''}" data-k="${k}">${l}</span>`).join('');
+    el.querySelectorAll('.segb').forEach(btn=>btn.onclick=()=>{step=+btn.dataset.k;buildSeg();draw();});}
+  buildSeg();draw();
+  numChk(stage.querySelector('.card'),-12,()=>{addReveal(`<div class="rh">✓ ∂L/∂w = −12</div><p>$\\partial L/\\partial w=\\underbrace{(-6)}_{\\text{upstream, }\\partial L/\\partial(wx)}\\times\\underbrace{(2)}_{\\text{local, }\\partial(wx)/\\partial w=x}=-12.$ Every node does exactly this one multiply — upstream gradient times local derivative — and the whole of backpropagation is that step, repeated from the loss back to each weight.</p>`);});
+  setHints([`Gradient at a node = upstream gradient × local derivative.`,`(−6) × (2) = −12.`]);
+}
+function c11_problems(){
+  stage.innerHTML=`<div class="card"><h2>Problem set</h2>
+    <p>Jacobian shapes, the matrix chain rule, the reusable identities, and backprop by hand. Paper first; solutions fold open.</p>
+
+    <div class="prob"><span class="lvl">Jacobian shape</span><div class="ph">Problem 1</div>
+    <p>A map sends $\\mathbf x\\in\\mathbb R^5$ to $\\mathbf y\\in\\mathbb R^2$. In numerator layout, what shape is its Jacobian $\\partial\\mathbf y/\\partial\\mathbf x$, and how many partial derivatives does it hold?</p>
+    <details><summary>Show solution</summary><div class="sol"><p>Outputs index the rows, inputs the columns, so $J$ is $2\\times5$ — that's $2\\cdot5=10$ partials, one $\\partial y_i/\\partial x_j$ for every (output, input) pair. Rectangular, so no determinant.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">compute a Jacobian</span><div class="ph">Problem 2</div>
+    <p>Compute the Jacobian of $\\mathbf f(x,y)=(x^2y,\\ x+\\sin y)$, and evaluate it at $(1,0)$.</p>
+    <details><summary>Show solution</summary><div class="sol"><p>Each row is one output's gradient: $J=\\begin{pmatrix}2xy&x^2\\\\[2pt]1&\\cos y\\end{pmatrix}$. At $(1,0)$: $\\begin{pmatrix}0&1\\\\1&1\\end{pmatrix}$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">linear-map identity</span><div class="ph">Problem 3</div>
+    <p>For the linear layer $\\mathbf y=W\\mathbf x$ with $W=\\begin{pmatrix}1&2&0\\\\0&3&1\\end{pmatrix}$, write $\\partial\\mathbf y/\\partial\\mathbf x$ and give the single entry $\\partial y_2/\\partial x_3$.</p>
+    <details><summary>Show solution</summary><div class="sol"><p>$\\partial\\mathbf y/\\partial\\mathbf x=W$ — the derivative of a linear map is the map itself. Each Jacobian entry is the matching matrix entry, so $\\partial y_2/\\partial x_3=W_{23}=1$.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">chain rule — shape</span><div class="ph">Problem 4</div>
+    <p>$\\mathbf f:\\mathbb R^4\\to\\mathbb R^3$ and $\\mathbf g:\\mathbb R^3\\to\\mathbb R^2$. Write the Jacobian of the composite $\\mathbf g\\circ\\mathbf f$ as a product, and give its shape.</p>
+    <details><summary>Show solution</summary><div class="sol"><p>$J_{\\mathbf g\\circ\\mathbf f}=J_{\\mathbf g}\\,J_{\\mathbf f}$, with shapes $(2\\times3)(3\\times4)=2\\times4$. The inner $3$ — the middle dimension — matches and cancels; the order is outer-map-first ($J_{\\mathbf g}$ then $J_{\\mathbf f}$), forced by those dimensions.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">chain rule — numeric</span><div class="ph">Problem 5</div>
+    <p>With $J_{\\mathbf f}=\\begin{pmatrix}1&2\\\\0&1\\end{pmatrix}$ and $J_{\\mathbf g}=\\begin{pmatrix}2&0\\\\1&3\\end{pmatrix}$, compute the composite Jacobian $J_{\\mathbf g}J_{\\mathbf f}$.</p>
+    <details><summary>Show solution</summary><div class="sol"><p>Row $i$ of $J_{\\mathbf g}$ dotted with column $j$ of $J_{\\mathbf f}$: $J_{\\mathbf g}J_{\\mathbf f}=\\begin{pmatrix}2&4\\\\1&5\\end{pmatrix}$. (E.g. $(2,2)=1\\cdot2+3\\cdot1=5$.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">quadratic form</span><div class="ph">Problem 6</div>
+    <p>For $s=\\mathbf x^{\\mathsf T}A\\mathbf x$ with symmetric $A=\\begin{pmatrix}2&1\\\\1&3\\end{pmatrix}$, find $\\nabla s$ and evaluate it at $\\mathbf x=(1,1)$.</p>
+    <details><summary>Show solution</summary><div class="sol"><p>$\\nabla s=\\mathbf x^{\\mathsf T}(A+A^{\\mathsf T})=2\\mathbf x^{\\mathsf T}A$ for symmetric $A$. At $(1,1)$: $2A\\mathbf x=2\\begin{pmatrix}3\\\\4\\end{pmatrix}=(6,8)$. (Special case $A=I$: $s=\\lVert\\mathbf x\\rVert^2$ gives $\\nabla s=2\\mathbf x^{\\mathsf T}$ — the vector echo of $(x^2)'=2x$.)</p></div></details></div>
+
+    <div class="prob"><span class="lvl">elementwise map</span><div class="ph">Problem 7</div>
+    <p>$\\mathbf y=\\tanh(\\mathbf x)$, applied component by component, with $\\mathbf x\\in\\mathbb R^3$. What is $\\partial\\mathbf y/\\partial\\mathbf x$?</p>
+    <details><summary>Show solution</summary><div class="sol"><p>Each $y_i=\\tanh(x_i)$ depends on $x_i$ alone, so every off-diagonal partial is $0$: $J=\\operatorname{diag}\\big(1-\\tanh^2x_1,\\ 1-\\tanh^2x_2,\\ 1-\\tanh^2x_3\\big)$, using $\\tanh'=1-\\tanh^2$. A diagonal Jacobian — the shape every activation produces.</p></div></details></div>
+
+    <div class="prob"><span class="lvl">backprop by hand</span><div class="ph">Problem 8</div>
+    <p>One neuron: $z=wx+b$, $y=z^2$, $L=(y-t)^2$, with $x=1,\\ w=2,\\ b=1,\\ t=5$. Do the forward pass, then backprop to find $\\partial L/\\partial w$.</p>
+    <details><summary>Show solution</summary><div class="sol"><p>Forward: $z=2\\cdot1+1=3$, $y=z^2=9$, $L=(9-5)^2=16$. Backward, each node = upstream $\\times$ local: $\\partial L/\\partial y=2(y-t)=8$; through $y=z^2$, $\\partial L/\\partial z=8\\cdot2z=8\\cdot6=48$; through $z=wx+b$, $\\partial L/\\partial w=48\\cdot x=48$. (Likewise $\\partial L/\\partial b=48$ and $\\partial L/\\partial x=48\\cdot w=96$.)</p></div></details></div>
+  </div>`;
+  setHints([]);unlock();
 }
 function c7_doubleint(){
   stage.innerHTML=`<div class="card"><h2>Double integrals: adding up a solid</h2>
