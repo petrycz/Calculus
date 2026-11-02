@@ -91,6 +91,10 @@
   .hintbox{font-size:13.5px;line-height:1.55;color:#f0e2c2;background:rgba(232,184,75,.08);border:1px solid rgba(232,184,75,.25);border-radius:10px;padding:11px 13px;margin-top:12px;display:none;}
   .hintbox.show{display:block;}
   .mcard{cursor:pointer;transition:border-color .15s,transform .08s;} .mcard.lock{opacity:.55;cursor:default;}
+  .ccard{background:rgba(232,184,75,.04);border:1px dashed rgba(232,184,75,.45);box-shadow:none;padding:13px 15px;}
+  .ccard .mnum{color:var(--gold);} .ccard .mtitle{font-size:15.5px;margin:6px 0 4px;} .ccard .msub{font-size:13px;}
+  .mstat.plan{color:var(--gold);background:rgba(232,184,75,.12);}
+  .ctag{display:inline-block;font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:1px 8px;margin:7px 5px 0 0;}
   .mtop{display:flex;align-items:center;gap:9px;} .mnum{font-family:var(--mono);font-size:12px;color:var(--muted2);}
   .mstat{margin-left:auto;font-weight:650;font-size:11px;padding:3px 9px;border-radius:999px;}
   .mstat.done{color:var(--good);background:var(--good2);} .mstat.todo{color:var(--accent);background:rgba(122,184,255,.14);} .mstat.soon{color:var(--muted2);background:#141e2c;}
@@ -173,6 +177,17 @@ function loadState(){try{return JSON.parse(localStorage.getItem(SAVE_KEY));}catc
 function setHash(){try{const h=view==='module'?('#m'+curM+'b'+beat):'';if((location.hash||'')!==h)history.replaceState(null,'',h||location.pathname+location.search);}catch(e){}}
 function parseHash(){const m=/^#m(\d+)b(\d+)$/.exec(location.hash||'');return m?{curM:+m[1],beat:+m[2]}:null;}
 
+/* Capstone projects: built in their own GitHub repos, interleaved after the module that unlocks them */
+const CAPSTONES=[
+ {after:'c3',title:'Root-finder & equation solver',sub:'Newton\u2019s method and the secant method from scratch, then a tiny symbolic differentiator \u2014 how solvers actually find roots.',tags:['algorithm']},
+ {after:'c5',title:'Numerical integration library',sub:'Trapezoid, Simpson, adaptive, and Gaussian quadrature, with their error orders derived and then measured \u2014 the engine behind every integral a computer evaluates.',tags:['library']},
+ {after:'c5',title:'Physics & orbital simulator',sub:'Integrate the equations of motion numerically \u2014 Euler, then RK4, then a symplectic integrator \u2014 and watch orbits hold or drift. n-body and game physics.',tags:['simulation']},
+ {after:'c6',title:'How your math library computes sin, exp, log',sub:'Reimplement libm: Taylor and Chebyshev series plus range reduction, to a guaranteed number of digits.',tags:['algorithm']},
+ {after:'c7',title:'Gradient-descent optimizer library',sub:'SGD, momentum, and Adam built on the gradient, then a logistic-regression and SVM trainer that uses them.',tags:['ML']},
+ {after:'c8',title:'Constrained optimizer \u2192 portfolio optimizer',sub:'Lagrange multipliers then the KKT conditions, applied to the Markowitz efficient frontier \u2014 the calculus half of a risk engine.',tags:['trading']},
+ {after:'c10',title:'Poisson image editor (seamless cloning)',sub:'Reimplement P\u00e9rez et al. (2003): paste a region seamlessly by solving a Poisson equation on its gradient field \u2014 the healing-brush trick.',tags:['paper','graphics']},
+ {after:'c11',title:'Autograd engine \u2014 micrograd & vectorgrad',sub:'Reverse-mode automatic differentiation from scratch: a scalar engine, then a NumPy-vectorized Tensor with broadcasting and matmul backward, each training an MLP.',tags:['paper','ML'],done:true},
+];
 function renderMenu(){
   view='menu';footer.style.display='none';hintbox.className='hintbox';hintbox.innerHTML='';
   document.getElementById('backBtn').style.display='none';document.getElementById('pbarWrap').style.display='none';
@@ -181,7 +196,9 @@ function renderMenu(){
   let html=`<div class="card"><h1>Calculus, from First Principles</h1><p class="lede">A self-contained calculus course, built from the ground up: every rule and theorem is derived, nothing is assumed beyond basic algebra. It runs from limits through single-variable, multivariable, and vector calculus, and on into matrix calculus — the bridge to machine learning. Guided discovery, real proofs, worked problems.</p></div>`;
   MODULES.forEach((m,i)=>{const done=completed[m.id];const st=done?['done','✓ Done']:(m.ready?['todo','Start']:['soon','Soon']);
     html+=`<div class="card mcard${m.ready?'':' lock'}" data-i="${i}"><div class="mtop"><span class="mnum">Module ${i+1}</span><span class="mstat ${st[0]}">${st[1]}</span></div>
-      <div class="mtitle">${m.title}</div><div class="msub">${m.sub}</div></div>`;});
+      <div class="mtitle">${m.title}</div><div class="msub">${m.sub}</div></div>`;
+    CAPSTONES.filter(c=>c.after===m.id).forEach(c=>{html+=`<div class="card ccard"><div class="mtop"><span class="mnum">Capstone \u00b7 unlocked by Module ${i+1}</span><span class="mstat ${c.done?'done':'plan'}">${c.done?'\u2713 Built':'Planned'}</span></div>
+      <div class="mtitle">${c.title}</div><div class="msub">${c.sub}</div>${c.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div>`;});});
   stage.innerHTML=html;
   stage.querySelectorAll('.mcard').forEach(c=>{const i=parseInt(c.dataset.i);if(MODULES[i].ready)c.onclick=()=>openModule(i);});
   scrollTop();renderMath();saveState();setHash();
