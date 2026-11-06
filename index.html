@@ -194,9 +194,14 @@ const CAPSTONES=[
 ];
 /* Research papers: read in three passes (skim the claim, re-derive the equations, reproduce one result + a short note), interleaved on the menu after the module that unlocks them */
 const PAPERS=[
- {after:'c1',title:'Cauchy 1821',note:'rigor for limits & continuity',md:0},
- {after:'c5',title:'Butcher 1963',note:'Runge–Kutta methods',md:0},
- {after:'c11',title:'Baydin et al. 2018',note:'automatic differentiation survey',md:1},
+ {after:'c1',title:'Cauchy 1821',note:'rigor for limits & continuity',md:0,part:'1 of 2',sec:'Ch. 1–2: functions, infinitely small quantities, and the definition of continuity'},
+ {after:'c6',title:'Cauchy 1821',note:'rigor for limits & continuity',md:0,part:'2 of 2',sec:'Ch. 6: convergent and divergent series — the Cauchy criterion and the root test'},
+ {after:'c5',title:'Butcher 1963',note:'Runge–Kutta methods',md:0,part:'1 of 3',sec:'Intro: Runge–Kutta as weighted slope samples — read alongside your RK4 integrator'},
+ {after:'c6',title:'Butcher 1963',note:'Runge–Kutta methods',md:0,part:'2 of 3',sec:'Order conditions: matching Taylor expansions of the true and numerical solutions'},
+ {after:'c7',title:'Butcher 1963',note:'Runge–Kutta methods',md:0,part:'3 of 3',sec:'The system case: vector-valued right-hand sides and the rooted-tree bookkeeping'},
+ {after:'c2',title:'Baydin et al. 2018',note:'automatic differentiation survey',md:1,part:'1 of 3',sec:'§2 \'What AD is not\': numerical vs symbolic differentiation vs AD'},
+ {after:'c7',title:'Baydin et al. 2018',note:'automatic differentiation survey',md:1,part:'2 of 3',sec:'§3.1: forward mode and dual numbers (multivariable chain rule)'},
+ {after:'c11',title:'Baydin et al. 2018',note:'automatic differentiation survey',md:1,part:'3 of 3',sec:'§3.2 + §4–5: reverse mode (backprop), AD in ML, implementation — then audit your autograd'},
 ];
 function renderMenu(){
   view='menu';footer.style.display='none';hintbox.className='hintbox';hintbox.innerHTML='';
@@ -209,8 +214,8 @@ function renderMenu(){
       <div class="mtitle">${m.title}</div><div class="msub">${m.sub}</div></div>`;
     CAPSTONES.filter(c=>c.after===m.id).forEach(c=>{html+=`<div class="card ccard"><div class="mtop"><span class="mnum">Capstone \u00b7 unlocked by Module ${i+1}</span><span class="mstat ${c.done?'done':'plan'}">${c.done?'\u2713 Built':'Planned'}</span></div>
       <div class="mtitle">${c.title}</div><div class="msub">${c.sub}</div>${c.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div>`;});
-    PAPERS.filter(p=>p.after===m.id).forEach(p=>{html+=`<div class="card pcard${p.md?' md':''}"><div class="mtop"><span class="mnum">${p.md?'Frontier paper':'Paper'} \u00b7 read after ${m.addon?'Add-on '+m.addon:'Module '+(i+1)}</span><span class="mstat pread">To read</span></div>
-      <div class="mtitle">${p.title}</div><div class="msub">${p.note}</div></div>`;});});
+    PAPERS.filter(p=>p.after===m.id).forEach(p=>{html+=`<div class="card pcard${p.md?' md':''}"><div class="mtop"><span class="mnum">${p.md?'Frontier paper':'Paper'}${p.part?' \u00b7 part '+p.part:''} \u00b7 read after ${m.addon?'Add-on '+m.addon:'Module '+(i+1)}</span><span class="mstat pread">To read</span></div>
+      <div class="mtitle">${p.title}</div><div class="msub">${p.sec?p.sec+'<br><span style="color:var(--muted2)">'+p.note+'</span>':p.note}</div></div>`;});});
   stage.innerHTML=html;
   stage.querySelectorAll('.mcard').forEach(c=>{const i=parseInt(c.dataset.i);if(MODULES[i].ready)c.onclick=()=>openModule(i);});
   scrollTop();renderMath();saveState();setHash();
